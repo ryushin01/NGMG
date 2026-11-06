@@ -8,7 +8,7 @@ import { View, XStack, YStack } from 'tamagui';
 import { KIND_META, PLACE_KINDS, useSavePlace } from '@/entities/place';
 import { savedMessage, type Place, type PlaceInput } from '@/shared/api';
 import { formatCoordinate, toErrorMessage, useUnsavedGuard } from '@/shared/lib';
-import { AppText, StickyBottomCta, Chip, Field, TagInput } from '@/shared/ui';
+import { AppIcon, AppText, StickyBottomCta, Chip, Field, TagInput } from '@/shared/ui';
 import { placeSchema } from '../model/schema';
 
 type PlaceFormProps = {
@@ -53,7 +53,7 @@ export const PlaceForm = ({ placeId, initial, onSaved }: PlaceFormProps) => {
         contentContainerStyle={{ padding: 20, gap: 24 }}
       >
         <XStack gap={10} backgroundColor="brandSoft" padding={14} borderRadius={6}>
-          <MapPin size={20} color="#006ea8" strokeWidth={1.75} />
+          <AppIcon icon={MapPin} size={20} color="brandText" strokeWidth={1.75} />
           <YStack flex={1}>
             <AppText>{address || '주소 정보 없음'}</AppText>
             <AppText size="caption" tone="muted">

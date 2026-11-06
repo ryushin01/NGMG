@@ -1,0 +1,5 @@
+# maestro test e2e가 다른 흐름에서 불러 쓰는 보조 파일을 단독으로 실행하지 않게 합니다.
+flows:
+  - '*'
+excludeTags:
+  - helper

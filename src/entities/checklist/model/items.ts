@@ -17,10 +17,44 @@ export const groupChecklist = (items: ChecklistItem[]): ChecklistSection[] => {
     .filter((section) => section.items.length > 0);
 };
 
-export const buildDefaultItems = (newId: () => string): ChecklistItem[] =>
+export const DEFAULT_LIST_NAME = '기본';
+
+export const buildDefaultItems = (
+  newId: () => string,
+  listName = DEFAULT_LIST_NAME,
+): ChecklistItem[] =>
   DEFAULT_CHECKLIST.flatMap(({ category, titles }) =>
-    titles.map((title) => ({ id: newId(), title, category, checked: false })),
+    titles.map((title) => ({ id: newId(), title, category, checked: false, listName })),
   ).map((item, position) => ({ ...item, position }));
+
+/** 처음 만든 순서대로 목록 이름을 돌려줍니다. */
+export const listNames = (items: ChecklistItem[]) => [
+  ...new Set(items.map((item) => item.listName)),
+];
+
+/** 다음 출조를 위해 항목만 복사합니다. 체크는 지웁니다. */
+export const copyList = (
+  items: ChecklistItem[],
+  listName: string,
+  newId: () => string,
+): ChecklistItem[] => {
+  const start = nextPosition(items);
+  return items.map((item, index) => ({
+    ...item,
+    id: newId(),
+    listName,
+    checked: false,
+    position: start + index,
+  }));
+};
+
+/** 목록이 하나면 진행률을, 여럿이면 목록 개수를 보여 줍니다. */
+export const summarizeChecklist = (items: ChecklistItem[]) => {
+  if (items.length === 0) return undefined;
+  const names = listNames(items);
+  if (names.length > 1) return `목록 ${names.length}개`;
+  return `${items.length}개 중 ${items.filter((item) => item.checked).length}개 챙김`;
+};
 
 export const nextPosition = (items: ChecklistItem[]) =>
   items.reduce((max, item) => Math.max(max, item.position), -1) + 1;

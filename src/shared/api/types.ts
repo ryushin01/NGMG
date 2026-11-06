@@ -77,6 +77,8 @@ export type ChecklistItem = {
   category: string;
   checked: boolean;
   position: number;
+  /** 출조별로 나눈 목록의 이름 */
+  listName: string;
 };
 
 export type Session = { userId: string; email: string };

@@ -1,5 +1,7 @@
 # 화면 전환 중 누른 뒤로 가기가 무시될 수 있어 홈이 보일 때까지 반복합니다.
 appId: com.ryushin01.ngmg
+tags:
+  - helper
 ---
 - repeat:
     times: 6

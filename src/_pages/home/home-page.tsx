@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, YStack } from 'tamagui';
 import { usePlaces } from '@/entities/place';
 import type { Place } from '@/shared/api';
-import { Touchable } from '@/shared/ui';
+import { AppIcon, Touchable, useColors } from '@/shared/ui';
 import { HomeContent, PlaceSummary, type KindFilter } from '@/widgets/home-sheet';
 import { SyncBanner } from '@/widgets/sync-banner';
 import { PlaceMap, type PlaceMapHandle } from '@/widgets/place-map';
@@ -37,7 +37,7 @@ const FloatingButton = ({
     width={48}
     height={48}
     borderRadius={24}
-    backgroundColor="white"
+    backgroundColor="surface"
     alignItems="center"
     justifyContent="center"
     boxShadow="0 2px 6px #00000029"
@@ -48,6 +48,7 @@ const FloatingButton = ({
 
 export const HomePage = () => {
   const router = useRouter();
+  const colors = useColors();
   const navigation = useNavigation();
   const { top } = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -114,7 +115,7 @@ export const HomePage = () => {
   }));
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <PlaceMap
         ref={mapRef}
         places={visiblePlaces}
@@ -131,7 +132,7 @@ export const HomePage = () => {
           label="메뉴 열기"
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         >
-          <Menu size={24} color="#1a254f" strokeWidth={1.75} />
+          <AppIcon icon={Menu} size={24} color="ink" strokeWidth={1.75} />
         </FloatingButton>
       </View>
       <View position="absolute" top={top + 8} left={76} right={16} alignItems="flex-end">
@@ -144,21 +145,21 @@ export const HomePage = () => {
             label="지도에서 장소 추가"
             onPress={() => router.push('/map-pick')}
           >
-            <Plus size={24} color="#1a254f" strokeWidth={1.75} />
+            <AppIcon icon={Plus} size={24} color="ink" strokeWidth={1.75} />
           </FloatingButton>
           <FloatingButton
             testID="toggle-map-type"
             label={mapType === 'standard' ? '위성 지도로 보기' : '일반 지도로 보기'}
             onPress={() => setMapType((type) => (type === 'standard' ? 'hybrid' : 'standard'))}
           >
-            <Layers size={22} color="#1a254f" strokeWidth={1.75} />
+            <AppIcon icon={Layers} size={22} color="ink" strokeWidth={1.75} />
           </FloatingButton>
           <FloatingButton
             testID="current-location"
             label="현재 위치로 이동"
             onPress={moveToCurrentLocation}
           >
-            <LocateFixed size={22} color="#1a254f" strokeWidth={1.75} />
+            <AppIcon icon={LocateFixed} size={22} color="ink" strokeWidth={1.75} />
           </FloatingButton>
         </YStack>
       </Animated.View>
@@ -168,8 +169,12 @@ export const HomePage = () => {
         snapPoints={[SHEET_COLLAPSED, '88%']}
         enableDynamicSizing={false}
         animatedPosition={sheetPosition}
-        backgroundStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        handleIndicatorStyle={{ backgroundColor: '#c8ccd4', width: 36 }}
+        backgroundStyle={{
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          backgroundColor: colors.surface,
+        }}
+        handleIndicatorStyle={{ backgroundColor: colors.muted, width: 36 }}
         style={{ shadowColor: '#000000', shadowOpacity: 0.12, shadowRadius: 12, elevation: 8 }}
         accessible={false}
       >

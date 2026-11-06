@@ -1,21 +1,25 @@
 import { ActivityIndicator } from 'react-native';
 import { YStack } from 'tamagui';
 import { Button } from './button';
+import { useColors } from './colors';
 import { AppText } from './typography';
 
-export const LoadingView = ({ label = '불러오는 중입니다.' }: { label?: string }) => (
-  <YStack
-    flex={1}
-    alignItems="center"
-    justifyContent="center"
-    padding={24}
-    gap={12}
-    accessibilityLabel={label}
-    accessible
-  >
-    <ActivityIndicator color="#1a254f" />
-  </YStack>
-);
+export const LoadingView = ({ label = '불러오는 중입니다.' }: { label?: string }) => {
+  const colors = useColors();
+  return (
+    <YStack
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      padding={24}
+      gap={12}
+      accessibilityLabel={label}
+      accessible
+    >
+      <ActivityIndicator color={colors.ink} />
+    </YStack>
+  );
+};
 
 type MessageViewProps = { message: string; actionLabel?: string; onAction?: () => void };
 

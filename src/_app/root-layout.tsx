@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useSessionBootstrap, useSessionStore } from '@/entities/session';
 import { backend } from '@/shared/api';
+import { useColors } from '@/shared/ui';
 import { Providers } from './providers';
 
 SplashScreen.preventAutoHideAsync();
@@ -46,6 +47,7 @@ const useRecoveryLink = () => {
 };
 
 const Navigator = () => {
+  const colors = useColors();
   useSessionBootstrap();
   useClearCacheOnSignOut();
   useRecoveryLink();
@@ -60,8 +62,10 @@ const Navigator = () => {
 
   return (
     <>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#ffffff' } }}>
+      <StatusBar style="auto" />
+      <Stack
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }}
+      >
         <Stack.Protected guard={!!session}>
           <Stack.Screen name="(drawer)" />
           <Stack.Screen name="search" options={{ animation: 'fade' }} />

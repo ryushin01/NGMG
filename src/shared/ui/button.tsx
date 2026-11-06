@@ -1,6 +1,7 @@
 import { ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, XStack } from 'tamagui';
+import { useColors } from './colors';
 import { Touchable } from './pressable';
 import { AppText } from './typography';
 
@@ -21,6 +22,7 @@ export const Button = ({
   variant = 'primary',
   testID,
 }: ButtonProps) => {
+  const colors = useColors();
   const inactive = disabled || loading;
   const primary = variant === 'primary';
   return (
@@ -33,12 +35,12 @@ export const Button = ({
       borderRadius={6}
       alignItems="center"
       justifyContent="center"
-      backgroundColor={primary ? (inactive ? 'muted' : 'ink') : 'white'}
+      backgroundColor={primary ? (inactive ? 'muted' : 'ink') : 'surface'}
       borderWidth={primary ? 0 : 1}
       borderColor={variant === 'danger' ? 'danger' : 'ink'}
     >
       {loading ? (
-        <ActivityIndicator color={primary ? '#ffffff' : '#1a254f'} />
+        <ActivityIndicator color={primary ? colors.surface : colors.ink} />
       ) : (
         <AppText
           bold
@@ -61,6 +63,7 @@ export const BottomCta = ({
   testID,
 }: Omit<ButtonProps, 'variant'>) => {
   const { bottom } = useSafeAreaInsets();
+  const colors = useColors();
   const inactive = disabled || loading;
   return (
     <Touchable
@@ -73,7 +76,7 @@ export const BottomCta = ({
     >
       <XStack height={60} alignItems="center" justifyContent="center">
         {loading ? (
-          <ActivityIndicator color="#ffffff" />
+          <ActivityIndicator color={colors.surface} />
         ) : (
           <AppText bold tone="inverse" size="row">
             {label}

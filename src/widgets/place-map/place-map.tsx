@@ -85,7 +85,7 @@ export const PlaceMap = forwardRef<PlaceMapHandle, PlaceMapProps>(function Place
               borderRadius={20}
               backgroundColor="ink"
               borderWidth={2}
-              borderColor="white"
+              borderColor="surface"
               alignItems="center"
               justifyContent="center"
             >

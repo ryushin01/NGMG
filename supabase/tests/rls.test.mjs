@@ -1,7 +1,7 @@
 // 마이그레이션을 실제 Postgres(PGlite)에 적용하고 사용자 간 데이터 격리를 검사합니다.
 // auth·storage 스키마는 Supabase가 제공하므로 필요한 부분만 대역으로 만듭니다.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 
@@ -28,8 +28,9 @@ await db.exec(`
   grant execute on function storage.foldername(text) to authenticated;
   insert into auth.users values ('${A}'), ('${B}');
 `);
-for (const file of ['20261106000000_init.sql', '20261106000001_checklist.sql']) {
-  await db.exec(readFileSync(new URL(`../migrations/${file}`, import.meta.url), 'utf8'));
+const migrations = new URL('../migrations/', import.meta.url);
+for (const file of readdirSync(migrations).sort()) {
+  await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
 }
 await db.exec(`
   grant usage on schema public to authenticated;
@@ -140,4 +141,16 @@ test('체크리스트는 본인 항목만 보이고 다른 계정의 항목을 �
     ),
   );
   assert.equal((await as(A, 'select title from public.checklist_items')).rows[0].title, '구명조끼');
+});
+
+test('체크리스트 항목은 기본 목록에 들어가고 목록 이름은 길이 제한이 있습니다', async () => {
+  const { rows } = await as(
+    A,
+    `insert into public.checklist_items (title) values ('릴') returning list_name`,
+  );
+  assert.equal(rows[0].list_name, '기본');
+  await assert.rejects(
+    as(A, `insert into public.checklist_items (title, list_name) values ('릴', '')`),
+    /check/,
+  );
 });

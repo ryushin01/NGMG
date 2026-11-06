@@ -12,3 +12,13 @@ jest.mock('react-native-mmkv', () => ({
 }));
 // 네이티브 Worklets가 없는 Jest에서는 애니메이션 드라이버를 쓰지 않습니다.
 jest.mock('@tamagui/animations-reanimated', () => ({ createAnimations: () => undefined }));
+jest.mock('react-native-maps', () => ({
+  __esModule: true,
+  default: () => null,
+  Marker: () => null,
+}));
+jest.mock('react-native-keyboard-controller', () => ({
+  KeyboardAwareScrollView: ({ children }) => children,
+  KeyboardStickyView: ({ children }) => children,
+  KeyboardProvider: ({ children }) => children,
+}));

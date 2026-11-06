@@ -5,23 +5,26 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, YStack } from 'tamagui';
 import { ForgotPasswordForm, NewPasswordForm, SignInForm, SignUpForm } from '@/features/auth';
 import { backend } from '@/shared/api';
-import { AppText, Header } from '@/shared/ui';
+import { AppText, Header, useColors } from '@/shared/ui';
 
-const FormScroll = ({ children }: { children: ReactNode }) => (
-  <KeyboardAwareScrollView
-    bottomOffset={24}
-    keyboardShouldPersistTaps="handled"
-    style={{ flex: 1, backgroundColor: '#ffffff' }}
-    contentContainerStyle={{ padding: 24 }}
-  >
-    {children}
-  </KeyboardAwareScrollView>
-);
+const FormScroll = ({ children }: { children: ReactNode }) => {
+  const colors = useColors();
+  return (
+    <KeyboardAwareScrollView
+      bottomOffset={24}
+      keyboardShouldPersistTaps="handled"
+      style={{ flex: 1, backgroundColor: colors.surface }}
+      contentContainerStyle={{ padding: 24 }}
+    >
+      {children}
+    </KeyboardAwareScrollView>
+  );
+};
 
 export const SignInPage = () => {
   const { top } = useSafeAreaInsets();
   return (
-    <View flex={1} paddingTop={top} backgroundColor="white">
+    <View flex={1} paddingTop={top} backgroundColor="surface">
       <FormScroll>
         <YStack alignItems="center" paddingTop={40} paddingBottom={40} gap={8}>
           <Image
@@ -48,7 +51,7 @@ export const SignInPage = () => {
 };
 
 export const SignUpPage = () => (
-  <View flex={1} backgroundColor="white">
+  <View flex={1} backgroundColor="surface">
     <Header title="회원가입" />
     <FormScroll>
       <SignUpForm />
@@ -57,7 +60,7 @@ export const SignUpPage = () => (
 );
 
 export const ForgotPasswordPage = () => (
-  <View flex={1} backgroundColor="white">
+  <View flex={1} backgroundColor="surface">
     <Header title="비밀번호 찾기" />
     <FormScroll>
       <ForgotPasswordForm />
@@ -66,7 +69,7 @@ export const ForgotPasswordPage = () => (
 );
 
 export const ResetPasswordPage = () => (
-  <View flex={1} backgroundColor="white">
+  <View flex={1} backgroundColor="surface">
     <Header title="새 비밀번호 설정" />
     <FormScroll>
       <NewPasswordForm />

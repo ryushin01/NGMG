@@ -9,7 +9,15 @@ import { KindIcon, usePlaces } from '@/entities/place';
 import { usePlaceSearch } from '@/features/place-search';
 import type { SearchResult } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
-import { AppText, Divider, ListRow, LoadingView, MessageView, Touchable } from '@/shared/ui';
+import {
+  AppIcon,
+  AppText,
+  Divider,
+  ListRow,
+  LoadingView,
+  MessageView,
+  Touchable,
+} from '@/shared/ui';
 
 export const SearchPage = () => {
   const router = useRouter();
@@ -43,8 +51,8 @@ export const SearchPage = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="white">
-      <View paddingTop={top} boxShadow="0 4px 8px #0000000f" backgroundColor="white" zIndex={1}>
+    <View flex={1} backgroundColor="surface">
+      <View paddingTop={top} boxShadow="0 4px 8px #0000000f" backgroundColor="surface" zIndex={1}>
         <XStack height={60} alignItems="center" paddingHorizontal={8}>
           <Touchable
             onPress={() => router.back()}
@@ -52,7 +60,7 @@ export const SearchPage = () => {
             alignItems="center"
             justifyContent="center"
           >
-            <ArrowLeft size={24} color="#1a254f" strokeWidth={1.75} />
+            <AppIcon icon={ArrowLeft} size={24} color="ink" strokeWidth={1.75} />
           </Touchable>
           <View width={10} height={10} backgroundColor="brand" marginHorizontal={8} />
           <Input
@@ -79,7 +87,7 @@ export const SearchPage = () => {
               alignItems="center"
               justifyContent="center"
             >
-              <XCircle size={18} color="#5f6673" strokeWidth={1.75} />
+              <AppIcon icon={XCircle} size={18} color="muted" strokeWidth={1.75} />
             </Touchable>
           ) : null}
         </XStack>
@@ -166,7 +174,7 @@ export const SearchPage = () => {
                 testID={`search-result-${item.id}`}
                 title={item.name}
                 subtitle={item.address}
-                icon={<MapPin size={22} color="#5f6673" strokeWidth={1.5} />}
+                icon={<AppIcon icon={MapPin} size={22} color="muted" strokeWidth={1.5} />}
                 onPress={() => select(item)}
               />
             )}
@@ -180,11 +188,11 @@ export const SearchPage = () => {
           accessibilityLabel="지도에서 설정"
           borderTopWidth={1}
           borderTopColor="line"
-          backgroundColor="white"
+          backgroundColor="surface"
           paddingBottom={bottom}
         >
           <XStack height={56} alignItems="center" justifyContent="center" gap={8}>
-            <Map size={20} color="#1a254f" strokeWidth={1.5} />
+            <AppIcon icon={Map} size={20} color="ink" strokeWidth={1.5} />
             <AppText tone="ink">지도에서 설정</AppText>
           </XStack>
         </Touchable>

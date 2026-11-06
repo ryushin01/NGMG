@@ -51,6 +51,45 @@ const ZoomableImage = ({
   );
 };
 
+/** 오프라인에서 기기에 저장되지 않은 사진은 빈 칸 대신 안내를 보여 줍니다. */
+const GalleryImage = ({
+  photo,
+  width,
+  height,
+}: {
+  photo: Photo;
+  width: number;
+  height: number;
+}) => {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <View
+        testID="photo-unavailable"
+        width={width}
+        height={height}
+        backgroundColor="surfaceMuted"
+        alignItems="center"
+        justifyContent="center"
+        padding={24}
+      >
+        <AppText tone="muted" textAlign="center">
+          사진을 불러오지 못했습니다. 연결되면 다시 표시됩니다.
+        </AppText>
+      </View>
+    );
+  }
+  return (
+    <Image
+      source={{ uri: photo.url, cacheKey: photo.path }}
+      style={{ width, height }}
+      contentFit="cover"
+      transition={150}
+      onError={() => setFailed(true)}
+    />
+  );
+};
+
 /** 가로로 넘겨 보는 사진 목록과 확대 가능한 전체 화면 보기 */
 export const PhotoGallery = ({ photos, label }: { photos: Photo[]; label: string }) => {
   const { width, height } = useWindowDimensions();
@@ -77,12 +116,7 @@ export const PhotoGallery = ({ photos, label }: { photos: Photo[]; label: string
             accessibilityLabel={`${label} 사진 ${index + 1}, 크게 보기`}
             opacity="1 press:0.9"
           >
-            <Image
-              source={{ uri: item.url, cacheKey: item.path }}
-              style={{ width, height: pageHeight }}
-              contentFit="cover"
-              transition={150}
-            />
+            <GalleryImage photo={item} width={width} height={pageHeight} />
           </Touchable>
         )}
       />

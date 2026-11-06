@@ -28,7 +28,7 @@ export const RecordsPage = () => {
     [filter, keyword, records.data],
   );
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="전체 기록" />
       <View paddingHorizontal={20} paddingBottom={12}>
         <Field

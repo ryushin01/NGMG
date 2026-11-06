@@ -19,11 +19,14 @@ import type {
   TripRecord,
 } from './types';
 
+const AUTH_STORAGE_KEY = 'ngmg.supabase-auth';
+const SIGN_OUT_TIMEOUT = 5000;
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 const client = createClient(env.supabaseUrl, env.supabaseAnonKey, {
   auth: {
     storage: storageAdapter,
+    storageKey: AUTH_STORAGE_KEY,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -37,6 +40,8 @@ AppState.addEventListener('change', (state) => {
 });
 
 const LAST_SESSION_KEY = 'ngmg.last-session';
+
+const localSignOutListeners = new Set<(session: Session | null) => void>();
 
 const toSession = (session: SupabaseSession | null): Session | null =>
   session ? { userId: session.user.id, email: session.user.email ?? '' } : null;
@@ -80,6 +85,8 @@ const toPlace = (row: PlaceRow): Place => ({
 });
 
 const placePayload = (input: PlaceInput) => input;
+
+type ChecklistRow = Omit<ChecklistItem, 'listName'> & { list_name: string };
 
 type PhotoRow = {
   id: string;
@@ -195,6 +202,24 @@ const removeFiles = async (paths: string[]) => {
   if (error) throw error;
 };
 
+/** 업로드 직후 끊겨 행 없이 남은 파일을 지웁니다. 실패해도 저장 결과에는 영향이 없습니다. */
+const removeOrphanFiles = async (userId: string, recordId: string) => {
+  try {
+    const folder = `${userId}/${recordId}`;
+    const [{ data: files }, { data: rows }] = await Promise.all([
+      client.storage.from(PHOTO_BUCKET).list(folder),
+      client.from('record_photos').select('storage_path').eq('record_id', recordId),
+    ]);
+    const used = new Set((rows ?? []).map((row) => row.storage_path));
+    const orphans = (files ?? [])
+      .map((file) => `${folder}/${file.name}`)
+      .filter((path) => !used.has(path));
+    await removeFiles(orphans);
+  } catch {
+    // 다음 저장 때 다시 정리합니다.
+  }
+};
+
 const syncPhotos = async (recordId: string, input: RecordSaveInput) => {
   const userId = await currentUserId();
   const { data: existing, error } = await client
@@ -243,6 +268,7 @@ const syncPhotos = async (recordId: string, input: RecordSaveInput) => {
     if (deleteError) throw deleteError;
     await removeFiles(removed.map((row) => row.storage_path));
   }
+  await removeOrphanFiles(userId, recordId);
 };
 
 const uploadAll = async (
@@ -301,6 +327,7 @@ export const supabaseBackend: Backend = {
       return !!data.session;
     },
     subscribe(listener) {
+      localSignOutListeners.add(listener);
       const { data } = client.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT') storageAdapter.removeItem(LAST_SESSION_KEY);
         else if (!session) {
@@ -310,7 +337,10 @@ export const supabaseBackend: Backend = {
         }
         listener(rememberSession(toSession(session)));
       });
-      return () => data.subscription.unsubscribe();
+      return () => {
+        localSignOutListeners.delete(listener);
+        data.subscription.unsubscribe();
+      };
     },
     async signIn(email, password) {
       const { error } = await client.auth.signInWithPassword({ email, password });
@@ -322,8 +352,22 @@ export const supabaseBackend: Backend = {
       return { needsConfirmation: !data.session };
     },
     async signOut() {
-      const { error } = await client.auth.signOut();
-      if (error) throw error;
+      // 토큰이 만료된 채 끊겨 있으면 갱신 재시도가 길어지므로 오래 기다리지 않습니다.
+      const { error } = await Promise.race([
+        client.auth.signOut(),
+        new Promise<{ error: Error }>((resolve) =>
+          setTimeout(
+            () => resolve({ error: new TypeError('Network request failed') }),
+            SIGN_OUT_TIMEOUT,
+          ),
+        ),
+      ]);
+      if (!error) return;
+      if (!isTransientError(error)) throw error;
+      // 끊긴 상태에서도 이 기기에서는 로그아웃되어야 합니다. 서버 토큰은 만료되면 사라집니다.
+      storageAdapter.removeItem(AUTH_STORAGE_KEY);
+      storageAdapter.removeItem(LAST_SESSION_KEY);
+      localSignOutListeners.forEach((listener) => listener(null));
     },
     async sendPasswordReset(email) {
       const { error } = await client.auth.resetPasswordForEmail(email, {
@@ -438,13 +482,18 @@ export const supabaseBackend: Backend = {
     async list() {
       const { data, error } = await client
         .from('checklist_items')
-        .select('id, title, category, checked, position')
+        .select('id, title, category, checked, position, list_name')
         .order('position');
       if (error) throw error;
-      return data as ChecklistItem[];
+      return (data as ChecklistRow[]).map(({ list_name, ...item }) => ({
+        ...item,
+        listName: list_name,
+      }));
     },
     async upsert(items) {
-      const { error } = await client.from('checklist_items').upsert(items);
+      const { error } = await client
+        .from('checklist_items')
+        .upsert(items.map(({ listName, ...item }) => ({ ...item, list_name: listName })));
       if (error) throw error;
     },
     async remove(ids) {

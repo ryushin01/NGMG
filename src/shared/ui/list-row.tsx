@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { View, XStack, YStack } from 'tamagui';
 import { Touchable } from './pressable';
 import { AppText } from './typography';
+import { AppIcon } from './icon';
 
 type ListRowProps = {
   title: string;
@@ -20,7 +21,7 @@ export const ListRow = ({ title, subtitle, icon, chevron, onPress, testID }: Lis
     accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
     paddingHorizontal={20}
     paddingVertical={14}
-    backgroundColor="white press:surfaceMuted"
+    backgroundColor="surface press:surfaceMuted"
   >
     <XStack alignItems="center" gap={14}>
       {icon ? (
@@ -36,7 +37,7 @@ export const ListRow = ({ title, subtitle, icon, chevron, onPress, testID }: Lis
           </AppText>
         ) : null}
       </YStack>
-      {chevron ? <ChevronRight size={18} color="#5f6673" strokeWidth={1.75} /> : null}
+      {chevron ? <AppIcon icon={ChevronRight} size={18} color="muted" strokeWidth={1.75} /> : null}
     </XStack>
   </Touchable>
 );

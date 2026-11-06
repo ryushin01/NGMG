@@ -10,7 +10,7 @@ export const PlaceEditPage = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const place = usePlace(id);
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="장소 수정" />
       {place.data ? (
         <PlaceForm

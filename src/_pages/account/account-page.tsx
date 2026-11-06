@@ -6,12 +6,12 @@ import { useState } from 'react';
 import { Alert, ScrollView, Switch } from 'react-native';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
-import { useChecklist } from '@/entities/checklist';
+import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { useSessionStore } from '@/entities/session';
 import { useExportData } from '@/features/data-export';
 import { backend, isDemoOffline, setDemoOffline, sync, useSyncState } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
-import { AppText, Button, Divider, Header, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Button, Divider, Header, Touchable } from '@/shared/ui';
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <YStack paddingVertical={14} gap={2} accessible accessibilityLabel={`${label}, ${value}`}>
@@ -48,7 +48,7 @@ const LinkRow = ({
           {value}
         </AppText>
       ) : null}
-      <ChevronRight size={18} color="#5f6673" strokeWidth={1.75} />
+      <AppIcon icon={ChevronRight} size={18} color="muted" strokeWidth={1.75} />
     </XStack>
   </Touchable>
 );
@@ -104,11 +104,8 @@ export const AccountPage = () => {
     if (!next) void sync.flush({ force: true });
   };
 
-  const checked = checklist.data?.filter((item) => item.checked).length ?? 0;
-  const total = checklist.data?.length ?? 0;
-
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="MY 페이지" />
       <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: 40 }}>
         <YStack>
@@ -117,7 +114,7 @@ export const AccountPage = () => {
           <LinkRow
             testID="my-checklist"
             label="출조 체크리스트"
-            value={total > 0 ? `${total}개 중 ${checked}개 챙김` : undefined}
+            value={summarizeChecklist(checklist.data ?? [])}
             onPress={() => router.push('/checklist')}
           />
           <Divider />
@@ -138,15 +135,20 @@ export const AccountPage = () => {
           <Row label="앱 버전" value={Constants.expoConfig?.version ?? '-'} />
         </YStack>
         {backend.mode === 'demo' ? (
-          <XStack alignItems="center" gap={12} minHeight={44}>
-            <AppText flex={1}>데모 모드 연결 끊기</AppText>
-            <Switch
-              testID="demo-offline"
-              accessibilityLabel="데모 모드 연결 끊기"
-              value={demoOffline}
-              onValueChange={toggleDemoOffline}
-            />
-          </XStack>
+          <Touchable
+            testID="demo-offline"
+            onPress={() => toggleDemoOffline(!demoOffline)}
+            accessibilityRole="switch"
+            accessibilityLabel="데모 모드 연결 끊기"
+            accessibilityState={{ checked: demoOffline }}
+          >
+            <XStack alignItems="center" gap={12} minHeight={44}>
+              <AppText flex={1}>데모 모드 연결 끊기</AppText>
+              <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no">
+                <Switch value={demoOffline} />
+              </View>
+            </XStack>
+          </Touchable>
         ) : null}
         <YStack gap={10}>
           <AppText size="row" tone="ink" bold accessibilityRole="header">

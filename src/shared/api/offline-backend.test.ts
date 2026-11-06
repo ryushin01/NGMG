@@ -348,7 +348,14 @@ describe('계정 분리', () => {
     const { backend, sync, server, signInAs, authOut } = setup();
     signInAs('a');
     server.down = true;
-    const item = { id: 'c1', title: '구명조끼', category: '안전', checked: false, position: 0 };
+    const item = {
+      id: 'c1',
+      title: '구명조끼',
+      category: '안전',
+      checked: false,
+      position: 0,
+      listName: '기본',
+    };
     await backend.checklist.upsert([item]);
     expect(await backend.checklist.list()).toEqual([item]);
 
@@ -380,7 +387,14 @@ describe('체크리스트', () => {
   it('체크 상태를 끊긴 채로 바꾸고 복구되면 서버에 반영합니다', async () => {
     const { backend, sync, server, signInAs } = setup();
     signInAs('a');
-    const item = { id: 'c1', title: '릴', category: '장비', checked: false, position: 0 };
+    const item = {
+      id: 'c1',
+      title: '릴',
+      category: '장비',
+      checked: false,
+      position: 0,
+      listName: '기본',
+    };
     await backend.checklist.upsert([item]);
     server.down = true;
     await backend.checklist.upsert([{ ...item, checked: true }]);

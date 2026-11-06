@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react-native';
 import { XStack, YStack } from 'tamagui';
-import { AppText, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Touchable } from '@/shared/ui';
 
 type RatingFieldProps = { value: number | null; onChange: (next: number | null) => void };
 
@@ -21,11 +21,12 @@ export const RatingField = ({ value, onChange }: RatingFieldProps) => (
           alignItems="center"
           justifyContent="center"
         >
-          <Star
+          <AppIcon
+            icon={Star}
             size={28}
             strokeWidth={1.5}
-            color="#1a254f"
-            fill={value && score <= value ? '#00a8ff' : 'transparent'}
+            color="ink"
+            fill={value && score <= value ? 'brand' : undefined}
           />
         </Touchable>
       ))}

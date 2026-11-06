@@ -1,7 +1,7 @@
 import { Check, Trash2 } from 'lucide-react-native';
 import { View, XStack } from 'tamagui';
 import type { ChecklistItem } from '@/shared/api';
-import { AppText, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Touchable } from '@/shared/ui';
 
 type ChecklistRowProps = {
   item: ChecklistItem;
@@ -27,11 +27,11 @@ export const ChecklistRow = ({ item, onToggle, onRemove }: ChecklistRowProps) =>
           borderRadius={6}
           borderWidth={2}
           borderColor={item.checked ? 'ink' : 'muted'}
-          backgroundColor={item.checked ? 'ink' : 'white'}
+          backgroundColor={item.checked ? 'ink' : 'surface'}
           alignItems="center"
           justifyContent="center"
         >
-          {item.checked ? <Check size={16} color="#ffffff" strokeWidth={3} /> : null}
+          {item.checked ? <AppIcon icon={Check} size={16} color="surface" strokeWidth={3} /> : null}
         </View>
         <AppText
           flex={1}
@@ -49,7 +49,7 @@ export const ChecklistRow = ({ item, onToggle, onRemove }: ChecklistRowProps) =>
       alignItems="center"
       justifyContent="center"
     >
-      <Trash2 size={18} color="#5f6673" strokeWidth={1.75} />
+      <AppIcon icon={Trash2} size={18} color="muted" strokeWidth={1.75} />
     </Touchable>
   </XStack>
 );

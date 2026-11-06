@@ -94,7 +94,7 @@ export const RecordDetailPage = () => {
 
   if (!record.data) {
     return (
-      <View flex={1} backgroundColor="white">
+      <View flex={1} backgroundColor="surface">
         <Header title="기록" />
         {record.isError ? (
           <MessageView
@@ -129,7 +129,7 @@ export const RecordDetailPage = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header
         title="기록"
         right={<HeaderTextButton label="편집" onPress={() => router.push(`/record/${id}/edit`)} />}

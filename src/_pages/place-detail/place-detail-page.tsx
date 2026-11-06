@@ -10,6 +10,7 @@ import { RecordRow, useRecords } from '@/entities/record';
 import type { Place } from '@/shared/api';
 import { formatCoordinate, toErrorMessage } from '@/shared/lib';
 import {
+  AppIcon,
   AppMapView,
   AppText,
   BottomCta,
@@ -67,7 +68,7 @@ export const PlaceDetailPage = () => {
 
   if (!place.data) {
     return (
-      <View flex={1} backgroundColor="white">
+      <View flex={1} backgroundColor="surface">
         <Header title="장소" />
         {place.isError ? (
           <MessageView
@@ -108,7 +109,7 @@ export const PlaceDetailPage = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header
         title={KIND_META[data.kind].label}
         right={<HeaderTextButton label="편집" onPress={() => router.push(`/place/${id}/edit`)} />}
@@ -134,7 +135,7 @@ export const PlaceDetailPage = () => {
             {data.name}
           </AppText>
           <XStack gap={6}>
-            <MapPin size={18} color="#5f6673" strokeWidth={1.75} />
+            <AppIcon icon={MapPin} size={18} color="muted" strokeWidth={1.75} />
             <YStack flex={1}>
               <AppText>{data.address || '주소 없음'}</AppText>
               <AppText size="caption" tone="muted">
@@ -154,12 +155,12 @@ export const PlaceDetailPage = () => {
         <XStack paddingHorizontal={20} paddingBottom={12}>
           <ActionButton
             label="지도 앱"
-            icon={<ExternalLink size={20} color="#1a254f" strokeWidth={1.5} />}
+            icon={<AppIcon icon={ExternalLink} size={20} color="ink" strokeWidth={1.5} />}
             onPress={() => openInMaps(data)}
           />
           <ActionButton
             label="주소 복사"
-            icon={<Copy size={20} color="#1a254f" strokeWidth={1.5} />}
+            icon={<AppIcon icon={Copy} size={20} color="ink" strokeWidth={1.5} />}
             onPress={async () => {
               await Clipboard.setStringAsync(
                 data.address || formatCoordinate(data.latitude, data.longitude),
@@ -169,7 +170,7 @@ export const PlaceDetailPage = () => {
           />
           <ActionButton
             label="공유"
-            icon={<Share2 size={20} color="#1a254f" strokeWidth={1.5} />}
+            icon={<AppIcon icon={Share2} size={20} color="ink" strokeWidth={1.5} />}
             onPress={() =>
               Share.share({
                 message: `${data.name}\n${data.address}\n${formatCoordinate(data.latitude, data.longitude)}`,

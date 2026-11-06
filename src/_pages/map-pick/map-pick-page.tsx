@@ -46,7 +46,7 @@ export const MapPickPage = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="지도에서 설정" />
       <View flex={1}>
         <AppMapView

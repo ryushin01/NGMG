@@ -1,0 +1,22 @@
+# 서버가 끊긴 상태에서 로그아웃합니다.
+appId: com.ryushin01.ngmg
+---
+- runFlow: _open-drawer.yaml
+- tapOn:
+    id: drawer-account
+- extendedWaitUntil:
+    visible:
+      id: sign-out
+    timeout: 15000
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible: .*이 기기에 남고.*
+    timeout: 8000
+- tapOn:
+    text: 로그아웃
+    index: 1
+- extendedWaitUntil:
+    visible:
+      id: field-email
+    timeout: 60000

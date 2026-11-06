@@ -16,7 +16,7 @@ export const PlaceNewPage = () => {
   const valid = Number.isFinite(latitude) && Number.isFinite(longitude);
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="새 장소" />
       {valid ? (
         <PlaceForm

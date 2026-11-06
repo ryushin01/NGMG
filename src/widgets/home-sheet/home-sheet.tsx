@@ -1,13 +1,14 @@
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
-import { ArrowRight, MapPin, Square, X } from 'lucide-react-native';
+import { ArrowRight, ChevronRight, ListChecks, MapPin, Square, X } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
+import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { KindBadge } from '@/entities/place';
 import { RecordRow, useRecords } from '@/entities/record';
 import type { Place, PlaceKind } from '@/shared/api';
 import { formatDate, getTide } from '@/shared/lib';
-import { AppText, Button, Chip, Divider, Tag, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Button, Chip, Divider, Tag, Touchable } from '@/shared/ui';
 
 export type KindFilter = PlaceKind | 'all';
 
@@ -34,6 +35,8 @@ export const HomeContent = ({
 }: HomeContentProps) => {
   const router = useRouter();
   const records = useRecords();
+  const checklist = useChecklist();
+  const checklistSummary = summarizeChecklist(checklist.data ?? []);
   const visible = (records.data ?? [])
     .filter((record) => filter === 'all' || record.placeKind === filter)
     .slice(0, 5);
@@ -55,11 +58,11 @@ export const HomeContent = ({
           justifyContent="center"
         >
           <XStack alignItems="center" gap={12}>
-            <Square size={10} color="#1a254f" fill="#1a254f" />
+            <AppIcon icon={Square} size={10} color="ink" fill="ink" />
             <AppText flex={1} tone="muted">
               주소나 장소 검색
             </AppText>
-            <ArrowRight size={22} color="#1a254f" strokeWidth={1.5} />
+            <AppIcon icon={ArrowRight} size={22} color="ink" strokeWidth={1.5} />
           </XStack>
         </Touchable>
         <XStack gap={8} accessibilityRole="radiogroup" accessibilityLabel="지도 핀 분류">
@@ -88,6 +91,25 @@ export const HomeContent = ({
             </XStack>
           </ScrollView>
         ) : null}
+        <Touchable
+          testID="home-checklist"
+          onPress={() => router.push('/checklist')}
+          accessibilityLabel={`출조 체크리스트${checklistSummary ? `, ${checklistSummary}` : ''}`}
+          justifyContent="center"
+        >
+          <XStack alignItems="center" gap={10}>
+            <AppIcon icon={ListChecks} size={20} color="ink" strokeWidth={1.75} />
+            <AppText flex={1} tone="ink">
+              출조 체크리스트
+            </AppText>
+            {checklistSummary ? (
+              <AppText size="caption" tone="muted">
+                {checklistSummary}
+              </AppText>
+            ) : null}
+            <AppIcon icon={ChevronRight} size={18} color="muted" strokeWidth={1.75} />
+          </XStack>
+        </Touchable>
       </YStack>
       <View height={8} backgroundColor="surfaceMuted" marginTop={18} />
       <XStack
@@ -148,11 +170,11 @@ export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => 
             alignItems="center"
             justifyContent="center"
           >
-            <X size={22} color="#1a254f" strokeWidth={1.75} />
+            <AppIcon icon={X} size={22} color="ink" strokeWidth={1.75} />
           </Touchable>
         </XStack>
         <XStack gap={6} alignItems="center">
-          <MapPin size={16} color="#5f6673" strokeWidth={1.75} />
+          <AppIcon icon={MapPin} size={16} color="muted" strokeWidth={1.75} />
           <AppText flex={1} size="caption" tone="muted" numberOfLines={1}>
             {place.address || '주소 없음'}
           </AppText>

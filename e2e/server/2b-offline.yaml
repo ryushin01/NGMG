@@ -43,3 +43,19 @@ appId: com.ryushin01.ngmg
     timeout: 60000
 - assertVisible:
     id: record-delete
+# 끊긴 상태에서도 전에 본 사진은 기기 캐시로 보입니다.
+- runFlow: _back-to-home.yaml
+- runFlow: _open-drawer.yaml
+- tapOn:
+    id: drawer-records
+- extendedWaitUntil:
+    visible: .*서버 출조 수정.*
+    timeout: 30000
+- tapOn: .*서버 출조 수정.*
+- extendedWaitUntil:
+    visible:
+      id: photo-0
+    timeout: 30000
+- assertNotVisible:
+    id: photo-unavailable
+- waitForAnimationToEnd

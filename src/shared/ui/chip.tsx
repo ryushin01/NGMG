@@ -4,6 +4,7 @@ import { XStack, YStack } from 'tamagui';
 import { Field } from './field';
 import { Touchable } from './pressable';
 import { AppText } from './typography';
+import { AppIcon } from './icon';
 
 type ChipProps = {
   label: string;
@@ -23,7 +24,7 @@ export const Chip = ({ label, selected, onPress, testID }: ChipProps) => (
     borderRadius={22}
     borderWidth={1}
     borderColor={selected ? 'ink' : 'line'}
-    backgroundColor={selected ? 'ink' : 'white'}
+    backgroundColor={selected ? 'ink' : 'surface'}
     alignItems="center"
     justifyContent="center"
   >
@@ -52,7 +53,7 @@ export const Tag = ({ label, onRemove }: { label: string; onRemove?: () => void 
         alignItems="center"
         justifyContent="center"
       >
-        <X size={14} color="#1a254f" />
+        <AppIcon icon={X} size={14} color="ink" />
       </Touchable>
     ) : null}
   </XStack>

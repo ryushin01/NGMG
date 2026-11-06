@@ -1,6 +1,16 @@
 # 서버가 돌아오면 자동으로 올라갑니다. 아직 남아 있으면 동기화 화면에서 바로 보냅니다.
 appId: com.ryushin01.ngmg
 ---
+- tapOn:
+    id: field-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: field-password
+- inputText: first-password
+- runFlow: ../_hide-keyboard-android.yaml
+- tapOn:
+    id: sign-in-submit
+- runFlow: _after-sign-in.yaml
 - runFlow:
     when:
       visible:

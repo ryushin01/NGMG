@@ -11,7 +11,7 @@ export const RecordNewPage = () => {
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
   const place = usePlace(placeId);
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title={place.data ? `${place.data.name} 기록` : '새 기록'} />
       {place.data ? (
         <RecordForm
@@ -39,7 +39,7 @@ export const RecordEditPage = () => {
   const record = useRecord(id);
   const place = usePlace(record.data?.placeId ?? '', { enabled: !!record.data });
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="기록 수정" />
       {record.data ? (
         <RecordForm

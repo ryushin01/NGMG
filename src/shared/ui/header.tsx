@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, XStack } from 'tamagui';
 import { Touchable } from './pressable';
 import { AppText } from './typography';
+import { AppIcon } from './icon';
 
 type HeaderProps = {
   title: string;
@@ -18,7 +19,7 @@ export const Header = ({ title, right, closeIcon, onBack }: HeaderProps) => {
   const { top } = useSafeAreaInsets();
   const Icon = closeIcon ? X : ArrowLeft;
   return (
-    <View paddingTop={top} backgroundColor="white">
+    <View paddingTop={top} backgroundColor="surface">
       <XStack height={52} alignItems="center" paddingHorizontal={8}>
         <Touchable
           onPress={onBack ?? (() => router.back())}
@@ -26,7 +27,7 @@ export const Header = ({ title, right, closeIcon, onBack }: HeaderProps) => {
           alignItems="center"
           justifyContent="center"
         >
-          <Icon color="#1a254f" size={24} strokeWidth={1.75} />
+          <AppIcon icon={Icon} color="ink" size={24} strokeWidth={1.75} />
         </Touchable>
         <View flex={1} alignItems="center">
           <AppText size="row" tone="ink" numberOfLines={1} accessibilityRole="header">

@@ -8,7 +8,10 @@ import {
   buildDefaultItems,
   CHECKLIST_CATEGORIES,
   ChecklistRow,
+  copyList,
+  DEFAULT_LIST_NAME,
   groupChecklist,
+  listNames,
   nextPosition,
   useChecklist,
   useRemoveChecklist,
@@ -37,7 +40,14 @@ export const ChecklistPage = () => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<string>(CHECKLIST_CATEGORIES[0]);
 
-  const items = checklist.data ?? [];
+  const [selected, setSelected] = useState<string | null>(null);
+  const [newListName, setNewListName] = useState<string | null>(null);
+
+  const allItems = checklist.data ?? [];
+  const lists = listNames(allItems);
+  const listName =
+    selected && lists.includes(selected) ? selected : (lists[0] ?? DEFAULT_LIST_NAME);
+  const items = allItems.filter((item) => item.listName === listName);
   const checkedItems = items.filter((item) => item.checked);
   const onError = (error: unknown) => toast.error(toErrorMessage(error, '저장하지 못했습니다.'));
 
@@ -55,7 +65,8 @@ export const ChecklistPage = () => {
           title: trimmed,
           category,
           checked: false,
-          position: nextPosition(items),
+          position: nextPosition(allItems),
+          listName,
         },
       ],
       { onError },
@@ -66,6 +77,41 @@ export const ChecklistPage = () => {
   const toggle = (item: ChecklistItem) => {
     Haptics.selectionAsync();
     upsert.mutate([{ ...item, checked: !item.checked }], { onError });
+  };
+
+  const createList = () => {
+    const name = newListName?.trim();
+    if (!name) return;
+    if (lists.includes(name)) {
+      toast.warning('같은 이름의 목록이 있습니다.');
+      return;
+    }
+    // 지금 보는 목록을 복사해 시작합니다. 항목이 없으면 기본 준비물로 채웁니다.
+    upsert.mutate(
+      items.length > 0 ? copyList(items, name, newId) : buildDefaultItems(newId, name),
+      {
+        onError,
+      },
+    );
+    setSelected(name);
+    setNewListName(null);
+  };
+
+  const confirmDeleteList = () => {
+    Alert.alert('목록 삭제', `${listName} 목록의 항목 ${items.length}개를 모두 지웁니다.`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          remove.mutate(
+            items.map((item) => item.id),
+            { onError },
+          );
+          setSelected(null);
+        },
+      },
+    ]);
   };
 
   const confirmReset = () => {
@@ -98,7 +144,7 @@ export const ChecklistPage = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header
         title="출조 체크리스트"
         right={
@@ -118,9 +164,82 @@ export const ChecklistPage = () => {
       ) : (
         <ScrollView
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           contentContainerStyle={{ paddingBottom: 40 }}
         >
           <YStack padding={20} gap={12}>
+            {lists.length > 0 ? (
+              <YStack gap={8}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack
+                    gap={8}
+                    accessibilityRole="radiogroup"
+                    accessibilityLabel="체크리스트 목록"
+                  >
+                    {lists.map((name) => (
+                      <Chip
+                        key={name}
+                        testID={`checklist-list-${name}`}
+                        label={name}
+                        selected={name === listName}
+                        onPress={() => setSelected(name)}
+                      />
+                    ))}
+                  </XStack>
+                </ScrollView>
+                {newListName === null ? (
+                  <XStack gap={8}>
+                    <View flex={1}>
+                      <Button
+                        testID="checklist-new-list"
+                        variant="outline"
+                        label="이 목록 복사해 새 목록"
+                        onPress={() => setNewListName('')}
+                      />
+                    </View>
+                    {lists.length > 1 ? (
+                      <Button
+                        testID="checklist-delete-list"
+                        variant="danger"
+                        label="목록 삭제"
+                        onPress={confirmDeleteList}
+                      />
+                    ) : null}
+                  </XStack>
+                ) : (
+                  <YStack gap={8}>
+                    <Field
+                      testID="checklist-new-list-name"
+                      label="새 목록 이름"
+                      placeholder="예: 거문도 11월"
+                      value={newListName}
+                      onChangeText={setNewListName}
+                      onSubmitEditing={createList}
+                      submitBehavior="submit"
+                      returnKeyType="done"
+                      maxLength={50}
+                      autoFocusNative
+                    />
+                    <XStack gap={8}>
+                      <View flex={1}>
+                        <Button
+                          variant="outline"
+                          label="취소"
+                          onPress={() => setNewListName(null)}
+                        />
+                      </View>
+                      <View flex={1}>
+                        <Button
+                          testID="checklist-new-list-save"
+                          label="만들기"
+                          onPress={createList}
+                        />
+                      </View>
+                    </XStack>
+                  </YStack>
+                )}
+              </YStack>
+            ) : null}
             <AppText
               testID="checklist-progress"
               size="title"
@@ -160,7 +279,7 @@ export const ChecklistPage = () => {
               <Button
                 testID="checklist-defaults"
                 label="기본 목록으로 시작"
-                onPress={() => upsert.mutate(buildDefaultItems(newId), { onError })}
+                onPress={() => upsert.mutate(buildDefaultItems(newId, listName), { onError })}
               />
             ) : null}
           </YStack>

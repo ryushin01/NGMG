@@ -1,12 +1,12 @@
 import { Fish, Utensils } from 'lucide-react-native';
 import type { Place, PlaceKind } from '@/shared/api';
-import { ListRow } from '@/shared/ui';
+import { AppIcon, ListRow } from '@/shared/ui';
 
 export const KindIcon = ({ kind, size = 22 }: { kind: PlaceKind; size?: number }) =>
   kind === 'fishing' ? (
-    <Fish size={size} color="#006ea8" strokeWidth={1.75} />
+    <AppIcon icon={Fish} size={size} color="brandText" strokeWidth={1.75} />
   ) : (
-    <Utensils size={size} color="#b23a1d" strokeWidth={1.75} />
+    <AppIcon icon={Utensils} size={size} color="coralText" strokeWidth={1.75} />
   );
 
 export const PlaceRow = ({ place, onPress }: { place: Place; onPress: () => void }) => (

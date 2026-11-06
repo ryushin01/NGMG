@@ -42,7 +42,7 @@ export const SyncPage = () => {
     await sync.flush({ force: true }).finally(() => setFlushing(false));
   };
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="동기화" />
       <YStack paddingHorizontal={20} paddingBottom={12} gap={12}>
         <AppText testID="sync-status" accessibilityLiveRegion="polite">

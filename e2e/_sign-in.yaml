@@ -1,4 +1,6 @@
 appId: com.ryushin01.ngmg
+tags:
+  - helper
 ---
 - extendedWaitUntil:
     visible:

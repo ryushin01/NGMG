@@ -1,5 +1,7 @@
 # 시스템 사진 선택기에서 첫 줄의 사진 3장을 고릅니다.
 appId: com.ryushin01.ngmg
+tags:
+  - helper
 ---
 - waitForAnimationToEnd
 - runFlow:

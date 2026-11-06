@@ -1,0 +1,30 @@
+# 기록을 다시 저장하면 사진은 유지되고 행 없이 남은 파일만 지워집니다.
+appId: com.ryushin01.ngmg
+---
+- runFlow: _back-to-home.yaml
+- runFlow: _open-drawer.yaml
+- tapOn:
+    id: drawer-records
+- extendedWaitUntil:
+    visible: .*서버 출조.*
+    timeout: 20000
+- tapOn: .*서버 출조.*
+- extendedWaitUntil:
+    visible:
+      id: photo-0
+    timeout: 20000
+- tapOn: 편집
+- extendedWaitUntil:
+    visible:
+      id: record-title
+    timeout: 20000
+- tapOn:
+    id: record-title
+- inputText: ' 수정'
+- tapOn: 기본 정보
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible: .*서버 출조 수정.*
+    timeout: 60000
+- runFlow: _back-to-home.yaml

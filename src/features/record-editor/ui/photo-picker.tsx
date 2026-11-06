@@ -5,7 +5,7 @@ import { Alert, ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
 import type { LocalPhoto, Photo } from '@/shared/api';
 import { MAX_PHOTOS_PER_RECORD } from '@/shared/config';
-import { AppText, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Touchable } from '@/shared/ui';
 
 type PhotoPickerProps = {
   kept: Photo[];
@@ -66,13 +66,13 @@ export const PhotoPicker = ({ kept, added, onChangeKept, onChangeAdded }: PhotoP
                 testID="photo-add-library"
                 label="보관함에서 추가"
                 onPress={pickFromLibrary}
-                icon={<ImagePlus size={24} color="#1a254f" strokeWidth={1.75} />}
+                icon={<AppIcon icon={ImagePlus} size={24} color="ink" strokeWidth={1.75} />}
               />
               <AddTile
                 testID="photo-add-camera"
                 label="촬영"
                 onPress={takePhoto}
-                icon={<Camera size={24} color="#1a254f" strokeWidth={1.75} />}
+                icon={<AppIcon icon={Camera} size={24} color="ink" strokeWidth={1.75} />}
               />
             </>
           ) : null}
@@ -165,7 +165,7 @@ const Thumb = ({
         alignItems="center"
         justifyContent="center"
       >
-        <X size={14} color="#ffffff" />
+        <AppIcon icon={X} size={14} color="surface" />
       </View>
     </Touchable>
   </View>

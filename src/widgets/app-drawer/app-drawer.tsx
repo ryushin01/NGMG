@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, XStack, YStack } from 'tamagui';
 import { useSessionStore } from '@/entities/session';
 import { backend } from '@/shared/api';
-import { AppText, Divider, Touchable } from '@/shared/ui';
+import { AppIcon, AppText, Divider, Touchable, useColors } from '@/shared/ui';
 
 const MenuItem = ({
   label,
@@ -33,6 +33,7 @@ const MenuItem = ({
 export const AppDrawer = ({ onNavigate }: { onNavigate: () => void }) => {
   const router = useRouter();
   const { top } = useSafeAreaInsets();
+  const colors = useColors();
   const email = useSessionStore((state) => state.session?.email);
 
   const go = (href: '/places' | '/records' | '/search' | '/account' | '/checklist' | '/stats') => {
@@ -41,7 +42,7 @@ export const AppDrawer = ({ onNavigate }: { onNavigate: () => void }) => {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.surface }}>
       <YStack paddingTop={top + 24} paddingBottom={32}>
         <Touchable
           testID="drawer-account"
@@ -57,7 +58,7 @@ export const AppDrawer = ({ onNavigate }: { onNavigate: () => void }) => {
                 {email}
               </AppText>
             </YStack>
-            <ChevronRight size={20} color="#5f6673" strokeWidth={1.75} />
+            <AppIcon icon={ChevronRight} size={20} color="muted" strokeWidth={1.75} />
           </XStack>
         </Touchable>
         {backend.mode === 'demo' ? (

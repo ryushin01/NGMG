@@ -1,6 +1,13 @@
 import { ChecklistRow } from './checklist-row';
 
-const item = { id: '1', title: '구명조끼', category: '안전', checked: false, position: 0 };
+const item = {
+  id: '1',
+  title: '구명조끼',
+  category: '안전',
+  checked: false,
+  position: 0,
+  listName: '기본',
+};
 const noop = () => undefined;
 
 export default { title: 'entities/ChecklistRow', component: ChecklistRow };

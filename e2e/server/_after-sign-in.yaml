@@ -1,14 +1,26 @@
-# iOS 암호 저장 창은 홈이 열린 뒤 늦게 뜨므로 정해진 횟수만큼 확인하며 닫습니다.
+# iOS 암호 저장 창은 홈이 열린 뒤 늦게 뜰 수 있어, 충분히 기다린 뒤 창이 사라질 때까지 닫습니다.
 appId: com.ryushin01.ngmg
+tags:
+  - helper
 ---
 - repeat:
-    times: 8
+    times: 10
     commands:
       - runFlow:
           when:
             visible: 지금 안 함
           commands:
             - tapOn: 지금 안 함
+      - waitForAnimationToEnd
+- repeat:
+    times: 30
+    while:
+      notVisible:
+        id: add-place-here
+    commands:
+      # 시스템 창이라 글자로 찾지 못할 때가 있어 지금 안 함 버튼의 위치를 누릅니다.
+      - tapOn:
+          point: '31%,61%'
       - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:

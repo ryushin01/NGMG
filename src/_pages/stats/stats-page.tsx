@@ -52,7 +52,7 @@ export const StatsPage = () => {
   const stats = useMemo(() => computeStats(records.data ?? [], year), [records.data, year]);
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="통계" />
       {records.isPending ? (
         <LoadingView />

@@ -80,6 +80,7 @@ Docker와 Supabase CLI로 로컬 서버를 띄우고 그 주소로 앱을 빌드
 
 ```bash
 supabase start
+supabase migration up --local   # 이미 만든 로컬 DB에 새 마이그레이션을 적용합니다.
 # EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 과 anon 키로 iOS Release 빌드 후 시뮬레이터에 설치
 DEVICE=<시뮬레이터 ID> pnpm run test:e2e:server
 ```

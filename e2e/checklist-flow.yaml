@@ -44,6 +44,33 @@ appId: com.ryushin01.ngmg
 - scrollUntilVisible:
     element: 25개 중 1개 챙김
     direction: UP
+# 출조별 목록: 복사하면 체크는 지워지고 원래 목록은 그대로입니다.
+- scrollUntilVisible:
+    element:
+      id: checklist-new-list
+    direction: UP
+- tapOn:
+    id: checklist-new-list
+- tapOn:
+    id: checklist-new-list-name
+- inputText: 거문도
+- tapOn:
+    id: checklist-new-list-save
+- extendedWaitUntil:
+    visible: 25개 중 0개 챙김
+    timeout: 8000
+- tapOn:
+    id: checklist-list-기본
+- assertVisible: 25개 중 1개 챙김
+- tapOn:
+    id: checklist-list-거문도
+- tapOn:
+    id: checklist-delete-list
+- tapOn:
+    text: 삭제
+- extendedWaitUntil:
+    visible: 25개 중 1개 챙김
+    timeout: 8000
 # 다시 들어와도 유지됩니다.
 - tapOn: 뒤로 가기
 - tapOn:

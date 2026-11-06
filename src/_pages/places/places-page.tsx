@@ -39,7 +39,7 @@ export const PlacesPage = () => {
   }, [filter, keyword, places.data, tag]);
 
   return (
-    <View flex={1} backgroundColor="white">
+    <View flex={1} backgroundColor="surface">
       <Header title="내 장소" />
       <View paddingHorizontal={20} paddingBottom={12}>
         <Field

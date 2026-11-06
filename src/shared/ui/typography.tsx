@@ -13,7 +13,7 @@ export const AppText = styled(Text, {
       muted: { color: 'muted' },
       brand: { color: 'brandText' },
       danger: { color: 'danger' },
-      inverse: { color: 'white' },
+      inverse: { color: 'surface' },
     },
     size: {
       caption: { fontSize: 13, lineHeight: '18px' },

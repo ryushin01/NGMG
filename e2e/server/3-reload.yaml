@@ -12,7 +12,7 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: drawer-records
 - extendedWaitUntil:
-    visible: .*서버 출조.*
+    visible: .*서버 출조 수정.*
     timeout: 20000
 - runFlow: _back-to-home.yaml
 - tapOn:
