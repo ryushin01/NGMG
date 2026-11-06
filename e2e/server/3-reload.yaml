@@ -14,7 +14,7 @@ appId: com.ryushin01.ngmg
 - extendedWaitUntil:
     visible: .*서버 출조.*
     timeout: 20000
-- tapOn: 뒤로 가기
+- runFlow: _back-to-home.yaml
 - tapOn:
     id: open-drawer
 - tapOn:
@@ -22,7 +22,7 @@ appId: com.ryushin01.ngmg
 - extendedWaitUntil:
     visible: 24개 중 2개 챙김
     timeout: 20000
-- tapOn: 뒤로 가기
+- runFlow: _back-to-home.yaml
 - tapOn:
     id: open-drawer
 - tapOn:
@@ -38,8 +38,8 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: field-email
 - inputText: ${EMAIL}
+- runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
     id: reset-submit
-- extendedWaitUntil:
-    visible: .*재설정 메일을 보냈습니다.*
-    timeout: 15000
+# 재설정 메일 수신은 run.sh가 확인합니다.
+- waitForAnimationToEnd

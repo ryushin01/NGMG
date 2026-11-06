@@ -101,7 +101,7 @@ export const AccountPage = () => {
   const toggleDemoOffline = (next: boolean) => {
     setDemoOffline(next);
     setDemoOfflineState(next);
-    if (!next) void sync.flush();
+    if (!next) void sync.flush({ force: true });
   };
 
   const checked = checklist.data?.filter((item) => item.checked).length ?? 0;

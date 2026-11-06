@@ -18,20 +18,7 @@ appId: com.ryushin01.ngmg
 - hideKeyboard
 - tapOn:
     id: photo-add-library
-- waitForAnimationToEnd
-- extendedWaitUntil:
-    visible: '최대 10장.*'
-    timeout: 20000
-- waitForAnimationToEnd
-# 보관함 첫 줄의 사진 3장을 선택합니다. (좌표는 iOS 사진 선택기 기준)
-- tapOn:
-    point: '16%,27%'
-- tapOn:
-    point: '50%,27%'
-- tapOn:
-    point: '83%,27%'
-- tapOn:
-    point: '90%,15%'
+- runFlow: _pick-photos.yaml
 - extendedWaitUntil:
     visible: '.*3/10.*'
     timeout: 20000

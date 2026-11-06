@@ -17,7 +17,7 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: checklist-item-릴
 - assertVisible: 24개 중 2개 챙김
-- tapOn: 뒤로 가기
+- runFlow: _back-to-home.yaml
 - tapOn:
     id: open-drawer
 - tapOn:

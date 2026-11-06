@@ -23,3 +23,13 @@ describe('isTransientError', () => {
     expect(isTransientError(null)).toBe(false);
   });
 });
+
+it('서버에 닿지 못한 오류는 원인을 알 수 있는 안내로 바꿉니다', () => {
+  expect(toErrorMessage(new TypeError('Network request failed'))).toBe(
+    '네트워크 연결을 확인해 주세요.',
+  );
+  expect(toErrorMessage({ name: 'AuthRetryableFetchError', message: '' })).toBe(
+    '네트워크 연결을 확인해 주세요.',
+  );
+  expect(toErrorMessage({ message: 'x', code: '23514' }, '저장 실패')).toBe('저장 실패');
+});

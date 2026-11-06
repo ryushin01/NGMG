@@ -42,11 +42,11 @@ export const connectQueryManagers = () => {
   );
   const onAppState = (status: AppStateStatus) => {
     focusManager.setFocused(status === 'active');
-    if (status === 'active') void sync.flush();
+    if (status === 'active') void sync.flush({ force: true });
   };
   const subscription = AppState.addEventListener('change', onAppState);
-  // 일시적인 서버 오류로 멈춘 전송을 다시 시도합니다.
-  const timer = setInterval(() => void sync.flush(), RETRY_INTERVAL);
+  // 일시적인 서버 오류나 잘못된 연결 상태 보고로 멈춘 전송을 다시 시도합니다.
+  const timer = setInterval(() => void sync.flush({ force: true }), RETRY_INTERVAL);
   const unsubscribeSynced = sync.onSynced(() => void queryClient.invalidateQueries());
   return () => {
     subscription.remove();

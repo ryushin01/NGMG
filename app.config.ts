@@ -32,6 +32,8 @@ const config: ExpoConfig = {
       'expo-build-properties',
       {
         android: {
+          // 로컬 Supabase(http)로 E2E를 돌릴 때만 평문 통신을 허용합니다.
+          usesCleartextTraffic: (process.env.EXPO_PUBLIC_SUPABASE_URL ?? '').startsWith('http://'),
           // react-native-maps가 가져오는 WorkManager의 Room DB는 이름으로 찾으므로 R8 제거를 막습니다.
           extraProguardRules:
             '-keep class * extends androidx.room.RoomDatabase { <init>(); }\n-keep class androidx.work.impl.WorkDatabase_Impl { *; }',

@@ -1,15 +1,20 @@
-# 서버가 돌아오면 대기 중인 변경을 올립니다.
+# 서버가 돌아오면 자동으로 올라갑니다. 아직 남아 있으면 동기화 화면에서 바로 보냅니다.
 appId: com.ryushin01.ngmg
 ---
-- tapOn:
-    id: sync-banner
 - runFlow:
     when:
       visible:
-        id: sync-now
+        id: sync-banner
     commands:
       - tapOn:
-          id: sync-now
-- extendedWaitUntil:
-    visible: 모든 변경을 서버에 올렸습니다.
-    timeout: 60000
+          id: sync-banner
+      - runFlow:
+          when:
+            visible:
+              id: sync-now
+          commands:
+            - tapOn:
+                id: sync-now
+      - extendedWaitUntil:
+          visible: 모든 변경을 서버에 올렸습니다.
+          timeout: 60000

@@ -32,6 +32,7 @@ Kakao REST 키는 앱에 넣지 않고 서버 비밀 값으로 둡니다.
 npx supabase login
 npx supabase link --project-ref <프로젝트 ID>
 npx supabase db push
+npx supabase config push   # 인증 메일 링크가 앱으로 돌아오도록 site_url과 redirect URL을 올립니다.
 npx supabase secrets set KAKAO_REST_API_KEY=<Kakao REST 키>
 npx supabase functions deploy place-search
 npx supabase functions deploy delete-account

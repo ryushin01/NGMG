@@ -267,8 +267,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     saveSnapshot();
   };
 
-  const canReachServer = async () => {
-    if (!online) return false;
+  const canReachServer = async (force = false) => {
+    if (!online && !force) return false;
     try {
       // 토큰 갱신은 서버에 닿지 않으면 오래 재시도하므로 화면을 기다리게 하지 않습니다.
       return await Promise.race([
@@ -280,14 +280,16 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     }
   };
 
-  const runFlush = async () => {
+  const runFlush = async (force: boolean) => {
     let sent = 0;
-    while (online && userId) {
+    while ((online || force) && userId) {
       const next = ops.find((op) => op.status === 'pending');
       if (!next) break;
-      if (!(await canReachServer())) break;
+      if (!(await canReachServer(force))) break;
       try {
         const value = await execute(next);
+        // 서버에 닿았으므로 연결 상태 보고가 틀렸던 것입니다. 다음 이벤트를 기다리지 않고 바로잡습니다.
+        online = true;
         ops = ops.filter((op) => op.id !== next.id);
         mergeSent(next, value);
         results.set(next.id, { value });
@@ -307,9 +309,14 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     if (sent > 0) syncedListeners.forEach((listener) => listener());
   };
 
-  const flush = async () => {
+  /**
+   * force는 기기의 연결 상태 보고를 믿지 않고 실제로 보내 봅니다.
+   * 보고가 잘못되어 오프라인으로 남으면 연결 변화 이벤트가 올 때까지 동기화가 멈추기 때문입니다.
+   * 실패해도 변경은 대기로 남으므로 손해가 없습니다.
+   */
+  const flush = async ({ force = false }: { force?: boolean } = {}) => {
     while (running) await running;
-    running = runFlush().finally(() => {
+    running = runFlush(force).finally(() => {
       running = null;
     });
     return running;
@@ -556,7 +563,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         op.id === id ? { ...op, status: 'pending' as const, error: undefined } : op,
       );
       saveOps();
-      return flush();
+      return flush({ force: true });
     },
     discard(id: string) {
       const target = ops.find((op) => op.id === id);

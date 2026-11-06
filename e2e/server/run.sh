@@ -1,6 +1,7 @@
 #!/bin/zsh
 # 로컬 Supabase에 연결한 Release 앱을 시뮬레이터에 설치한 뒤 실행합니다.
 # 필요 조건: supabase start, maestro, DEVICE(시뮬레이터 ID)
+# Android는 PLATFORM=android, DEVICE=emulator-5554로 실행하고 먼저 adb reverse tcp:54321 tcp:54321을 설정합니다.
 # 토큰 만료까지 시험하려면 supabase/config.toml의 auth.jwt_expiry를 잠시 낮추고 TOKEN_WAIT(초)를 줍니다.
 set -u
 cd "$(dirname "$0")"
@@ -20,9 +21,10 @@ mail_link() {
         console.log(m[0]);
       })"
 }
-step() { echo "== $1"; maestro --device "$DEVICE" test -e EMAIL="$EMAIL" "$1.yaml" > "/tmp/ngmg-$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "/tmp/ngmg-$1.log" | head -3; exit 1; }; }
+step() { echo "== $1"; timeout "${STEP_TIMEOUT:-420}" maestro --device "$DEVICE" test -e EMAIL="$EMAIL" "$1.yaml" > "$LOGS/$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "$LOGS/$1.log" | head -3; exit 1; }; }
 check() { [ "$2" = "$3" ] && echo "ok   $1 = $2" || { echo "FAIL $1: $2 (기대값 $3)"; FAILED=1; }; }
 FAILED=0
+LOGS=$(mktemp -d)
 
 step 1-sign-up
 LINK=$(mail_link Confirm); echo "인증 링크 수신"
@@ -34,8 +36,8 @@ sleep 2
 UID_=$(sql "select id from auth.users where email='$EMAIL'")
 check "장소" "$(sql "select count(*) from public.places where user_id='$UID_'")" 1
 check "기록" "$(sql "select count(*) from public.records where user_id='$UID_'")" 1
-check "사진 행" "$(sql "select count(*) from public.record_photos where user_id='$UID_'")" 2
-check "저장소 파일" "$(sql "select count(*) from storage.objects where bucket_id='record-photos' and name like '$UID_/%'")" 2
+check "사진 행" "$(sql "select count(*) from public.record_photos where user_id='$UID_'")" 3
+check "저장소 파일" "$(sql "select count(*) from storage.objects where bucket_id='record-photos' and name like '$UID_/%'")" 3
 check "체크리스트" "$(sql "select count(*) from public.checklist_items where user_id='$UID_'")" 24
 check "체크된 항목" "$(sql "select string_agg(title, ',') from public.checklist_items where user_id='$UID_' and checked")" 낚싯대
 
@@ -55,7 +57,11 @@ step 3-reload
 LINK=$(mail_link Reset); echo "재설정 링크 수신"
 TARGET=$(curl -s -o /dev/null -w '%{redirect_url}' "$LINK")
 case "$TARGET" in ngmg://*access_token*type=recovery*) echo "ok   재설정 링크가 앱으로 연결";; *) echo "FAIL 재설정 링크: ${TARGET%%#*}"; FAILED=1;; esac
-xcrun simctl openurl "$DEVICE" "$TARGET"
+if [ "${PLATFORM:-ios}" = android ]; then
+  adb -s "$DEVICE" shell "am start -a android.intent.action.VIEW -d '$TARGET'" > /dev/null
+else
+  xcrun simctl openurl "$DEVICE" "$TARGET"
+fi
 
 step 4-new-password
 sleep 2

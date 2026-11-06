@@ -39,7 +39,7 @@ export const SyncPage = () => {
   const [flushing, setFlushing] = useState(false);
   const flushNow = async () => {
     setFlushing(true);
-    await sync.flush().finally(() => setFlushing(false));
+    await sync.flush({ force: true }).finally(() => setFlushing(false));
   };
   return (
     <View flex={1} backgroundColor="white">

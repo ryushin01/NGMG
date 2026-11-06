@@ -1,0 +1,20 @@
+# 기록 CSV와 전체 JSON을 만들어 공유 화면을 엽니다.
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-account
+- extendedWaitUntil:
+    visible:
+      id: export-csv
+    timeout: 8000
+- tapOn:
+    id: export-csv
+- waitForAnimationToEnd
+- assertNotVisible: 내보내지 못했습니다.*
+- assertNotVisible:
+    id: export-csv

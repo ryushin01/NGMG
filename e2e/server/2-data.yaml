@@ -12,13 +12,10 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: field-password
 - inputText: first-password
+- runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
     id: sign-in-submit
-- runFlow:
-    when:
-      visible: 지금 안 함
-    commands:
-      - tapOn: 지금 안 함
+- runFlow: _after-sign-in.yaml
 - extendedWaitUntil:
     visible:
       id: add-place-here
@@ -49,19 +46,9 @@ appId: com.ryushin01.ngmg
 - tapOn: 기본 정보
 - tapOn:
     id: photo-add-library
-- waitForAnimationToEnd
+- runFlow: ../_pick-photos.yaml
 - extendedWaitUntil:
-    visible: '최대 10장.*'
-    timeout: 20000
-- waitForAnimationToEnd
-- tapOn:
-    point: '16%,27%'
-- tapOn:
-    point: '50%,27%'
-- tapOn:
-    point: '90%,15%'
-- extendedWaitUntil:
-    visible: '.*2/10.*'
+    visible: '.*3/10.*'
     timeout: 20000
 - tapOn:
     id: record-save
@@ -69,13 +56,8 @@ appId: com.ryushin01.ngmg
     visible:
       id: photo-0
     timeout: 120000
-- assertVisible: '.*1 / 2.*'
-- tapOn: 뒤로 가기
-- tapOn: 뒤로 가기
-- extendedWaitUntil:
-    visible:
-      id: open-drawer
-    timeout: 15000
+- assertVisible: '.*1 / 3.*'
+- runFlow: _back-to-home.yaml
 - tapOn:
     id: open-drawer
 - tapOn:

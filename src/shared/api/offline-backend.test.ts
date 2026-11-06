@@ -313,6 +313,36 @@ describe('토큰을 갱신하지 못한 상태', () => {
   });
 });
 
+describe('연결 상태 보고가 틀린 경우', () => {
+  it('오프라인 보고 중에도 강제 전송은 서버에 닿으면 올리고 상태를 바로잡습니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    sync.setOnline(false);
+    await backend.places.create(placeInput);
+    expect(sync.getState().ops).toHaveLength(1);
+    expect(server.places).toEqual([]);
+
+    await sync.flush();
+    expect(server.places).toEqual([]);
+
+    await sync.flush({ force: true });
+    expect(server.places).toHaveLength(1);
+    expect(sync.getState().ops).toEqual([]);
+    expect(sync.getState().online).toBe(true);
+  });
+
+  it('실제로 끊겨 있으면 강제 전송도 변경을 대기로 남깁니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    server.down = true;
+    sync.setOnline(false);
+    await backend.places.create(placeInput);
+    await sync.flush({ force: true });
+    expect(sync.getState().ops.map((op) => op.status)).toEqual(['pending']);
+    expect(sync.getState().online).toBe(false);
+  });
+});
+
 describe('계정 분리', () => {
   it('대기 변경과 체크리스트는 계정별로 따로 보관됩니다', async () => {
     const { backend, sync, server, signInAs, authOut } = setup();

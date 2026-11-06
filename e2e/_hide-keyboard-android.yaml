@@ -1,0 +1,8 @@
+# Android에서는 제출 버튼이 키보드에 가려지므로 먼저 닫습니다.
+appId: com.ryushin01.ngmg
+---
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard

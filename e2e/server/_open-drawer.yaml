@@ -1,0 +1,12 @@
+# 화면 전환 중 누른 메뉴 버튼이 무시될 수 있어 서랍이 열릴 때까지 반복합니다.
+appId: com.ryushin01.ngmg
+---
+- repeat:
+    times: 5
+    while:
+      notVisible:
+        id: drawer-account
+    commands:
+      - tapOn:
+          id: open-drawer
+      - waitForAnimationToEnd

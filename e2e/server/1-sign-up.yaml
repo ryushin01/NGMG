@@ -23,8 +23,11 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: field-passwordConfirm
 - inputText: first-password
+- runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
     id: sign-up-submit
+# 가입에 성공하면 로그인 화면으로 돌아갑니다. 메일 수신은 run.sh가 확인합니다.
 - extendedWaitUntil:
-    visible: .*인증 메일을 보냈습니다.*
-    timeout: 15000
+    visible:
+      id: sign-in-submit
+    timeout: 20000

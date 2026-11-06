@@ -1,17 +1,10 @@
+const NETWORK_MESSAGE = '네트워크 연결을 확인해 주세요.';
+
 const MESSAGES: [RegExp, string][] = [
   [/invalid login credentials/i, '이메일 또는 비밀번호가 맞지 않습니다.'],
   [/already registered/i, '이미 가입된 이메일입니다.'],
   [/email not confirmed/i, '이메일 인증을 먼저 완료해 주세요.'],
-  [/network request failed|failed to fetch/i, '네트워크 연결을 확인해 주세요.'],
 ];
-
-export const toErrorMessage = (
-  error: unknown,
-  fallback = '문제가 발생했습니다. 다시 시도해 주세요.',
-) => {
-  const message = error instanceof Error ? error.message : '';
-  return MESSAGES.find(([pattern]) => pattern.test(message))?.[1] ?? fallback;
-};
 
 const TRANSIENT_NAMES = new Set(['AuthRetryableFetchError', 'FunctionsFetchError']);
 const TRANSIENT_MESSAGE =
@@ -30,4 +23,14 @@ export const isTransientError = (error: unknown) => {
   if (code === 'PGRST301' || code === 'PGRST303') return true;
   if (status === 401 || (typeof status === 'number' && status >= 500)) return true;
   return TRANSIENT_MESSAGE.test(message ?? '');
+};
+
+export const toErrorMessage = (
+  error: unknown,
+  fallback = '문제가 발생했습니다. 다시 시도해 주세요.',
+) => {
+  const message = (error as { message?: string } | null)?.message ?? '';
+  const known = MESSAGES.find(([pattern]) => pattern.test(message))?.[1];
+  if (known) return known;
+  return isTransientError(error) ? NETWORK_MESSAGE : fallback;
 };
