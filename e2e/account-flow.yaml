@@ -1,0 +1,32 @@
+# 입력 오류 안내, 서랍 메뉴, 로그아웃 후 로그인 화면 복귀
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: sign-in-submit
+    timeout: 30000
+- tapOn:
+    id: sign-in-submit
+- assertVisible: 이메일을 입력해 주세요.
+- assertVisible: 비밀번호를 입력해 주세요.
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-records
+- assertVisible: 전체 기록
+- assertVisible: '.*가을 감성돔 첫 출조.*'
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-account
+- assertVisible: '.*demo@ngmg.app.*'
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-submit
+    timeout: 8000

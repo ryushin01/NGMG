@@ -1,0 +1,45 @@
+# 서버가 끊기고 토큰이 만료된 상태에서 앱을 다시 켜 조회하고 저장합니다.
+appId: com.ryushin01.ngmg
+---
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: open-drawer
+    timeout: 30000
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-checklist
+- extendedWaitUntil:
+    visible: 24개 중 1개 챙김
+    timeout: 30000
+- tapOn:
+    id: checklist-item-릴
+- assertVisible: 24개 중 2개 챙김
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-places
+- extendedWaitUntil:
+    visible: .*서버 포인트.*
+    timeout: 30000
+- tapOn: .*서버 포인트.*
+- extendedWaitUntil:
+    visible:
+      id: place-add-record
+    timeout: 30000
+- tapOn:
+    id: place-add-record
+- tapOn:
+    id: record-title
+- inputText: 끊김 출조
+- tapOn: 기본 정보
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible: .*끊김 출조.*
+    timeout: 60000
+- assertVisible:
+    id: record-delete

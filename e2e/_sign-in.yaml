@@ -1,0 +1,24 @@
+appId: com.ryushin01.ngmg
+---
+- extendedWaitUntil:
+    visible:
+      id: field-email
+    timeout: 60000
+- tapOn:
+    id: field-email
+- inputText: demo@ngmg.app
+- tapOn:
+    id: field-password
+- inputText: demo-password
+- hideKeyboard
+- tapOn:
+    id: sign-in-submit
+- runFlow:
+    when:
+      visible: 지금 안 함
+    commands:
+      - tapOn: 지금 안 함
+- extendedWaitUntil:
+    visible:
+      id: home-search
+    timeout: 15000

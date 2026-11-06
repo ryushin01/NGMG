@@ -1,0 +1,55 @@
+# 프로덕션 빌드(데모 모드)의 핵심 흐름을 검사합니다.
+# 로그인 → 주소 검색 → 장소 저장 → 기록 저장 → 목록 → 삭제 → 로그아웃
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: home-search
+- inputText: 거문도
+- extendedWaitUntil:
+    visible:
+      id: search-result-s1
+    timeout: 8000
+- tapOn:
+    id: search-result-s1
+- assertVisible: 전남 여수시 삼산면 거문리
+- assertVisible: 위도·경도 34.03000, 127.30000
+- tapOn:
+    id: place-save
+- extendedWaitUntil:
+    visible:
+      id: place-title
+    timeout: 8000
+- assertVisible: 거문도항
+- tapOn:
+    id: place-add-record
+- tapOn:
+    id: record-title
+- inputText: E2E 출조
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: record-catches
+    direction: DOWN
+- tapOn:
+    id: record-catches
+- inputText: 감성돔 1마리
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible:
+      id: record-title
+    timeout: 8000
+- assertVisible: E2E 출조
+- assertVisible: '.*감성돔 1마리.*'
+# 기록 삭제 후 장소 상세로 돌아옵니다.
+- tapOn:
+    id: record-delete
+- tapOn: 삭제
+- extendedWaitUntil:
+    visible:
+      id: place-title
+    timeout: 8000
+- assertVisible: 기록 0건

@@ -1,0 +1,95 @@
+# 인증을 마친 계정으로 로그인해 장소, 사진 기록, 체크리스트를 서버에 저장합니다.
+appId: com.ryushin01.ngmg
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: field-email
+    timeout: 30000
+- tapOn:
+    id: field-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: field-password
+- inputText: first-password
+- tapOn:
+    id: sign-in-submit
+- runFlow:
+    when:
+      visible: 지금 안 함
+    commands:
+      - tapOn: 지금 안 함
+- extendedWaitUntil:
+    visible:
+      id: add-place-here
+    timeout: 20000
+- tapOn:
+    id: add-place-here
+- extendedWaitUntil:
+    visible:
+      id: map-pick-confirm
+    timeout: 15000
+- tapOn:
+    id: map-pick-confirm
+- tapOn:
+    id: place-name
+- inputText: 서버 포인트
+- tapOn: 장소 이름.*
+- tapOn:
+    id: place-save
+- extendedWaitUntil:
+    visible:
+      id: place-add-record
+    timeout: 20000
+- tapOn:
+    id: place-add-record
+- tapOn:
+    id: record-title
+- inputText: 서버 출조
+- tapOn: 기본 정보
+- tapOn:
+    id: photo-add-library
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: '최대 10장.*'
+    timeout: 20000
+- waitForAnimationToEnd
+- tapOn:
+    point: '16%,27%'
+- tapOn:
+    point: '50%,27%'
+- tapOn:
+    point: '90%,15%'
+- extendedWaitUntil:
+    visible: '.*2/10.*'
+    timeout: 20000
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible:
+      id: photo-0
+    timeout: 120000
+- assertVisible: '.*1 / 2.*'
+- tapOn: 뒤로 가기
+- tapOn: 뒤로 가기
+- extendedWaitUntil:
+    visible:
+      id: open-drawer
+    timeout: 15000
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-checklist
+- extendedWaitUntil:
+    visible:
+      id: checklist-defaults
+    timeout: 15000
+- tapOn:
+    id: checklist-defaults
+- extendedWaitUntil:
+    visible: 24개 중 0개 챙김
+    timeout: 15000
+- tapOn:
+    id: checklist-item-낚싯대
+- assertVisible: 24개 중 1개 챙김
+- waitForAnimationToEnd

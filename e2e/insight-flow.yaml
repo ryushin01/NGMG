@@ -1,0 +1,51 @@
+# 통계, 기록 검색, 날씨·물때 불러오기를 검사합니다.
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-stats
+- extendedWaitUntil:
+    visible:
+      id: stats-monthly
+    timeout: 8000
+- assertVisible: 자주 간 장소
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-records
+- tapOn:
+    id: records-search
+- inputText: 없는검색어
+- hideKeyboard
+- assertVisible: 검색 결과가 없습니다.
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-places
+- extendedWaitUntil:
+    visible:
+      id: place-row-p1
+    timeout: 8000
+- tapOn:
+    id: place-row-p1
+- extendedWaitUntil:
+    visible:
+      id: place-add-record
+    timeout: 8000
+- tapOn:
+    id: place-add-record
+- scrollUntilVisible:
+    element:
+      id: record-load-conditions
+    direction: DOWN
+- tapOn:
+    id: record-load-conditions
+- extendedWaitUntil:
+    visible: .*음력.*
+    timeout: 15000

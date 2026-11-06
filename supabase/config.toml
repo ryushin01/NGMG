@@ -1,0 +1,9 @@
+project_id = "ngmg"
+
+[auth]
+site_url = "ngmg://"
+additional_redirect_urls = ["ngmg://", "exp+ngmg://**"]
+enable_signup = true
+
+[auth.email]
+enable_confirmations = true

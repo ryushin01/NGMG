@@ -1,0 +1,45 @@
+# 앱을 다시 켜면 세션이 유지되고 서버 값이 보입니다.
+appId: com.ryushin01.ngmg
+---
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: open-drawer
+    timeout: 30000
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-records
+- extendedWaitUntil:
+    visible: .*서버 출조.*
+    timeout: 20000
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-checklist
+- extendedWaitUntil:
+    visible: 24개 중 2개 챙김
+    timeout: 20000
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-account
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: go-forgot
+    timeout: 15000
+- tapOn:
+    id: go-forgot
+- tapOn:
+    id: field-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: reset-submit
+- extendedWaitUntil:
+    visible: .*재설정 메일을 보냈습니다.*
+    timeout: 15000

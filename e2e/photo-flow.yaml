@@ -1,0 +1,52 @@
+# 맛집 기록에 사진 여러 장을 첨부합니다. 시뮬레이터 보관함에 사진이 있어야 합니다.
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-places
+- tapOn:
+    id: place-row-p5
+- tapOn:
+    id: place-add-record
+- tapOn:
+    id: record-title
+- inputText: 사진 기록
+- hideKeyboard
+- tapOn:
+    id: photo-add-library
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: '최대 10장.*'
+    timeout: 20000
+- waitForAnimationToEnd
+# 보관함 첫 줄의 사진 3장을 선택합니다. (좌표는 iOS 사진 선택기 기준)
+- tapOn:
+    point: '16%,27%'
+- tapOn:
+    point: '50%,27%'
+- tapOn:
+    point: '83%,27%'
+- tapOn:
+    point: '90%,15%'
+- extendedWaitUntil:
+    visible: '.*3/10.*'
+    timeout: 20000
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible:
+      id: photo-0
+    timeout: 90000
+- assertVisible: '.*1 / 3.*'
+- tapOn:
+    id: photo-0
+- extendedWaitUntil:
+    visible:
+      id: photo-viewer-close
+    timeout: 8000
+- tapOn:
+    id: photo-viewer-close

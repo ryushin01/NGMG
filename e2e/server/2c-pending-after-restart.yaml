@@ -1,0 +1,8 @@
+# 올리지 못한 변경이 앱을 다시 켜도 남아 있습니다.
+appId: com.ryushin01.ngmg
+---
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: .*동기화 대기 2건.*
+    timeout: 30000

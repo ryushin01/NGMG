@@ -1,0 +1,30 @@
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: go-sign-up
+    timeout: 30000
+- tapOn:
+    id: go-sign-up
+- tapOn:
+    id: field-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: field-password
+- runFlow: _close-password-sheet.yaml
+- tapOn:
+    id: field-password
+- inputText: first-password
+- tapOn:
+    id: field-passwordConfirm
+- runFlow: _close-password-sheet.yaml
+- tapOn:
+    id: field-passwordConfirm
+- inputText: first-password
+- tapOn:
+    id: sign-up-submit
+- extendedWaitUntil:
+    visible: .*인증 메일을 보냈습니다.*
+    timeout: 15000

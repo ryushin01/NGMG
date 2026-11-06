@@ -1,0 +1,86 @@
+# 끊긴 상태에서 체크와 기록을 저장하고, 연결되면 자동으로 올라가는지 검사합니다.
+appId: com.ryushin01.ngmg
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+# 온라인에서 목록을 한 번 받은 뒤 연결을 끊습니다.
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-account
+- extendedWaitUntil:
+    visible:
+      id: my-checklist
+    timeout: 8000
+- tapOn:
+    id: demo-offline
+- tapOn: 뒤로 가기
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-places
+- extendedWaitUntil:
+    visible:
+      id: place-row-p1
+    timeout: 8000
+- tapOn:
+    id: place-row-p1
+- extendedWaitUntil:
+    visible:
+      id: place-add-record
+    timeout: 8000
+- tapOn:
+    id: place-add-record
+- tapOn:
+    id: record-title
+- inputText: 오프라인 출조
+- hideKeyboard
+# 입력 중 뒤로 가면 확인합니다.
+- tapOn: 뒤로 가기
+- assertVisible: 작성을 그만둘까요?
+- tapOn: 계속 작성
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible:
+      id: record-title
+    timeout: 8000
+- assertVisible: 오프라인 출조
+- repeat:
+    while:
+      notVisible:
+        id: open-drawer
+    times: 6
+    commands:
+      - tapOn: 뒤로 가기
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: sync-banner
+    timeout: 8000
+- assertVisible: .*동기화 대기 1건.*
+- tapOn:
+    id: sync-banner
+- assertVisible: .*오프라인 출조.*
+- tapOn: 뒤로 가기
+# 연결을 되살리면 올라가고 기록은 그대로입니다.
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-account
+- tapOn:
+    id: demo-offline
+- extendedWaitUntil:
+    visible: .*완료.*
+    timeout: 8000
+- tapOn: 뒤로 가기
+- assertNotVisible:
+    id: sync-banner
+- tapOn:
+    id: open-drawer
+- tapOn:
+    id: drawer-records
+- extendedWaitUntil:
+    visible: .*오프라인 출조.*
+    timeout: 8000

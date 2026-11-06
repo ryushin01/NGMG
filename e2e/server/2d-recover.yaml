@@ -1,0 +1,15 @@
+# 서버가 돌아오면 대기 중인 변경을 올립니다.
+appId: com.ryushin01.ngmg
+---
+- tapOn:
+    id: sync-banner
+- runFlow:
+    when:
+      visible:
+        id: sync-now
+    commands:
+      - tapOn:
+          id: sync-now
+- extendedWaitUntil:
+    visible: 모든 변경을 서버에 올렸습니다.
+    timeout: 60000
