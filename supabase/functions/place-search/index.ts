@@ -1,21 +1,24 @@
-// 주소·장소 검색과 좌표→주소 변환. Kakao REST 키를 앱에 넣지 않도록 서버에서 호출합니다.
+// 세계 장소 검색과 좌표→주소 변환. 사용 정책을 지키도록 서버에서 호출합니다.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { mergeSearchResults, pickReverseAddress } from './normalize.ts';
+import { isValidCoordinate, normalizeResults, pickReverseAddress } from './normalize.ts';
 
-const KAKAO = 'https://dapi.kakao.com/v2/local';
+const NOMINATIM = 'https://nominatim.openstreetmap.org';
+// 사용 정책에 따라 앱을 식별할 수 있는 User-Agent를 보냅니다.
+const USER_AGENT = 'NewWorld/1.0 (https://github.com/ryushin01/NewWorld)';
 
-const kakao = async (path: string, params: Record<string, string>) => {
-  const key = Deno.env.get('KAKAO_REST_API_KEY');
-  if (!key) throw new Error('KAKAO_REST_API_KEY가 설정되지 않았습니다.');
-  const response = await fetch(`${KAKAO}/${path}?${new URLSearchParams(params)}`, {
-    headers: { Authorization: `KakaoAK ${key}` },
+const TIMEOUT_MS = 8000;
+
+const nominatim = async (path: string, params: Record<string, string>) => {
+  const query = new URLSearchParams({ format: 'jsonv2', 'accept-language': 'ko', ...params });
+  const response = await fetch(`${NOMINATIM}/${path}?${query}`, {
+    headers: { 'User-Agent': USER_AGENT },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!response.ok) throw new Error(`Kakao API 오류: ${response.status}`);
-  const body = await response.json();
-  return body.documents ?? [];
+  if (!response.ok) throw new Error(`Nominatim 오류: ${response.status}`);
+  return response.json();
 };
 
-/** 앱에 공개되는 anon 키만으로 Kakao 사용량을 쓰지 못하게 로그인한 사용자만 허용합니다. */
+/** 앱에 공개되는 anon 키만으로 외부 호출을 하지 못하게 로그인한 사용자만 허용합니다. */
 const isSignedIn = async (request: Request) => {
   const token = request.headers.get('Authorization')?.replace(/^Bearer /, '');
   if (!token) return false;
@@ -31,18 +34,15 @@ Deno.serve(async (request) => {
   try {
     const { query, latitude, longitude } = await request.json();
     if (typeof query === 'string' && query.trim()) {
-      const [addresses, keywords] = await Promise.all([
-        kakao('search/address.json', { query, size: '5' }),
-        kakao('search/keyword.json', { query, size: '15' }),
-      ]);
-      return Response.json({ results: mergeSearchResults(addresses, keywords) });
+      const places = await nominatim('search', { q: query, limit: '15' });
+      return Response.json({ results: normalizeResults(places) });
     }
-    if (typeof latitude === 'number' && typeof longitude === 'number') {
-      const documents = await kakao('geo/coord2address.json', {
-        x: String(longitude),
-        y: String(latitude),
+    if (isValidCoordinate(latitude, longitude)) {
+      const place = await nominatim('reverse', {
+        lat: String(latitude),
+        lon: String(longitude),
       });
-      return Response.json({ address: pickReverseAddress(documents) });
+      return Response.json({ address: pickReverseAddress(place) });
     }
     return Response.json({ error: 'query 또는 좌표가 필요합니다.' }, { status: 400 });
   } catch (error) {

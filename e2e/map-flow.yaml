@@ -1,34 +1,22 @@
-# 핀 요약, 더보기, 분류 필터, 지도에서 위치 지정
-appId: com.ryushin01.ngmg
+# 분류 필터, 지도에서 위치 지정
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true
 - runFlow: _sign-in.yaml
-- waitForAnimationToEnd
-# 분류 필터: 맛집만 남기면 낚시 전용 핀(제주)이 사라집니다.
 - tapOn:
-    id: filter-restaurant
+    id: tab-map
+- extendedWaitUntil:
+    visible:
+      id: home-search
+    timeout: 8000
+- waitForAnimationToEnd
+# 분류 필터를 바꿔도 지도가 유지됩니다.
+- tapOn:
+    id: filter-fantasy
 - tapOn:
     id: filter-all
-# 전남 앞바다의 낚시 핀(거문도)을 누릅니다.
-- tapOn:
-    point: '41%,54%'
-- extendedWaitUntil:
-    visible:
-      id: place-summary
-    timeout: 8000
-- assertVisible: 거문도 동도 갯바위
-- assertVisible: 낚시 포인트
-- tapOn:
-    id: summary-more
-- extendedWaitUntil:
-    visible:
-      id: place-title
-    timeout: 8000
-- assertVisible: '.*가을 감성돔 첫 출조.*'
-- tapOn: 뒤로 가기
-- tapOn:
-    id: place-summary-close
+- assertVisible: 오늘은 어디로 떠나볼까요?
 - tapOn:
     id: add-place-here
 - extendedWaitUntil:
@@ -46,7 +34,7 @@ appId: com.ryushin01.ngmg
 - inputText: 지도에서 고른 곳
 - hideKeyboard
 - tapOn:
-    id: kind-restaurant
+    id: kind-fantasy
 - tapOn:
     id: place-save
 - extendedWaitUntil:
@@ -54,4 +42,4 @@ appId: com.ryushin01.ngmg
       id: place-title
     timeout: 8000
 - assertVisible: 지도에서 고른 곳
-- assertVisible: 맛집
+- assertVisible: 환상 세계

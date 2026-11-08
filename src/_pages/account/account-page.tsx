@@ -70,7 +70,7 @@ export const AccountPage = () => {
   });
 
   const confirmDelete = () => {
-    Alert.alert('계정 삭제', '모든 장소, 기록, 사진이 영구 삭제되며 되돌릴 수 없습니다.', [
+    Alert.alert('계정 삭제', '모든 여행지, 기록, 사진이 영구 삭제되며 되돌릴 수 없습니다.', [
       { text: '취소', style: 'cancel' },
       { text: '계정 삭제', style: 'destructive', onPress: () => deleteAccount.mutate() },
     ]);
@@ -106,14 +106,16 @@ export const AccountPage = () => {
 
   return (
     <View flex={1} backgroundColor="surface">
-      <Header title="MY 페이지" />
+      <Header title="MY" hideBack />
       <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: 40 }}>
         <YStack>
           <Row label="이메일" value={email} />
           <Divider />
+          <LinkRow testID="my-places" label="내 여행지" onPress={() => router.push('/places')} />
+          <Divider />
           <LinkRow
             testID="my-checklist"
-            label="출조 체크리스트"
+            label="여행 체크리스트"
             value={summarizeChecklist(checklist.data ?? [])}
             onPress={() => router.push('/checklist')}
           />

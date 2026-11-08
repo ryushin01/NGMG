@@ -1,21 +1,21 @@
 import type { PlaceKind } from '@/shared/api';
 
-export const PLACE_KINDS: PlaceKind[] = ['fishing', 'restaurant'];
+export const PLACE_KINDS: PlaceKind[] = ['real', 'fantasy'];
 
 export const KIND_META: Record<
   PlaceKind,
   { label: string; pin: number; background: string; text: string }
 > = {
-  fishing: {
-    label: '낚시 포인트',
-    pin: require('~/assets/pins/fishing.png'),
+  real: {
+    label: '실존 유적',
+    pin: require('~/assets/pins/real.png'),
     background: 'brandSoft',
     text: 'brandText',
   },
-  restaurant: {
-    label: '맛집',
-    pin: require('~/assets/pins/restaurant.png'),
-    background: 'coralSoft',
-    text: 'coralText',
+  fantasy: {
+    label: '환상 세계',
+    pin: require('~/assets/pins/fantasy.png'),
+    background: 'fantasySoft',
+    text: 'fantasyText',
   },
 };

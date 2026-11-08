@@ -1,4 +1,5 @@
-export type PlaceKind = 'fishing' | 'restaurant';
+/** 실존 유적인지, 전설·문학 속 공간인지 나눕니다. */
+export type PlaceKind = 'real' | 'fantasy';
 
 export type Place = {
   id: string;
@@ -9,6 +10,10 @@ export type Place = {
   longitude: number;
   memo: string;
   tags: string[];
+  /** 앱에 수록된 여행지에서 저장했으면 그 id. 직접 추가한 장소는 null입니다. */
+  catalogId: string | null;
+  /** 가고 싶어요 표시 */
+  wishlisted: boolean;
   recordCount: number;
   lastVisitedAt: string | null;
   createdAt: string;
@@ -16,7 +21,15 @@ export type Place = {
 
 export type PlaceInput = Pick<
   Place,
-  'name' | 'kind' | 'address' | 'latitude' | 'longitude' | 'memo' | 'tags'
+  | 'name'
+  | 'kind'
+  | 'address'
+  | 'latitude'
+  | 'longitude'
+  | 'memo'
+  | 'tags'
+  | 'catalogId'
+  | 'wishlisted'
 >;
 
 export type Photo = {
@@ -40,17 +53,19 @@ export type TripRecord = {
   memo: string;
   partySize: number | null;
   members: string[];
-  gear: string;
-  rig: string;
-  bait: string;
-  weather: string;
-  tide: string;
-  wind: string;
-  waterTemp: number | null;
-  catches: string;
-  menu: string;
-  price: number | null;
+  /** 1~5 감동 별점 */
   rating: number | null;
+  // 실존 유적 여행
+  weather: string;
+  temperature: number | null;
+  transport: string;
+  lodging: string;
+  cost: number | null;
+  highlights: string;
+  // 환상 세계 여행
+  gateway: string;
+  encounters: string;
+  souvenir: string;
   photos: Photo[];
 };
 
@@ -77,7 +92,7 @@ export type ChecklistItem = {
   category: string;
   checked: boolean;
   position: number;
-  /** 출조별로 나눈 목록의 이름 */
+  /** 여행별로 나눈 목록의 이름 */
   listName: string;
 };
 

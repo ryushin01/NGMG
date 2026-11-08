@@ -1,13 +1,13 @@
 # 서버가 끊긴 상태에서 로그아웃합니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - runFlow: _open-drawer.yaml
-- tapOn:
-    id: drawer-account
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: sign-out
-    timeout: 15000
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
 - tapOn:
     id: sign-out
 - extendedWaitUntil:

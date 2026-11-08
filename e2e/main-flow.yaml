@@ -1,50 +1,59 @@
 # 프로덕션 빌드(데모 모드)의 핵심 흐름을 검사합니다.
-# 로그인 → 주소 검색 → 장소 저장 → 기록 저장 → 목록 → 삭제 → 로그아웃
-appId: com.ryushin01.ngmg
+# 로그인 → 장소 검색 → 장소 저장 → 기록 저장 → 삭제
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true
 - runFlow: _sign-in.yaml
 - tapOn:
+    id: tab-map
+- extendedWaitUntil:
+    visible:
+      id: home-search
+    timeout: 8000
+- tapOn:
     id: home-search
-- inputText: 거문도
+- inputText: 쿠스코
 - extendedWaitUntil:
     visible:
       id: search-result-s1
     timeout: 8000
 - tapOn:
     id: search-result-s1
-- assertVisible: 전남 여수시 삼산면 거문리
-- assertVisible: 위도·경도 34.03000, 127.30000
+- assertVisible: 페루 쿠스코주
 - tapOn:
     id: place-save
 - extendedWaitUntil:
     visible:
       id: place-title
     timeout: 8000
-- assertVisible: 거문도항
+- assertVisible: 쿠스코
 - tapOn:
     id: place-add-record
 - tapOn:
     id: record-title
-- inputText: E2E 출조
+- inputText: E2E 여행
 - hideKeyboard
 - scrollUntilVisible:
     element:
-      id: record-catches
+      id: record-highlights
     direction: DOWN
 - tapOn:
-    id: record-catches
-- inputText: 감성돔 1마리
+    id: record-highlights
+- inputText: 태양의 신전
 - tapOn:
     id: record-save
 - extendedWaitUntil:
     visible:
       id: record-title
     timeout: 8000
-- assertVisible: E2E 출조
-- assertVisible: '.*감성돔 1마리.*'
+- assertVisible: E2E 여행
+- assertVisible: '.*태양의 신전.*'
 # 기록 삭제 후 장소 상세로 돌아옵니다.
+- scrollUntilVisible:
+    element:
+      id: record-delete
+    direction: DOWN
 - tapOn:
     id: record-delete
 - tapOn: 삭제

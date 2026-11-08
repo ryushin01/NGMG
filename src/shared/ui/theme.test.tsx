@@ -26,7 +26,7 @@ const TEXT_PAIRS: [Name, Name][] = [
   ['muted', 'surface'],
   ['brandText', 'surface'],
   ['danger', 'surface'],
-  ['coralText', 'surface'],
+  ['fantasyText', 'surface'],
   ['surface', 'ink'],
   ['surface', 'inkPressed'],
   ['text', 'surfaceMuted'],
@@ -34,7 +34,7 @@ const TEXT_PAIRS: [Name, Name][] = [
   ['ink', 'brandSoft'],
   ['brandText', 'brandSoft'],
   ['muted', 'brandSoft'],
-  ['coralText', 'coralSoft'],
+  ['fantasyText', 'fantasySoft'],
 ];
 
 describe.each([

@@ -67,18 +67,17 @@ const Navigator = () => {
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }}
       >
         <Stack.Protected guard={!!session}>
-          <Stack.Screen name="(drawer)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="destination/[id]" />
           <Stack.Screen name="search" options={{ animation: 'fade' }} />
           <Stack.Screen name="map-pick" />
           <Stack.Screen name="place/new" />
           <Stack.Screen name="place/[id]/index" />
           <Stack.Screen name="place/[id]/edit" />
           <Stack.Screen name="places" />
-          <Stack.Screen name="records" />
           <Stack.Screen name="record/new" />
           <Stack.Screen name="record/[id]/index" />
           <Stack.Screen name="record/[id]/edit" />
-          <Stack.Screen name="account" />
           <Stack.Screen name="checklist" />
           <Stack.Screen name="stats" />
           <Stack.Screen name="sync" />

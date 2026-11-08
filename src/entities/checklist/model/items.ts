@@ -1,5 +1,5 @@
 import type { ChecklistItem } from '@/shared/api';
-import { CHECKLIST_CATEGORIES, DEFAULT_CHECKLIST } from './defaults';
+import { CHECKLIST_CATEGORIES, DEFAULT_CHECKLIST, FANTASY_CHECKLIST } from './defaults';
 
 export type ChecklistSection = { category: string; items: ChecklistItem[] };
 
@@ -19,20 +19,29 @@ export const groupChecklist = (items: ChecklistItem[]): ChecklistSection[] => {
 
 export const DEFAULT_LIST_NAME = '기본';
 
-export const buildDefaultItems = (
+const buildItems = (
+  source: typeof DEFAULT_CHECKLIST,
   newId: () => string,
-  listName = DEFAULT_LIST_NAME,
+  listName: string,
 ): ChecklistItem[] =>
-  DEFAULT_CHECKLIST.flatMap(({ category, titles }) =>
-    titles.map((title) => ({ id: newId(), title, category, checked: false, listName })),
-  ).map((item, position) => ({ ...item, position }));
+  source
+    .flatMap(({ category, titles }) =>
+      titles.map((title) => ({ id: newId(), title, category, checked: false, listName })),
+    )
+    .map((item, position) => ({ ...item, position }));
+
+export const buildDefaultItems = (newId: () => string, listName = DEFAULT_LIST_NAME) =>
+  buildItems(DEFAULT_CHECKLIST, newId, listName);
+
+export const buildFantasyItems = (newId: () => string, listName = DEFAULT_LIST_NAME) =>
+  buildItems(FANTASY_CHECKLIST, newId, listName);
 
 /** 처음 만든 순서대로 목록 이름을 돌려줍니다. */
 export const listNames = (items: ChecklistItem[]) => [
   ...new Set(items.map((item) => item.listName)),
 ];
 
-/** 다음 출조를 위해 항목만 복사합니다. 체크는 지웁니다. */
+/** 다음 여행을 위해 항목만 복사합니다. 체크는 지웁니다. */
 export const copyList = (
   items: ChecklistItem[],
   listName: string,

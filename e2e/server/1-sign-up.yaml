@@ -1,4 +1,4 @@
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true

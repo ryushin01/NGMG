@@ -22,12 +22,14 @@ export const PlaceNewPage = () => {
         <PlaceForm
           initial={{
             name: params.name ?? '',
-            kind: 'fishing',
+            kind: 'real',
             address: params.address ?? '',
             latitude,
             longitude,
             memo: '',
             tags: [],
+            catalogId: null,
+            wishlisted: false,
           }}
           onSaved={(place) => router.replace(`/place/${place.id}`)}
         />

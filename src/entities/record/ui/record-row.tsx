@@ -1,14 +1,14 @@
 import { Image } from 'expo-image';
-import { ChevronRight, Fish, Utensils } from 'lucide-react-native';
+import { ChevronRight, Landmark, Sparkles } from 'lucide-react-native';
 import { View, XStack, YStack } from 'tamagui';
 import type { TripRecord } from '@/shared/api';
 import { formatDate } from '@/shared/lib';
 import { AppIcon, AppText, Touchable } from '@/shared/ui';
 
 const summarize = (record: TripRecord) =>
-  record.placeKind === 'fishing'
-    ? record.catches || record.rig || record.memo
-    : record.menu || record.memo;
+  record.placeKind === 'real'
+    ? record.highlights || record.memo
+    : record.encounters || record.gateway || record.memo;
 
 export const RecordRow = ({ record, onPress }: { record: TripRecord; onPress: () => void }) => {
   const title = record.title || record.placeName;
@@ -40,10 +40,10 @@ export const RecordRow = ({ record, onPress }: { record: TripRecord; onPress: ()
               contentFit="cover"
               accessibilityIgnoresInvertColors
             />
-          ) : record.placeKind === 'fishing' ? (
-            <AppIcon icon={Fish} size={22} color="brandText" strokeWidth={1.75} />
+          ) : record.placeKind === 'real' ? (
+            <AppIcon icon={Landmark} size={22} color="brandText" strokeWidth={1.75} />
           ) : (
-            <AppIcon icon={Utensils} size={22} color="coralText" strokeWidth={1.75} />
+            <AppIcon icon={Sparkles} size={22} color="fantasyText" strokeWidth={1.75} />
           )}
         </View>
         <YStack flex={1} gap={2}>

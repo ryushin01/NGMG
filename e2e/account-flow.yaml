@@ -1,5 +1,5 @@
-# 입력 오류 안내, 서랍 메뉴, 로그아웃 후 로그인 화면 복귀
-appId: com.ryushin01.ngmg
+# 입력 오류 안내, 탭 이동, 로그아웃 후 로그인 화면 복귀
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true
@@ -13,17 +13,18 @@ appId: com.ryushin01.ngmg
 - assertVisible: 비밀번호를 입력해 주세요.
 - runFlow: _sign-in.yaml
 - tapOn:
-    id: open-drawer
+    id: tab-records
+- assertVisible: 여행 기록
+- assertVisible: '.*구름이 걷히던 아침.*'
 - tapOn:
-    id: drawer-records
-- assertVisible: 전체 기록
-- assertVisible: '.*가을 감성돔 첫 출조.*'
-- tapOn: 뒤로 가기
-- tapOn:
-    id: open-drawer
-- tapOn:
-    id: drawer-account
-- assertVisible: '.*demo@ngmg.app.*'
+    id: tab-my
+- assertVisible: '.*demo@newworld.app.*'
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
 - tapOn:
     id: sign-out
 - extendedWaitUntil:

@@ -9,10 +9,3 @@ export const collectMembers = (records: TripRecord[], kind: PlaceKind) => {
   }
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([member]) => member);
 };
-
-const hasGear = (record: TripRecord) =>
-  record.placeKind === 'fishing' && !!(record.gear || record.rig || record.bait);
-
-/** 같은 장소의 최근 낚시 기록을 먼저, 없으면 전체에서 가장 최근 기록을 고릅니다. */
-export const findLastFishing = (records: TripRecord[], placeId: string) =>
-  records.find((record) => record.placeId === placeId && hasGear(record)) ?? records.find(hasGear);

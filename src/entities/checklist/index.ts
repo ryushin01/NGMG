@@ -1,6 +1,7 @@
 export { CHECKLIST_CATEGORIES } from './model/defaults';
 export {
   buildDefaultItems,
+  buildFantasyItems,
   copyList,
   DEFAULT_LIST_NAME,
   groupChecklist,

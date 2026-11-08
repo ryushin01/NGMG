@@ -15,7 +15,7 @@ export const AppIcon = ({ icon: Icon, color, fill, size, strokeWidth }: AppIconP
   return (
     <Icon
       color={colors[color]}
-      fill={fill ? colors[fill] : undefined}
+      fill={fill ? colors[fill] : 'none'}
       size={size}
       strokeWidth={strokeWidth}
     />

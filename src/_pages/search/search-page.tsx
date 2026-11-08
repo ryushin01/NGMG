@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Input, View, XStack, YStack } from 'tamagui';
+import { searchDestinations } from '@/entities/destination';
 import { KindIcon, usePlaces } from '@/entities/place';
 import { usePlaceSearch } from '@/features/place-search';
 import type { SearchResult } from '@/shared/api';
@@ -40,6 +41,12 @@ export const SearchPage = () => {
     [keyword, places.data],
   );
 
+  const catalog = useMemo(
+    () => (keyword ? searchDestinations(keyword).slice(0, 8) : []),
+    [keyword],
+  );
+  const customPlaces = myPlaces.filter((place) => !place.catalogId);
+
   const select = (result: SearchResult) => {
     const params = new URLSearchParams({
       lat: String(result.latitude),
@@ -72,9 +79,9 @@ export const SearchPage = () => {
             autoFocusNative
             value={query}
             onChangeText={setQuery}
-            placeholder="주소 또는 장소 이름 입력"
+            placeholder="유적지, 도시, 전설의 땅 이름"
             placeholderTextColor="muted"
-            accessibilityLabel="주소 또는 장소 이름"
+            accessibilityLabel="유적지, 도시, 전설의 땅 이름"
             returnKeyType="search"
             fontSize={16}
             color="text"
@@ -93,7 +100,7 @@ export const SearchPage = () => {
         </XStack>
       </View>
       <YStack flex={1}>
-        {keyword && search.isError && myPlaces.length === 0 ? (
+        {keyword && search.isError && customPlaces.length === 0 && catalog.length === 0 ? (
           <MessageView
             message={toErrorMessage(search.error, '검색하지 못했습니다.')}
             actionLabel="다시 시도"
@@ -108,20 +115,45 @@ export const SearchPage = () => {
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={() => <Divider inset={58} />}
             ListHeaderComponent={
-              myPlaces.length > 0 ? (
+              customPlaces.length > 0 || catalog.length > 0 ? (
                 <YStack paddingBottom={8}>
-                  <AppText
-                    size="caption"
-                    tone="muted"
-                    bold
-                    paddingHorizontal={20}
-                    paddingTop={16}
-                    paddingBottom={4}
-                    accessibilityRole="header"
-                  >
-                    내 장소
-                  </AppText>
-                  {myPlaces.map((place) => (
+                  {catalog.length > 0 ? (
+                    <AppText
+                      size="caption"
+                      tone="muted"
+                      bold
+                      paddingHorizontal={20}
+                      paddingTop={16}
+                      paddingBottom={4}
+                      accessibilityRole="header"
+                    >
+                      여행지 도감
+                    </AppText>
+                  ) : null}
+                  {catalog.map((item) => (
+                    <ListRow
+                      key={item.id}
+                      testID={`search-destination-${item.id}`}
+                      title={item.name}
+                      subtitle={item.location}
+                      icon={<KindIcon kind={item.realm} />}
+                      onPress={() => router.push(`/destination/${item.id}`)}
+                    />
+                  ))}
+                  {customPlaces.length > 0 ? (
+                    <AppText
+                      size="caption"
+                      tone="muted"
+                      bold
+                      paddingHorizontal={20}
+                      paddingTop={16}
+                      paddingBottom={4}
+                      accessibilityRole="header"
+                    >
+                      내 장소
+                    </AppText>
+                  ) : null}
+                  {customPlaces.map((place) => (
                     <ListRow
                       key={place.id}
                       title={place.name}
@@ -158,7 +190,7 @@ export const SearchPage = () => {
               ) : null
             }
             ListEmptyComponent={
-              keyword && myPlaces.length === 0 ? (
+              keyword && customPlaces.length === 0 && catalog.length === 0 ? (
                 <AppText
                   tone="muted"
                   textAlign="center"
@@ -181,6 +213,9 @@ export const SearchPage = () => {
           />
         )}
       </YStack>
+      <AppText size="caption" tone="muted" textAlign="center" paddingBottom={4}>
+        장소 검색 데이터 © OpenStreetMap 기여자
+      </AppText>
       <KeyboardStickyView offset={{ closed: 0, opened: bottom }}>
         <Touchable
           testID="pick-on-map"

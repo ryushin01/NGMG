@@ -1,0 +1,84 @@
+# 실존/환상 탭, 여행지 상세, 가고 싶어요, 수록 여행지에 기록 남기기
+appId: com.ryushin01.newworld
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- assertVisible: 실존 유적
+- assertVisible: 25곳 중 1곳 다녀옴
+- tapOn:
+    id: world-search-real
+- inputText: 페트라
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: destination-petra
+    timeout: 8000
+- tapOn:
+    id: wish-petra
+- tapOn:
+    id: destination-petra
+- extendedWaitUntil:
+    visible:
+      id: destination-title
+    timeout: 8000
+- assertVisible: 페트라
+- assertVisible:
+    id: destination-wish
+    selected: true
+- tapOn: 뒤로 가기
+# 환상 탭은 다른 목록과 전승 연고지 안내를 보여 줍니다.
+- tapOn:
+    id: tab-fantasy
+- extendedWaitUntil:
+    visible:
+      id: world-progress-fantasy
+    timeout: 8000
+- assertVisible: 20곳 중 1곳 다녀옴
+- assertNotVisible:
+    id: destination-petra
+- tapOn:
+    id: world-search-fantasy
+- inputText: 샹그릴라
+- hideKeyboard
+- tapOn:
+    id: destination-shangri-la
+- extendedWaitUntil:
+    visible:
+      id: destination-title
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: destination-location-note
+    direction: DOWN
+- tapOn:
+    id: destination-add-record
+- tapOn:
+    id: record-title
+- inputText: 푸른 달의 계곡
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: record-gateway
+    direction: DOWN
+- assertNotVisible:
+    id: record-load-conditions
+- tapOn:
+    id: record-gateway
+- inputText: 잃어버린 지평선
+- tapOn:
+    id: record-save
+- extendedWaitUntil:
+    visible:
+      id: record-title
+    timeout: 8000
+- assertVisible: '.*잃어버린 지평선.*'
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn:
+    id: tab-fantasy
+- extendedWaitUntil:
+    visible: 20곳 중 2곳 다녀옴
+    timeout: 8000

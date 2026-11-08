@@ -7,15 +7,15 @@ import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { KindBadge } from '@/entities/place';
 import { RecordRow, useRecords } from '@/entities/record';
 import type { Place, PlaceKind } from '@/shared/api';
-import { formatDate, getTide } from '@/shared/lib';
+import { formatDate } from '@/shared/lib';
 import { AppIcon, AppText, Button, Chip, Divider, Tag, Touchable } from '@/shared/ui';
 
 export type KindFilter = PlaceKind | 'all';
 
 const FILTERS: { value: KindFilter; label: string }[] = [
   { value: 'all', label: '전체' },
-  { value: 'fishing', label: '낚시' },
-  { value: 'restaurant', label: '맛집' },
+  { value: 'real', label: '실존' },
+  { value: 'fantasy', label: '환상' },
 ];
 
 type HomeContentProps = {
@@ -50,7 +50,7 @@ export const HomeContent = ({
         <Touchable
           testID="home-search"
           onPress={() => router.push('/search')}
-          accessibilityLabel="주소나 장소 검색"
+          accessibilityLabel="여행지나 장소 검색"
           height={56}
           borderRadius={28}
           backgroundColor="brandSoft"
@@ -60,7 +60,7 @@ export const HomeContent = ({
           <XStack alignItems="center" gap={12}>
             <AppIcon icon={Square} size={10} color="ink" fill="ink" />
             <AppText flex={1} tone="muted">
-              주소나 장소 검색
+              여행지나 장소 검색
             </AppText>
             <AppIcon icon={ArrowRight} size={22} color="ink" strokeWidth={1.5} />
           </XStack>
@@ -94,13 +94,13 @@ export const HomeContent = ({
         <Touchable
           testID="home-checklist"
           onPress={() => router.push('/checklist')}
-          accessibilityLabel={`출조 체크리스트${checklistSummary ? `, ${checklistSummary}` : ''}`}
+          accessibilityLabel={`여행 체크리스트${checklistSummary ? `, ${checklistSummary}` : ''}`}
           justifyContent="center"
         >
           <XStack alignItems="center" gap={10}>
             <AppIcon icon={ListChecks} size={20} color="ink" strokeWidth={1.75} />
             <AppText flex={1} tone="ink">
-              출조 체크리스트
+              여행 체크리스트
             </AppText>
             {checklistSummary ? (
               <AppText size="caption" tone="muted">
@@ -135,7 +135,7 @@ export const HomeContent = ({
       </XStack>
       {visible.length === 0 ? (
         <AppText tone="muted" paddingHorizontal={20} paddingVertical={24} textAlign="center">
-          아직 기록이 없습니다. 지도에서 핀을 눌러 첫 기록을 남겨 보세요.
+          아직 기록이 없습니다. 핀을 눌러 첫 여행을 남겨 보세요.
         </AppText>
       ) : (
         visible.map((record, index) => (
@@ -152,7 +152,6 @@ export const HomeContent = ({
 /** 핀을 눌렀을 때 보여 주는 간결한 장소 정보 */
 export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => void }) => {
   const router = useRouter();
-  const tide = getTide(new Date(), place.latitude, place.longitude);
   return (
     <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
       <YStack gap={10} testID="place-summary" accessibilityLiveRegion="polite">
@@ -183,11 +182,6 @@ export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => 
           기록 {place.recordCount}건
           {place.lastVisitedAt ? ` · 최근 방문 ${formatDate(place.lastVisitedAt)}` : ''}
         </AppText>
-        {place.kind === 'fishing' ? (
-          <AppText testID="place-summary-tide" size="caption" tone="ink">
-            오늘 물때 {tide.name} (음력 {tide.lunarDay}일, {tide.system})
-          </AppText>
-        ) : null}
         {place.memo ? <AppText numberOfLines={2}>{place.memo}</AppText> : null}
         {place.tags.length > 0 ? (
           <XStack gap={6} flexWrap="wrap">
@@ -202,14 +196,24 @@ export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => 
               testID="summary-add-record"
               variant="outline"
               label="기록 추가"
-              onPress={() => router.push(`/record/new?placeId=${place.id}`)}
+              onPress={() =>
+                router.push(
+                  place.catalogId
+                    ? `/record/new?catalogId=${place.catalogId}`
+                    : `/record/new?placeId=${place.id}`,
+                )
+              }
             />
           </View>
           <View flex={1}>
             <Button
               testID="summary-more"
               label="더보기"
-              onPress={() => router.push(`/place/${place.id}`)}
+              onPress={() =>
+                router.push(
+                  place.catalogId ? `/destination/${place.catalogId}` : `/place/${place.id}`,
+                )
+              }
             />
           </View>
         </XStack>

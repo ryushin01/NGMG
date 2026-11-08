@@ -1,31 +1,31 @@
 # 서버가 끊기고 토큰이 만료된 상태에서 앱을 다시 켜 조회하고 저장합니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - stopApp
 - launchApp
 - extendedWaitUntil:
     visible:
-      id: open-drawer
+      id: tab-my
     timeout: 30000
 - tapOn:
-    id: open-drawer
+    id: tab-my
 - tapOn:
-    id: drawer-checklist
+    id: my-checklist
 - extendedWaitUntil:
-    visible: 24개 중 1개 챙김
+    visible: 21개 중 1개 챙김
     timeout: 30000
 - tapOn:
-    id: checklist-item-릴
-- assertVisible: 24개 중 2개 챙김
+    id: checklist-item-유적 입장권 예약
+- assertVisible: 21개 중 2개 챙김
 - runFlow: _back-to-home.yaml
 - tapOn:
-    id: open-drawer
+    id: tab-my
 - tapOn:
-    id: drawer-places
+    id: my-places
 - extendedWaitUntil:
-    visible: .*서버 포인트.*
+    visible: .*서버 유적.*
     timeout: 30000
-- tapOn: .*서버 포인트.*
+- tapOn: .*서버 유적.*
 - extendedWaitUntil:
     visible:
       id: place-add-record
@@ -34,24 +34,23 @@ appId: com.ryushin01.ngmg
     id: place-add-record
 - tapOn:
     id: record-title
-- inputText: 끊김 출조
+- inputText: 끊김 여행
 - tapOn: 기본 정보
 - tapOn:
     id: record-save
 - extendedWaitUntil:
-    visible: .*끊김 출조.*
+    visible: .*끊김 여행.*
     timeout: 60000
 - assertVisible:
     id: record-delete
 # 끊긴 상태에서도 전에 본 사진은 기기 캐시로 보입니다.
 - runFlow: _back-to-home.yaml
-- runFlow: _open-drawer.yaml
 - tapOn:
-    id: drawer-records
+    id: tab-records
 - extendedWaitUntil:
-    visible: .*서버 출조 수정.*
+    visible: .*서버 여행 수정.*
     timeout: 30000
-- tapOn: .*서버 출조 수정.*
+- tapOn: .*서버 여행 수정.*
 - extendedWaitUntil:
     visible:
       id: photo-0

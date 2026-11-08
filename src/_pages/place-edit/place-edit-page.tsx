@@ -23,6 +23,8 @@ export const PlaceEditPage = () => {
             longitude: place.data.longitude,
             memo: place.data.memo,
             tags: place.data.tags,
+            catalogId: place.data.catalogId,
+            wishlisted: place.data.wishlisted,
           }}
           onSaved={() => router.back()}
         />

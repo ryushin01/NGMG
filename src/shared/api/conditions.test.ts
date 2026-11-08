@@ -1,38 +1,27 @@
-import { describeWind, parseConditions, toKstHour } from './conditions';
+import { parseConditions, toUtcHour } from './conditions';
 
 jest.mock('expo-crypto', () => ({ randomUUID: () => 'id' }));
 
-it('UTC 시각을 한국 시각 시간대로 맞춥니다', () => {
-  expect(toKstHour('2026-11-06T00:40:00.000Z')).toBe('2026-11-06T09:00');
+it('기록 시각을 UTC 시간 단위로 맞춥니다', () => {
+  expect(toUtcHour('2026-11-06T00:40:00.000Z')).toBe('2026-11-06T00:00');
 });
 
-it('풍향 각도를 불어오는 방향으로 표현합니다', () => {
-  expect(describeWind(10.74, 331)).toBe('북서풍 10.7m/s');
-  expect(describeWind(3, 0)).toBe('북풍 3.0m/s');
-  expect(describeWind(3, 359)).toBe('북풍 3.0m/s');
-});
-
-const time = ['2026-11-06T08:00', '2026-11-06T09:00'];
-const weather = {
+const data = {
   hourly: {
-    time,
+    time: ['2026-11-06T00:00', '2026-11-06T01:00'],
     weather_code: [3, 0],
-    wind_speed_10m: [1, 10.74],
-    wind_direction_10m: [0, 331],
+    temperature_2m: [18, 18.5],
   },
 };
 
-it('기록 시각의 값을 고르고 수온이 없어도 나머지를 돌려줍니다', () => {
-  const iso = '2026-11-06T00:10:00.000Z';
-  const marine = { hourly: { time, sea_surface_temperature: [18, 18.5] } };
-  expect(parseConditions(weather, marine, iso)).toEqual({
+it('기록 시각의 날씨와 기온을 고릅니다', () => {
+  expect(parseConditions(data, '2026-11-06T01:10:00.000Z')).toEqual({
     weather: '맑음',
-    wind: '북서풍 10.7m/s',
-    waterTemp: 18.5,
+    temperature: 18.5,
   });
-  expect(parseConditions(weather, null, iso)?.waterTemp).toBeNull();
 });
 
 it('해당 시각의 값이 없으면 null입니다', () => {
-  expect(parseConditions(weather, null, '2020-01-01T00:00:00.000Z')).toBeNull();
+  expect(parseConditions(data, '2020-01-01T00:00:00.000Z')).toBeNull();
+  expect(parseConditions(null, '2026-11-06T01:10:00.000Z')).toBeNull();
 });

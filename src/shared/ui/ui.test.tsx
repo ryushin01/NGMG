@@ -32,8 +32,10 @@ describe('Button', () => {
 });
 
 it('Chip은 선택 상태를 접근성 상태로 알립니다', async () => {
-  await render(wrap(<Chip label="맛집" selected />));
-  expect(screen.getByLabelText('맛집').props.accessibilityState).toMatchObject({ selected: true });
+  await render(wrap(<Chip label="환상 세계" selected />));
+  expect(screen.getByLabelText('환상 세계').props.accessibilityState).toMatchObject({
+    selected: true,
+  });
 });
 
 it('Field는 레이블과 오류를 보여 줍니다', async () => {

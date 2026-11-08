@@ -19,7 +19,7 @@ import type {
   TripRecord,
 } from './types';
 
-const AUTH_STORAGE_KEY = 'ngmg.supabase-auth';
+const AUTH_STORAGE_KEY = 'newworld.supabase-auth';
 const SIGN_OUT_TIMEOUT = 5000;
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
@@ -39,7 +39,7 @@ AppState.addEventListener('change', (state) => {
   else client.auth.stopAutoRefresh();
 });
 
-const LAST_SESSION_KEY = 'ngmg.last-session';
+const LAST_SESSION_KEY = 'newworld.last-session';
 
 const localSignOutListeners = new Set<(session: Session | null) => void>();
 
@@ -65,6 +65,8 @@ type PlaceRow = {
   longitude: number;
   memo: string;
   tags: string[];
+  catalog_id: string | null;
+  wishlisted: boolean;
   created_at: string;
   record_count?: number;
   last_visited_at?: string | null;
@@ -79,12 +81,17 @@ const toPlace = (row: PlaceRow): Place => ({
   longitude: row.longitude,
   memo: row.memo,
   tags: row.tags,
+  catalogId: row.catalog_id,
+  wishlisted: row.wishlisted,
   recordCount: row.record_count ?? 0,
   lastVisitedAt: row.last_visited_at ?? null,
   createdAt: row.created_at,
 });
 
-const placePayload = (input: PlaceInput) => input;
+const placePayload = ({ catalogId, ...input }: PlaceInput) => ({
+  ...input,
+  catalog_id: catalogId,
+});
 
 type ChecklistRow = Omit<ChecklistItem, 'listName'> & { list_name: string };
 
@@ -104,17 +111,16 @@ type RecordRow = {
   memo: string;
   party_size: number | null;
   members: string[];
-  gear: string;
-  rig: string;
-  bait: string;
-  weather: string;
-  tide: string;
-  wind: string;
-  water_temp: number | string | null;
-  catches: string;
-  menu: string;
-  price: number | null;
   rating: number | null;
+  weather: string;
+  temperature: number | string | null;
+  transport: string;
+  lodging: string;
+  cost: number | null;
+  highlights: string;
+  gateway: string;
+  encounters: string;
+  souvenir: string;
   places: { name: string; kind: Place['kind'] } | null;
   record_photos: PhotoRow[];
 };
@@ -140,23 +146,22 @@ const toRecords = async (rows: RecordRow[]): Promise<TripRecord[]> => {
     id: row.id,
     placeId: row.place_id,
     placeName: row.places?.name ?? '',
-    placeKind: row.places?.kind ?? 'fishing',
+    placeKind: row.places?.kind ?? 'real',
     visitedAt: row.visited_at,
     title: row.title,
     memo: row.memo,
     partySize: row.party_size,
     members: row.members,
-    gear: row.gear,
-    rig: row.rig,
-    bait: row.bait,
-    weather: row.weather,
-    tide: row.tide,
-    wind: row.wind,
-    waterTemp: row.water_temp === null ? null : Number(row.water_temp),
-    catches: row.catches,
-    menu: row.menu,
-    price: row.price,
     rating: row.rating,
+    weather: row.weather,
+    temperature: row.temperature === null ? null : Number(row.temperature),
+    transport: row.transport,
+    lodging: row.lodging,
+    cost: row.cost,
+    highlights: row.highlights,
+    gateway: row.gateway,
+    encounters: row.encounters,
+    souvenir: row.souvenir,
     photos: [...row.record_photos]
       .sort((a, b) => a.position - b.position)
       .map((photo): Photo => ({
@@ -176,17 +181,16 @@ const recordPayload = ({ record }: RecordSaveInput) => ({
   memo: record.memo,
   party_size: record.partySize,
   members: record.members,
-  gear: record.gear,
-  rig: record.rig,
-  bait: record.bait,
-  weather: record.weather,
-  tide: record.tide,
-  wind: record.wind,
-  water_temp: record.waterTemp,
-  catches: record.catches,
-  menu: record.menu,
-  price: record.price,
   rating: record.rating,
+  weather: record.weather,
+  temperature: record.temperature,
+  transport: record.transport,
+  lodging: record.lodging,
+  cost: record.cost,
+  highlights: record.highlights,
+  gateway: record.gateway,
+  encounters: record.encounters,
+  souvenir: record.souvenir,
 });
 
 const currentUserId = async () => {

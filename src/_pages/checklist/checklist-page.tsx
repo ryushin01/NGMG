@@ -6,6 +6,7 @@ import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
 import {
   buildDefaultItems,
+  buildFantasyItems,
   CHECKLIST_CATEGORIES,
   ChecklistRow,
   copyList,
@@ -117,7 +118,7 @@ export const ChecklistPage = () => {
   const confirmReset = () => {
     Alert.alert(
       '체크 모두 해제',
-      '다음 출조를 위해 체크를 모두 지웁니다. 항목은 그대로 남습니다.',
+      '다음 여행을 위해 체크를 모두 지웁니다. 항목은 그대로 남습니다.',
       [
         { text: '취소', style: 'cancel' },
         {
@@ -146,7 +147,7 @@ export const ChecklistPage = () => {
   return (
     <View flex={1} backgroundColor="surface">
       <Header
-        title="출조 체크리스트"
+        title="여행 체크리스트"
         right={
           checkedItems.length > 0 ? (
             <HeaderTextButton label="모두 해제" onPress={confirmReset} />
@@ -211,7 +212,7 @@ export const ChecklistPage = () => {
                     <Field
                       testID="checklist-new-list-name"
                       label="새 목록 이름"
-                      placeholder="예: 거문도 11월"
+                      placeholder="예: 페루 5월"
                       value={newListName}
                       onChangeText={setNewListName}
                       onSubmitEditing={createList}
@@ -253,7 +254,7 @@ export const ChecklistPage = () => {
             <Field
               testID="checklist-input"
               label="항목 추가"
-              placeholder="예: 구명조끼"
+              placeholder="예: 고산병약"
               value={title}
               onChangeText={setTitle}
               onSubmitEditing={add}
@@ -276,11 +277,19 @@ export const ChecklistPage = () => {
             </ScrollView>
             <Button testID="checklist-add" variant="outline" label="추가" onPress={add} />
             {items.length === 0 ? (
-              <Button
-                testID="checklist-defaults"
-                label="기본 목록으로 시작"
-                onPress={() => upsert.mutate(buildDefaultItems(newId, listName), { onError })}
-              />
+              <>
+                <Button
+                  testID="checklist-defaults"
+                  label="유적 여행 기본 목록으로 시작"
+                  onPress={() => upsert.mutate(buildDefaultItems(newId, listName), { onError })}
+                />
+                <Button
+                  testID="checklist-fantasy-defaults"
+                  variant="outline"
+                  label="환상 여행 목록으로 시작"
+                  onPress={() => upsert.mutate(buildFantasyItems(newId, listName), { onError })}
+                />
+              </>
             ) : null}
           </YStack>
           {groupChecklist(items).map((section) => (

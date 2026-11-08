@@ -71,7 +71,7 @@ const setup = () => {
           ...input.record,
           id,
           placeName: '',
-          placeKind: 'fishing',
+          placeKind: 'real',
           photos: input.newPhotos.map((photo) => ({ id: photo.uri, url: photo.uri })),
         } as unknown as TripRecord;
         server.records = [record, ...server.records];
@@ -130,13 +130,15 @@ const setup = () => {
 };
 
 const placeInput = {
-  name: '거문도',
-  kind: 'fishing' as const,
+  name: '마추픽추',
+  kind: 'real' as const,
   address: '',
   latitude: 34,
   longitude: 127,
   memo: '',
   tags: [],
+  catalogId: null,
+  wishlisted: false,
 };
 
 const recordInput = (placeId: string, title: string): RecordInput => ({
@@ -146,17 +148,16 @@ const recordInput = (placeId: string, title: string): RecordInput => ({
   memo: '',
   partySize: null,
   members: [],
-  gear: '',
-  rig: '',
-  bait: '',
-  weather: '',
-  tide: '',
-  wind: '',
-  waterTemp: null,
-  catches: '',
-  menu: '',
-  price: null,
   rating: null,
+  weather: '',
+  temperature: null,
+  transport: '',
+  lodging: '',
+  cost: null,
+  highlights: '',
+  gateway: '',
+  encounters: '',
+  souvenir: '',
 });
 
 describe('연결된 상태', () => {
@@ -186,7 +187,7 @@ describe('끊긴 상태', () => {
 
     const place = await backend.places.create(placeInput);
     const record = await backend.records.create({
-      record: recordInput(place.id, '오프라인 출조'),
+      record: recordInput(place.id, '오프라인 여행'),
       keptPhotos: [],
       newPhotos: [{ uri: 'tmp/a.jpg', width: 10, height: 10 }],
     });
@@ -195,7 +196,7 @@ describe('끊긴 상태', () => {
     expect(record.photos[0].url).toBe('file:///outbox/saved-tmp/a.jpg');
     expect(await backend.places.get(place.id)).toMatchObject({ recordCount: 1 });
     expect((await backend.records.list({ placeId: place.id })).map((r) => r.title)).toEqual([
-      '오프라인 출조',
+      '오프라인 여행',
     ]);
 
     const synced = jest.fn();
@@ -211,7 +212,7 @@ describe('끊긴 상태', () => {
     expect(sync.getState().ops).toEqual([]);
     expect(synced).toHaveBeenCalledTimes(1);
     expect(removedPhotos).toEqual(['saved-tmp/a.jpg']);
-    expect((await backend.records.get(record.id)).title).toBe('오프라인 출조');
+    expect((await backend.records.get(record.id)).title).toBe('오프라인 여행');
   });
 
   it('마지막으로 받은 목록을 보여 주고, 받은 적이 없으면 오류입니다', async () => {
@@ -378,8 +379,8 @@ describe('계정 분리', () => {
     server.down = true;
     await backend.places.create({ ...placeInput, name: '둘째' });
     await backend.auth.signOut();
-    expect(store.has('ngmg.snapshot.a')).toBe(false);
-    expect(JSON.parse(store.get('ngmg.outbox.a') as string)).toHaveLength(1);
+    expect(store.has('newworld.snapshot.a')).toBe(false);
+    expect(JSON.parse(store.get('newworld.outbox.a') as string)).toHaveLength(1);
   });
 });
 

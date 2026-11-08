@@ -10,8 +10,8 @@ import { Chip, Divider, Field, Header, LoadingView, MessageView } from '@/shared
 type Filter = PlaceKind | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: '전체' },
-  { value: 'fishing', label: '낚시' },
-  { value: 'restaurant', label: '맛집' },
+  { value: 'real', label: '실존' },
+  { value: 'fantasy', label: '환상' },
 ];
 
 export const RecordsPage = () => {
@@ -29,12 +29,12 @@ export const RecordsPage = () => {
   );
   return (
     <View flex={1} backgroundColor="surface">
-      <Header title="전체 기록" />
+      <Header title="여행 기록" hideBack />
       <View paddingHorizontal={20} paddingBottom={12}>
         <Field
           testID="records-search"
           label="기록 검색"
-          placeholder="제목, 장소, 어종, 미끼, 멤버, 메뉴"
+          placeholder="제목, 장소, 동행, 인상 깊은 곳"
           value={keyword}
           onChangeText={setKeyword}
           returnKeyType="search"
@@ -71,7 +71,7 @@ export const RecordsPage = () => {
               message={
                 keyword.trim()
                   ? '검색 결과가 없습니다.'
-                  : '아직 기록이 없습니다. 지도에서 장소를 골라 기록을 남겨 보세요.'
+                  : '아직 기록이 없습니다. 여행지에서 첫 기록을 남겨 보세요.'
               }
             />
           }

@@ -11,8 +11,8 @@ import { BottomCta, Chip, Divider, Field, Header, LoadingView, MessageView } fro
 type Filter = PlaceKind | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: '전체' },
-  { value: 'fishing', label: '낚시 포인트' },
-  { value: 'restaurant', label: '맛집' },
+  { value: 'real', label: '실존 유적' },
+  { value: 'fantasy', label: '환상 세계' },
 ];
 
 export const PlacesPage = () => {
@@ -40,7 +40,7 @@ export const PlacesPage = () => {
 
   return (
     <View flex={1} backgroundColor="surface">
-      <Header title="내 장소" />
+      <Header title="내 여행지" />
       <View paddingHorizontal={20} paddingBottom={12}>
         <Field
           testID="places-search"
@@ -100,7 +100,9 @@ export const PlacesPage = () => {
           ListEmptyComponent={
             <MessageView
               message={
-                keyword.trim() || tag ? '조건에 맞는 장소가 없습니다.' : '저장한 장소가 없습니다.'
+                keyword.trim() || tag
+                  ? '조건에 맞는 장소가 없습니다.'
+                  : '가고 싶은 여행지에 하트를 눌러 보세요.'
               }
             />
           }

@@ -1,4 +1,4 @@
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 tags:
   - helper
 ---
@@ -8,7 +8,7 @@ tags:
     timeout: 60000
 - tapOn:
     id: field-email
-- inputText: demo@ngmg.app
+- inputText: demo@newworld.app
 - tapOn:
     id: field-password
 - inputText: demo-password
@@ -22,5 +22,5 @@ tags:
       - tapOn: 지금 안 함
 - extendedWaitUntil:
     visible:
-      id: home-search
+      id: world-search-real
     timeout: 15000
