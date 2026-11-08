@@ -1,0 +1,40 @@
+# 둘러보기로 시작하고, 앱을 다시 켜도 데모 데이터와 로그인이 유지되는지 확인합니다.
+appId: com.ryushin01.newworld
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: demo-browse
+    timeout: 60000
+- tapOn:
+    id: demo-browse
+- extendedWaitUntil:
+    visible:
+      id: world-search-real
+    timeout: 15000
+- waitForAnimationToEnd
+- tapOn:
+    id: wish-giza
+    retryTapIfNoChange: false
+- waitForAnimationToEnd
+- launchApp:
+    clearState: false
+    stopApp: true
+- extendedWaitUntil:
+    visible:
+      id: world-search-real
+    timeout: 30000
+- tapOn:
+    id: tab-my
+- tapOn:
+    id: my-places
+- extendedWaitUntil:
+    visible:
+      id: places-filter-wish
+    timeout: 8000
+- tapOn:
+    id: places-filter-wish
+- extendedWaitUntil:
+    visible: .*기자 피라미드.*
+    timeout: 8000

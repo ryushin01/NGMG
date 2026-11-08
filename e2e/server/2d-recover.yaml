@@ -4,10 +4,12 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: field-email
 - inputText: ${EMAIL}
+- waitForAnimationToEnd
 - tapOn:
     id: field-password
 - inputText: first-password
 - runFlow: ../_hide-keyboard-android.yaml
+- waitForAnimationToEnd
 - tapOn:
     id: sign-in-submit
 - runFlow: _after-sign-in.yaml

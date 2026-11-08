@@ -139,7 +139,7 @@ export const AccountPage = () => {
           <Divider />
           <Row
             label="데이터 저장"
-            value={backend.mode === 'demo' ? '데모 모드 (기기 메모리)' : '서버 동기화'}
+            value={backend.mode === 'demo' ? '데모 모드 (이 기기에 저장)' : '서버 동기화'}
           />
           <Divider />
           <Row label="앱 버전" value={Constants.expoConfig?.version ?? '-'} />
