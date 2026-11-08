@@ -69,6 +69,13 @@ const Navigator = () => {
         <Stack.Protected guard={!!session}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="destination/[id]" />
+          <Stack.Screen name="courses" />
+          <Stack.Screen name="timeline" />
+          <Stack.Screen name="passport" />
+          <Stack.Screen name="trips" />
+          <Stack.Screen name="trip/new" />
+          <Stack.Screen name="trip/[id]/index" />
+          <Stack.Screen name="trip/[id]/edit" />
           <Stack.Screen name="search" options={{ animation: 'fade' }} />
           <Stack.Screen name="map-pick" />
           <Stack.Screen name="place/new" />

@@ -13,9 +13,10 @@ import {
 } from '@/entities/destination';
 import { usePlaces } from '@/entities/place';
 import { savedByCatalogId, useToggleWish } from '@/features/destination-save';
+import { usePosition } from '@/features/nearby';
 import type { PlaceKind } from '@/shared/api';
-import { toErrorMessage } from '@/shared/lib';
-import { AppText, Chip, Field, MessageView } from '@/shared/ui';
+import { distanceKm, formatDistance, toErrorMessage } from '@/shared/lib';
+import { AppText, Button, Chip, Field, MessageView } from '@/shared/ui';
 import { SyncBanner } from '@/widgets/sync-banner';
 
 const COPY: Record<PlaceKind, { title: string; subtitle: string; placeholder: string }> = {
@@ -38,16 +39,30 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
   const toggleWish = useToggleWish();
   const [keyword, setKeyword] = useState('');
   const [group, setGroup] = useState<string | null>(null);
+  const [nearby, setNearby] = useState(false);
+  const { position, request } = usePosition();
   const copy = COPY[realm];
   const groups = realm === 'real' ? REAL_GROUPS : FANTASY_GROUPS;
 
   const saved = useMemo(() => savedByCatalogId(places.data ?? []), [places.data]);
   const all = useMemo(() => searchDestinations('', realm), [realm]);
   const visitedCount = all.filter((item) => (saved.get(item.id)?.recordCount ?? 0) > 0).length;
-  const data = useMemo(
-    () => searchDestinations(keyword, realm).filter((item) => !group || item.group === group),
-    [group, keyword, realm],
-  );
+  const data = useMemo(() => {
+    const found = searchDestinations(keyword, realm).filter(
+      (item) => !group || item.group === group,
+    );
+    if (!nearby || !position) return found;
+    return [...found].sort((a, b) => distanceKm(position, a) - distanceKm(position, b));
+  }, [group, keyword, nearby, position, realm]);
+
+  const toggleNearby = async () => {
+    if (nearby) {
+      setNearby(false);
+      return;
+    }
+    if (position || (await request())) setNearby(true);
+    else toast.warning('가까운 순으로 보려면 위치 권한을 허용해 주세요.');
+  };
 
   return (
     <View flex={1} backgroundColor="surface">
@@ -69,6 +84,32 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
                 </AppText>
               </YStack>
               <SyncBanner />
+            </XStack>
+            <XStack paddingHorizontal={20} gap={8}>
+              <View flex={1}>
+                <Button
+                  testID={`world-courses-${realm}`}
+                  variant="outline"
+                  label="코스"
+                  onPress={() => router.push('/courses')}
+                />
+              </View>
+              <View flex={1}>
+                <Button
+                  testID={`world-timeline-${realm}`}
+                  variant="outline"
+                  label="연대표"
+                  onPress={() => router.push('/timeline')}
+                />
+              </View>
+              <View flex={1}>
+                <Button
+                  testID={`world-passport-${realm}`}
+                  variant="outline"
+                  label="여권"
+                  onPress={() => router.push('/passport')}
+                />
+              </View>
             </XStack>
             <View paddingHorizontal={20}>
               <Field
@@ -97,6 +138,14 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
                   selected={group === null}
                   onPress={() => setGroup(null)}
                 />
+                {realm === 'real' ? (
+                  <Chip
+                    testID="world-nearby"
+                    label="가까운 순"
+                    selected={nearby}
+                    onPress={toggleNearby}
+                  />
+                ) : null}
                 {groups.map((item) => (
                   <Chip
                     key={item}
@@ -118,6 +167,7 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
               destination={item}
               wishlisted={place?.wishlisted ?? false}
               visited={(place?.recordCount ?? 0) > 0}
+              distance={nearby && position ? formatDistance(distanceKm(position, item)) : undefined}
               onPress={() => router.push(`/destination/${item.id}`)}
               onToggleWish={() =>
                 toggleWish(item, {

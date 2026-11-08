@@ -16,6 +16,7 @@ import type {
   PlaceInput,
   RecordSaveInput,
   Session,
+  Trip,
   TripRecord,
 } from './types';
 
@@ -95,6 +96,24 @@ const placePayload = ({ catalogId, ...input }: PlaceInput) => ({
 
 type ChecklistRow = Omit<ChecklistItem, 'listName'> & { list_name: string };
 
+type TripRow = {
+  id: string;
+  title: string;
+  start_date: string | null;
+  end_date: string | null;
+  stops: string[];
+  memo: string;
+};
+
+const toTrip = (row: TripRow): Trip => ({
+  id: row.id,
+  title: row.title,
+  startDate: row.start_date,
+  endDate: row.end_date,
+  stops: row.stops,
+  memo: row.memo,
+});
+
 type PhotoRow = {
   id: string;
   storage_path: string;
@@ -117,6 +136,7 @@ type RecordRow = {
   transport: string;
   lodging: string;
   cost: number | null;
+  currency: string;
   highlights: string;
   gateway: string;
   encounters: string;
@@ -158,6 +178,7 @@ const toRecords = async (rows: RecordRow[]): Promise<TripRecord[]> => {
     transport: row.transport,
     lodging: row.lodging,
     cost: row.cost,
+    currency: row.currency,
     highlights: row.highlights,
     gateway: row.gateway,
     encounters: row.encounters,
@@ -187,6 +208,7 @@ const recordPayload = ({ record }: RecordSaveInput) => ({
   transport: record.transport,
   lodging: record.lodging,
   cost: record.cost,
+  currency: record.currency,
   highlights: record.highlights,
   gateway: record.gateway,
   encounters: record.encounters,
@@ -502,6 +524,29 @@ export const supabaseBackend: Backend = {
     },
     async remove(ids) {
       const { error } = await client.from('checklist_items').delete().in('id', ids);
+      if (error) throw error;
+    },
+  },
+  trips: {
+    async list() {
+      const { data, error } = await client
+        .from('trips')
+        .select('id, title, start_date, end_date, stops, memo')
+        .order('start_date', { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      return (data as TripRow[]).map(toTrip);
+    },
+    async save({ id, title, startDate, endDate, stops, memo }) {
+      const { data, error } = await client
+        .from('trips')
+        .upsert({ id, title, start_date: startDate, end_date: endDate, stops, memo })
+        .select('id, title, start_date, end_date, stops, memo')
+        .single();
+      if (error) throw error;
+      return toTrip(data as TripRow);
+    },
+    async remove(id) {
+      const { error } = await client.from('trips').delete().eq('id', id);
       if (error) throw error;
     },
   },

@@ -5,7 +5,7 @@ import { Controller, useForm, type Control, type FieldPath } from 'react-hook-fo
 import { Linking } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { toast } from 'sonner-native';
-import { View, YStack } from 'tamagui';
+import { View, XStack, YStack } from 'tamagui';
 import { useRecords, useSaveRecord } from '@/entities/record';
 import {
   fetchConditions,
@@ -15,8 +15,8 @@ import {
   type PlaceKind,
   type TripRecord,
 } from '@/shared/api';
-import { toErrorMessage, useUnsavedGuard } from '@/shared/lib';
-import { AppText, StickyBottomCta, Button, Field, TagInput, Touchable } from '@/shared/ui';
+import { CURRENCIES, CURRENCY_LABELS, toErrorMessage, useUnsavedGuard } from '@/shared/lib';
+import { AppText, StickyBottomCta, Button, Chip, Field, TagInput, Touchable } from '@/shared/ui';
 import {
   recordFormSchema,
   toFormValues,
@@ -30,7 +30,7 @@ import { RatingField } from './rating-field';
 
 type TextName = Exclude<
   FieldPath<RecordFormValues>,
-  'members' | 'rating' | 'visitedAt' | `members.${number}`
+  'members' | 'rating' | 'visitedAt' | 'currency' | `members.${number}`
 >;
 
 type TextFieldProps = {
@@ -283,9 +283,31 @@ export const RecordForm = ({
               <TextField
                 control={control}
                 name="cost"
-                label="비용 (원)"
+                label="비용"
                 numeric
                 placeholder="예: 450000"
+              />
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <YStack gap={8}>
+                    <AppText size="caption" tone="muted" bold>
+                      통화
+                    </AppText>
+                    <XStack gap={8} flexWrap="wrap" accessibilityRole="radiogroup">
+                      {CURRENCIES.map((code) => (
+                        <Chip
+                          key={code}
+                          testID={`currency-${code}`}
+                          label={`${CURRENCY_LABELS[code]} ${code}`}
+                          selected={field.value === code}
+                          onPress={() => field.onChange(code)}
+                        />
+                      ))}
+                    </XStack>
+                  </YStack>
+                )}
               />
             </Section>
           </>

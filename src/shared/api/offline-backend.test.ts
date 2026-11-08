@@ -8,6 +8,7 @@ const setup = () => {
     places: [] as Place[],
     records: [] as TripRecord[],
     checklist: [] as import('./types').ChecklistItem[],
+    trips: [] as import('./types').Trip[],
     down: false,
     tokenBroken: false,
     rejectNext: false,
@@ -79,6 +80,21 @@ const setup = () => {
       },
       update: jest.fn(),
       remove: jest.fn(),
+    },
+    trips: {
+      list: async () => {
+        guard('trips.list');
+        return server.trips;
+      },
+      save: async (trip: import('./types').Trip) => {
+        guard('trips.save');
+        server.trips = [trip, ...server.trips.filter((item) => item.id !== trip.id)];
+        return trip;
+      },
+      remove: async (id: string) => {
+        guard('trips.remove');
+        server.trips = server.trips.filter((item) => item.id !== id);
+      },
     },
     checklist: {
       list: async () => {
@@ -154,6 +170,7 @@ const recordInput = (placeId: string, title: string): RecordInput => ({
   transport: '',
   lodging: '',
   cost: null,
+  currency: 'KRW',
   highlights: '',
   gateway: '',
   encounters: '',
@@ -403,5 +420,43 @@ describe('체크리스트', () => {
     server.down = false;
     await sync.flush();
     expect(server.checklist[0].checked).toBe(true);
+  });
+});
+
+describe('여정', () => {
+  const trip = {
+    id: 't1',
+    title: '코스',
+    startDate: null,
+    endDate: null,
+    stops: ['petra'],
+    memo: '',
+  };
+
+  it('끊긴 동안 저장한 여정을 보여 주고 연결되면 올립니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    await backend.trips.list();
+    sync.setOnline(false);
+    await backend.trips.save(trip);
+    expect(await backend.trips.list()).toEqual([trip]);
+    expect(server.trips).toEqual([]);
+    sync.setOnline(true);
+    await sync.flush();
+    expect(server.trips).toEqual([trip]);
+    expect(sync.getState().ops).toEqual([]);
+  });
+
+  it('끊긴 동안 지운 여정은 연결되면 서버에서도 지웁니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    await backend.trips.save(trip);
+    await backend.trips.list();
+    sync.setOnline(false);
+    await backend.trips.remove(trip.id);
+    expect(await backend.trips.list()).toEqual([]);
+    sync.setOnline(true);
+    await sync.flush();
+    expect(server.trips).toEqual([]);
   });
 });

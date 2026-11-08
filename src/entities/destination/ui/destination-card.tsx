@@ -10,6 +10,8 @@ type DestinationCardProps = {
   visited: boolean;
   onPress: () => void;
   onToggleWish: () => void;
+  /** 가까운 순으로 볼 때 표시하는 거리 */
+  distance?: string;
 };
 
 /** 카드와 하트 버튼은 중첩하지 않고 형제 요소로 둡니다. 스크린리더가 각각 초점을 잡습니다. */
@@ -19,12 +21,13 @@ export const DestinationCard = ({
   visited,
   onPress,
   onToggleWish,
+  distance,
 }: DestinationCardProps) => (
   <View paddingHorizontal={20} paddingBottom={20}>
     <Touchable
       testID={`destination-${destination.id}`}
       onPress={onPress}
-      accessibilityLabel={`${destination.name}, ${destination.location}, ${destination.tagline}${visited ? ', 다녀옴' : ''}`}
+      accessibilityLabel={`${destination.name}, ${distance ? `${distance}, ` : ''}${destination.location}, ${destination.tagline}${visited ? ', 다녀옴' : ''}`}
     >
       <YStack gap={10}>
         <View height={190} borderRadius={12} overflow="hidden" backgroundColor="surfaceMuted">
@@ -51,6 +54,7 @@ export const DestinationCard = ({
             ) : null}
           </XStack>
           <AppText size="caption" tone="muted" numberOfLines={1}>
+            {distance ? `${distance} · ` : ''}
             {destination.location} · {destination.era}
           </AppText>
           <AppText numberOfLines={2}>{destination.tagline}</AppText>

@@ -53,6 +53,11 @@ export const computeStats = (records: TripRecord[], year: number): RecordStats =
     places: rank(inYear.map((record) => record.placeName)),
     members: rank(inYear.flatMap((record) => record.members)),
     averageRating: average(inYear.map((record) => record.rating).filter(present)),
-    averageCost: average(real.map((record) => record.cost).filter(present)),
+    averageCost: average(
+      real
+        .filter((record) => record.currency === 'KRW')
+        .map((record) => record.cost)
+        .filter(present),
+    ),
   };
 };

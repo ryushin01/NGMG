@@ -7,6 +7,7 @@ import type {
   Place,
   RecordSaveInput,
   Session,
+  Trip,
   TripRecord,
 } from './types';
 
@@ -41,6 +42,10 @@ const wait = async () => {
 /** 계정별 저장을 확인할 수 있도록 체크리스트만 이메일별로 나눕니다. */
 const checklists = new Map<string, ChecklistItem[]>();
 const myChecklist = () => checklists.get(session?.userId ?? '') ?? [];
+const trips = new Map<string, Trip[]>();
+const myTrips = () => trips.get(session?.userId ?? '') ?? [];
+const setMyTrips = (items: Trip[]) => trips.set(session?.userId ?? '', items);
+
 const setMyChecklist = (items: ChecklistItem[]) => checklists.set(session?.userId ?? '', items);
 
 const withStats = (place: Place): Place => {
@@ -121,6 +126,7 @@ export const demoBackend: Backend = {
       places = [];
       records = [];
       checklists.delete(session?.userId ?? '');
+      trips.delete(session?.userId ?? '');
       setSession(null);
     },
   },
@@ -202,6 +208,21 @@ export const demoBackend: Backend = {
     async remove(ids) {
       await wait();
       setMyChecklist(myChecklist().filter((item) => !ids.includes(item.id)));
+    },
+  },
+  trips: {
+    async list() {
+      await wait();
+      return myTrips();
+    },
+    async save(trip) {
+      await wait();
+      setMyTrips([trip, ...myTrips().filter((item) => item.id !== trip.id)]);
+      return trip;
+    },
+    async remove(id) {
+      await wait();
+      setMyTrips(myTrips().filter((item) => item.id !== id));
     },
   },
   search: {

@@ -15,6 +15,7 @@ const record = {
   transport: '',
   lodging: '',
   cost: null,
+  currency: 'KRW',
   highlights: '',
   gateway: '',
   encounters: '',
