@@ -1,9 +1,9 @@
-# NGMG - 낚고먹고
+# NewWorld - 낚고먹고
 
-[![CI](https://github.com/ryushin01/NGMG/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/NGMG/actions/workflows/ci.yml)
+[![CI](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml)
 ![version](https://img.shields.io/badge/version-1.0.0-00a8ff)
 
-낚시 포인트와 맛집의 위치를 지도에 저장하고 출조와 식사를 기록하는 모바일 앱입니다. **NGMG**는 **낚고먹고**의 줄임말입니다.
+낚시 포인트와 맛집의 위치를 지도에 저장하고 출조와 식사를 기록하는 모바일 앱입니다. 앱 이름은 **낚고먹고**입니다.
 
 > **프로젝트 상태:** 직접 사용하기 위해 개발 중이며 스토어에는 출시하지 않았습니다. 서버 설정 값이 없으면 가상 데이터로 동작하는 데모 모드로 실행됩니다.
 
