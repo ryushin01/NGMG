@@ -73,7 +73,7 @@ export const applyOps = (
       ...input.record,
       id,
       placeName: place?.name ?? '',
-      placeKind: place?.kind ?? 'fishing',
+      placeKind: place?.kind ?? 'real',
       photos: [...input.keptPhotos, ...queued],
     };
   };
@@ -171,8 +171,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
   const stateListeners = new Set<() => void>();
   const syncedListeners = new Set<() => void>();
 
-  const outboxKey = () => `ngmg.outbox.${userId}`;
-  const snapshotKey = () => `ngmg.snapshot.${userId}`;
+  const outboxKey = () => `newworld.outbox.${userId}`;
+  const snapshotKey = () => `newworld.snapshot.${userId}`;
 
   const publish = () => {
     state = { online, ops };

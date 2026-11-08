@@ -1,14 +1,13 @@
 # 기록을 다시 저장하면 사진은 유지되고 행 없이 남은 파일만 지워집니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - runFlow: _back-to-home.yaml
-- runFlow: _open-drawer.yaml
 - tapOn:
-    id: drawer-records
+    id: tab-records
 - extendedWaitUntil:
-    visible: .*서버 출조.*
+    visible: .*서버 여행.*
     timeout: 20000
-- tapOn: .*서버 출조.*
+- tapOn: .*서버 여행.*
 - extendedWaitUntil:
     visible:
       id: photo-0
@@ -25,6 +24,6 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: record-save
 - extendedWaitUntil:
-    visible: .*서버 출조 수정.*
+    visible: .*서버 여행 수정.*
     timeout: 60000
 - runFlow: _back-to-home.yaml

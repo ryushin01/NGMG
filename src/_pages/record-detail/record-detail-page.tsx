@@ -20,47 +20,43 @@ import { PhotoGallery } from '@/widgets/photo-gallery';
 
 type Item = [label: string, value: string];
 
+const stars = (rating: number) => `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)} (${rating}점)`;
+
 const buildSections = (record: TripRecord): [string, Item[]][] => {
-  const people: Item[] = [
-    ['인원', record.partySize ? `${record.partySize}명` : ''],
-    [record.placeKind === 'fishing' ? '출조 멤버' : '동행', record.members.join(', ')],
-  ];
-  if (record.placeKind === 'fishing') {
-    return [
-      ['출조 인원', people],
-      ['조과', [['조과', record.catches]]],
+  const common: [string, Item[]][] = [
+    [
+      '함께한 사람',
       [
-        '장비와 채비',
-        [
-          ['출조 장비', record.gear],
-          ['채비', record.rig],
-          ['미끼', record.bait],
-        ],
+        ['인원', record.partySize ? `${record.partySize}명` : ''],
+        ['동행', record.members.join(', ')],
       ],
+    ],
+    ['감동', [['별점', record.rating ? stars(record.rating) : '']]],
+  ];
+  if (record.placeKind === 'real') {
+    return [
+      ...common,
+      ['인상 깊은 곳', [['내용', record.highlights]]],
       [
-        '조건',
+        '여행 정보',
         [
           ['날씨', record.weather],
-          ['물때', record.tide],
-          ['바람', record.wind],
-          ['수온', record.waterTemp !== null ? `${record.waterTemp}℃` : ''],
+          ['기온', record.temperature !== null ? `${record.temperature}℃` : ''],
+          ['교통', record.transport],
+          ['숙소', record.lodging],
+          ['비용', record.cost !== null ? formatPrice(record.cost) : ''],
         ],
       ],
     ];
   }
   return [
-    ['함께한 사람', people],
+    ...common,
     [
-      '식사',
+      '상상 여행',
       [
-        ['메뉴', record.menu],
-        ['가격', record.price !== null ? formatPrice(record.price) : ''],
-        [
-          '별점',
-          record.rating
-            ? `${'★'.repeat(record.rating)}${'☆'.repeat(5 - record.rating)} (${record.rating}점)`
-            : '',
-        ],
+        ['들어간 길', record.gateway],
+        ['만난 존재', record.encounters],
+        ['가져온 것', record.souvenir],
       ],
     ],
   ];

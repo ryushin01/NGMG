@@ -19,13 +19,13 @@ const shareFile = async (format: ExportFormat) => {
     format === 'csv'
       ? recordsToCsv(records)
       : toBackupJson(places, records, checklist, new Date().toISOString());
-  const file = new File(Paths.cache, `ngmg-${dayjs().format('YYYYMMDD-HHmmss')}.${format}`);
+  const file = new File(Paths.cache, `newworld-${dayjs().format('YYYYMMDD-HHmmss')}.${format}`);
   file.create({ overwrite: true });
   file.write(content);
   try {
     await Sharing.shareAsync(file.uri, {
       mimeType: MIME[format],
-      dialogTitle: '낚고먹고 내보내기',
+      dialogTitle: '신세계 내보내기',
     });
   } finally {
     // 공유가 끝나면 개인 기록 사본을 기기에 남기지 않습니다.

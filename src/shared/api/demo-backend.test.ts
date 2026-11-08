@@ -9,28 +9,29 @@ const baseRecord = (placeId: string) => ({
   memo: '',
   partySize: null,
   members: [],
-  gear: '',
-  rig: '',
-  bait: '',
-  weather: '',
-  tide: '',
-  wind: '',
-  waterTemp: null,
-  catches: '',
-  menu: '',
-  price: null,
   rating: null,
+  weather: '',
+  temperature: null,
+  transport: '',
+  lodging: '',
+  cost: null,
+  highlights: '',
+  gateway: '',
+  encounters: '',
+  souvenir: '',
 });
 
 it('장소를 만들고 기록과 사진을 저장한 뒤 함께 삭제합니다', async () => {
   const place = await api.places.create({
-    name: '새 포인트',
-    kind: 'fishing',
+    name: '새 유적',
+    kind: 'real',
     address: '',
     latitude: 34,
     longitude: 127,
     memo: '',
-    tags: ['갯바위'],
+    tags: ['신전'],
+    catalogId: null,
+    wishlisted: false,
   });
   const record = await api.records.create({
     record: baseRecord(place.id),
@@ -41,7 +42,7 @@ it('장소를 만들고 기록과 사진을 저장한 뒤 함께 삭제합니다
     ],
   });
   expect(record.photos).toHaveLength(2);
-  expect(record.placeName).toBe('새 포인트');
+  expect(record.placeName).toBe('새 유적');
   expect((await api.places.get(place.id)).recordCount).toBe(1);
 
   const updated = await api.records.update(record.id, {
@@ -65,6 +66,6 @@ it('로그인과 로그아웃을 구독자에게 알립니다', async () => {
 });
 
 it('이름과 주소로 검색합니다', async () => {
-  expect((await api.search.places('거문')).map((item) => item.name)).toContain('거문도항');
+  expect((await api.search.places('쿠스')).map((item) => item.name)).toContain('쿠스코');
   expect(await api.search.places('없는장소')).toEqual([]);
 });

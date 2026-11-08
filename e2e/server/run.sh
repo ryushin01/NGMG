@@ -5,8 +5,8 @@
 # 토큰 만료까지 시험하려면 supabase/config.toml의 auth.jwt_expiry를 잠시 낮추고 TOKEN_WAIT(초)를 줍니다.
 set -u
 cd "$(dirname "$0")"
-EMAIL="e2e-$(date +%s)@ngmg.test"
-DB=supabase_db_ngmg
+EMAIL="e2e-$(date +%s)@newworld.test"
+DB=supabase_db_newworld
 sql() { docker exec -i "$DB" psql -U postgres -At -c "$1"; }
 mail_link() {
   # 수신자 메일 중 $1을 포함한 가장 최근 메일의 첫 인증 링크를 찾습니다.
@@ -46,8 +46,8 @@ check "장소" "$(sql "select count(*) from public.places where user_id='$UID_'"
 check "기록" "$(sql "select count(*) from public.records where user_id='$UID_'")" 1
 check "사진 행" "$(sql "select count(*) from public.record_photos where user_id='$UID_'")" 3
 check "저장소 파일" "$(sql "select count(*) from storage.objects where bucket_id='record-photos' and name like '$UID_/%'")" 3
-check "체크리스트" "$(sql "select count(*) from public.checklist_items where user_id='$UID_'")" 24
-check "체크된 항목" "$(sql "select string_agg(title, ',') from public.checklist_items where user_id='$UID_' and checked")" 낚싯대
+check "체크리스트" "$(sql "select count(*) from public.checklist_items where user_id='$UID_'")" 21
+check "체크된 항목" "$(sql "select string_agg(title, ',') from public.checklist_items where user_id='$UID_' and checked")" 여권·비자
 
 # 행 없이 남은 파일은 다음 저장 때 지워집니다.
 RID=$(sql "select id from public.records where user_id='$UID_' limit 1")
@@ -58,7 +58,7 @@ check "남은 파일 정리" "$(sql "select count(*) from storage.objects where 
 check "사진 파일 유지" "$(sql "select count(*) from storage.objects where bucket_id='record-photos' and name like '$UID_/%'")" 3
 
 # 토큰이 만료될 시간을 기다렸다가 서버 없이 앱을 다시 켭니다.
-docker stop supabase_kong_ngmg > /dev/null
+docker stop supabase_kong_newworld > /dev/null
 sleep "${TOKEN_WAIT:-0}"
 step 2b-offline
 screenshot offline-photo
@@ -66,16 +66,16 @@ step 2c-pending-after-restart
 check "끊긴 동안 서버에 올라가지 않음" "$(sql "select count(*) from public.records where user_id='$UID_'")" 1
 # 끊긴 상태에서도 로그아웃되고, 올리지 못한 변경은 다시 로그인하면 올라갑니다.
 step 2c2-offline-sign-out
-docker start supabase_kong_ngmg > /dev/null
+docker start supabase_kong_newworld > /dev/null
 sleep 10
 step 2d-recover
-check "복구 후 기록" "$(sql "select count(*) from public.records where user_id='$UID_' and title='끊김 출조'")" 1
+check "복구 후 기록" "$(sql "select count(*) from public.records where user_id='$UID_' and title='끊김 여행'")" 1
 check "복구 후 체크" "$(sql "select count(*) from public.checklist_items where user_id='$UID_' and checked")" 2
 
 step 3-reload
 LINK=$(mail_link Reset); echo "재설정 링크 수신"
 TARGET=$(curl -s -o /dev/null -w '%{redirect_url}' "$LINK")
-case "$TARGET" in ngmg://*access_token*type=recovery*) echo "ok   재설정 링크가 앱으로 연결";; *) echo "FAIL 재설정 링크: ${TARGET%%#*}"; FAILED=1;; esac
+case "$TARGET" in newworld://*access_token*type=recovery*) echo "ok   재설정 링크가 앱으로 연결";; *) echo "FAIL 재설정 링크: ${TARGET%%#*}"; FAILED=1;; esac
 if [ "${PLATFORM:-ios}" = android ]; then
   adb -s "$DEVICE" shell "am start -a android.intent.action.VIEW -d '$TARGET'" > /dev/null
 else

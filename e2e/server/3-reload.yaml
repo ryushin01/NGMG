@@ -1,32 +1,28 @@
 # 앱을 다시 켜면 세션이 유지되고 서버 값이 보입니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - stopApp
 - launchApp
 - extendedWaitUntil:
     visible:
-      id: open-drawer
+      id: tab-my
     timeout: 30000
 - tapOn:
-    id: open-drawer
-- tapOn:
-    id: drawer-records
+    id: tab-records
 - extendedWaitUntil:
-    visible: .*서버 출조 수정.*
+    visible: .*서버 여행 수정.*
     timeout: 20000
 - runFlow: _back-to-home.yaml
 - tapOn:
-    id: open-drawer
+    id: tab-my
 - tapOn:
-    id: drawer-checklist
+    id: my-checklist
 - extendedWaitUntil:
     visible: 24개 중 2개 챙김
     timeout: 20000
 - runFlow: _back-to-home.yaml
 - tapOn:
-    id: open-drawer
-- tapOn:
-    id: drawer-account
+    id: tab-my
 - tapOn:
     id: sign-out
 - extendedWaitUntil:

@@ -1,13 +1,13 @@
-# 출조 체크리스트: 기본 목록, 체크, 항목 추가, 계정별 분리
-appId: com.ryushin01.ngmg
+# 여행 체크리스트: 기본 목록, 체크, 항목 추가, 계정별 분리
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true
 - runFlow: _sign-in.yaml
 - tapOn:
-    id: open-drawer
+    id: tab-my
 - tapOn:
-    id: drawer-checklist
+    id: my-checklist
 - extendedWaitUntil:
     visible:
       id: checklist-defaults
@@ -15,36 +15,41 @@ appId: com.ryushin01.ngmg
 - tapOn:
     id: checklist-defaults
 - extendedWaitUntil:
-    visible: 24개 중 0개 챙김
+    visible: 21개 중 0개 챙김
     timeout: 8000
 - tapOn:
-    id: checklist-item-낚싯대
-- assertVisible: 24개 중 1개 챙김
+    id: checklist-item-여권·비자
+    retryTapIfNoChange: false
+- assertVisible: 21개 중 1개 챙김
 - tapOn:
     id: checklist-input
-- inputText: 수온계
+- inputText: 삼각대
 - tapOn:
     id: checklist-add
-- assertVisible: 25개 중 1개 챙김
+- assertVisible: 22개 중 1개 챙김
+- hideKeyboard
 - scrollUntilVisible:
-    element: 수온계
+    element: 삼각대
     direction: DOWN
 # 모두 해제하면 항목은 남고 체크만 지워집니다.
 - tapOn: 모두 해제
 - tapOn: 해제
 - scrollUntilVisible:
-    element: 25개 중 0개 챙김
+    element: 22개 중 0개 챙김
     direction: UP
 - scrollUntilVisible:
     element:
-      id: checklist-item-릴
+      id: checklist-item-현지 통화
     direction: UP
+- waitForAnimationToEnd
 - tapOn:
-    id: checklist-item-릴
+    id: checklist-item-현지 통화
+    retryTapIfNoChange: false
+- waitForAnimationToEnd
 - scrollUntilVisible:
-    element: 25개 중 1개 챙김
+    element: 22개 중 1개 챙김
     direction: UP
-# 출조별 목록: 복사하면 체크는 지워지고 원래 목록은 그대로입니다.
+# 여행별 목록: 복사하면 체크는 지워지고 원래 목록은 그대로입니다.
 - scrollUntilVisible:
     element:
       id: checklist-new-list
@@ -53,34 +58,38 @@ appId: com.ryushin01.ngmg
     id: checklist-new-list
 - tapOn:
     id: checklist-new-list-name
-- inputText: 거문도
+- inputText: 페루
 - tapOn:
     id: checklist-new-list-save
 - extendedWaitUntil:
-    visible: 25개 중 0개 챙김
+    visible: 22개 중 0개 챙김
     timeout: 8000
 - tapOn:
     id: checklist-list-기본
-- assertVisible: 25개 중 1개 챙김
+- assertVisible: 22개 중 1개 챙김
 - tapOn:
-    id: checklist-list-거문도
+    id: checklist-list-페루
 - tapOn:
     id: checklist-delete-list
 - tapOn:
     text: 삭제
 - extendedWaitUntil:
-    visible: 25개 중 1개 챙김
+    visible: 22개 중 1개 챙김
     timeout: 8000
 # 다시 들어와도 유지됩니다.
 - tapOn: 뒤로 가기
 - tapOn:
-    id: open-drawer
-- tapOn:
-    id: drawer-account
+    id: tab-my
 - extendedWaitUntil:
-    visible: .*25개 중 1개 챙김.*
+    visible: .*22개 중 1개 챙김.*
     timeout: 8000
 # 다른 계정에는 보이지 않습니다.
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
 - tapOn:
     id: sign-out
 - extendedWaitUntil:
@@ -89,7 +98,7 @@ appId: com.ryushin01.ngmg
     timeout: 15000
 - tapOn:
     id: field-email
-- inputText: other@ngmg.app
+- inputText: other@newworld.app
 - tapOn:
     id: field-password
 - inputText: demo-password
@@ -103,14 +112,14 @@ appId: com.ryushin01.ngmg
       - tapOn: 지금 안 함
 - extendedWaitUntil:
     visible:
-      id: home-search
+      id: world-search-real
     timeout: 15000
 - tapOn:
-    id: open-drawer
+    id: tab-my
 - tapOn:
-    id: drawer-checklist
+    id: my-checklist
 - extendedWaitUntil:
     visible:
       id: checklist-defaults
     timeout: 8000
-- assertNotVisible: 수온계
+- assertNotVisible: 삼각대

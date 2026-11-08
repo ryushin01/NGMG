@@ -5,5 +5,5 @@ const meta: Meta<typeof KindBadge> = { title: 'entities/KindBadge', component: K
 export default meta;
 type Story = StoryObj<typeof KindBadge>;
 
-export const Fishing: Story = { args: { kind: 'fishing' } };
-export const Restaurant: Story = { args: { kind: 'restaurant' } };
+export const Real: Story = { args: { kind: 'real' } };
+export const Fantasy: Story = { args: { kind: 'fantasy' } };

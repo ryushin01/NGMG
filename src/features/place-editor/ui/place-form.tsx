@@ -91,7 +91,7 @@ export const PlaceForm = ({ placeId, initial, onSaved }: PlaceFormProps) => {
               testID="place-name"
               label="장소 이름"
               required
-              placeholder="예: 동쪽 갯바위 포인트"
+              placeholder="예: 이름 모를 고분군"
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
@@ -105,7 +105,7 @@ export const PlaceForm = ({ placeId, initial, onSaved }: PlaceFormProps) => {
           render={({ field }) => (
             <TagInput
               label="태그"
-              placeholder="예: 갯바위, 감성돔"
+              placeholder="예: 신전, 잉카"
               value={field.value}
               onChange={field.onChange}
               testID="place-tag"
@@ -120,7 +120,7 @@ export const PlaceForm = ({ placeId, initial, onSaved }: PlaceFormProps) => {
               testID="place-memo"
               label="메모"
               multiline
-              placeholder="찾아가는 길, 주차, 주의할 점 등"
+              placeholder="찾아가는 길, 입장 방법, 주의할 점 등"
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}

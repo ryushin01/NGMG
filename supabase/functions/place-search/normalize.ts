@@ -1,4 +1,4 @@
-// Kakao 로컬 API 응답을 앱에서 쓰는 형태로 바꿉니다. Deno와 Jest 양쪽에서 실행됩니다.
+// OpenStreetMap Nominatim 응답을 앱에서 쓰는 형태로 바꿉니다. Deno와 Jest 양쪽에서 실행됩니다.
 export type SearchResult = {
   id: string;
   name: string;
@@ -7,57 +7,30 @@ export type SearchResult = {
   longitude: number;
 };
 
-type KakaoKeyword = {
-  id: string;
-  place_name: string;
-  road_address_name?: string;
-  address_name?: string;
-  x: string;
-  y: string;
-};
-type KakaoAddress = { address_name: string; x: string; y: string };
-
-const toResult = (id: string, name: string, address: string, x: string, y: string) => {
-  const latitude = Number(y);
-  const longitude = Number(x);
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
-  return { id, name, address, latitude, longitude };
+export type NominatimPlace = {
+  place_id: number;
+  name?: string;
+  display_name: string;
+  lat: string;
+  lon: string;
 };
 
-/** 주소 일치 결과를 앞에 두고 같은 좌표의 중복을 제거합니다. */
-export const mergeSearchResults = (
-  addresses: KakaoAddress[],
-  keywords: KakaoKeyword[],
-): SearchResult[] => {
-  const results = [
-    ...addresses.map((item) =>
-      toResult(`address:${item.x},${item.y}`, item.address_name, item.address_name, item.x, item.y),
-    ),
-    ...keywords.map((item) =>
-      toResult(
-        `place:${item.id}`,
-        item.place_name,
-        item.road_address_name || item.address_name || '',
-        item.x,
-        item.y,
-      ),
-    ),
-  ].filter((item): item is SearchResult => item !== null);
+/** 좌표가 잘못된 결과와 같은 이름·좌표의 중복을 제거합니다. */
+export const normalizeResults = (places: NominatimPlace[]): SearchResult[] => {
   const seen = new Set<string>();
-  return results.filter((item) => {
-    const key = `${item.name}|${item.latitude}|${item.longitude}`;
-    if (seen.has(key)) return false;
+  return places.flatMap((place) => {
+    const latitude = Number(place.lat);
+    const longitude = Number(place.lon);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return [];
+    const name = place.name || place.display_name.split(',')[0].trim();
+    const key = `${name}|${latitude}|${longitude}`;
+    if (seen.has(key)) return [];
     seen.add(key);
-    return true;
+    return [
+      { id: `osm:${place.place_id}`, name, address: place.display_name, latitude, longitude },
+    ];
   });
 };
 
-type KakaoCoord = {
-  road_address?: { address_name: string } | null;
-  address?: { address_name: string } | null;
-};
-
-export const pickReverseAddress = (documents: KakaoCoord[]): string => {
-  const first = documents[0];
-  return first?.road_address?.address_name || first?.address?.address_name || '';
-};
+export const pickReverseAddress = (place: { display_name?: string } | null): string =>
+  place?.display_name ?? '';

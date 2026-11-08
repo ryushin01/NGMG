@@ -66,7 +66,7 @@ export const MapPickPage = () => {
           pointerEvents="none"
         >
           <Image
-            source={require('~/assets/pins/fishing.png')}
+            source={require('~/assets/pins/real.png')}
             style={{ width: PIN_WIDTH, height: PIN_HEIGHT }}
             accessibilityLabel="지도 중앙의 선택 위치"
           />

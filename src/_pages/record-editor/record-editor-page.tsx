@@ -1,14 +1,40 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'tamagui';
+import { findDestination } from '@/entities/destination';
 import { usePlace } from '@/entities/place';
 import { useRecord } from '@/entities/record';
+import { useEnsureCatalogPlace } from '@/features/destination-save';
 import { RecordForm } from '@/features/record-editor';
 import { toErrorMessage } from '@/shared/lib';
 import { Header, LoadingView, MessageView } from '@/shared/ui';
 
-export const RecordNewPage = () => {
+const CatalogRecordNew = ({ catalogId }: { catalogId: string }) => {
   const router = useRouter();
-  const { placeId } = useLocalSearchParams<{ placeId: string }>();
+  const destination = findDestination(catalogId);
+  const ensurePlace = useEnsureCatalogPlace();
+  if (!destination) {
+    return (
+      <View flex={1} backgroundColor="surface">
+        <Header title="새 기록" />
+        <MessageView message="여행지를 찾을 수 없습니다." />
+      </View>
+    );
+  }
+  return (
+    <View flex={1} backgroundColor="surface">
+      <Header title={`${destination.name} 기록`} />
+      <RecordForm
+        resolvePlaceId={() => ensurePlace(destination)}
+        kind={destination.realm}
+        coordinate={destination}
+        onSaved={(record) => router.replace(`/record/${record.id}`)}
+      />
+    </View>
+  );
+};
+
+const PlaceRecordNew = ({ placeId }: { placeId: string }) => {
+  const router = useRouter();
   const place = usePlace(placeId);
   return (
     <View flex={1} backgroundColor="surface">
@@ -30,6 +56,15 @@ export const RecordNewPage = () => {
         <LoadingView />
       )}
     </View>
+  );
+};
+
+export const RecordNewPage = () => {
+  const { placeId, catalogId } = useLocalSearchParams<{ placeId?: string; catalogId?: string }>();
+  return catalogId ? (
+    <CatalogRecordNew catalogId={catalogId} />
+  ) : (
+    <PlaceRecordNew placeId={placeId ?? ''} />
   );
 };
 

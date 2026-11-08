@@ -9,22 +9,21 @@ const csvCell = (value: string | number | null) => {
 
 const COLUMNS: [string, (record: TripRecord) => string | number | null][] = [
   ['날짜', (r) => r.visitedAt],
-  ['분류', (r) => (r.placeKind === 'fishing' ? '낚시' : '맛집')],
+  ['분류', (r) => (r.placeKind === 'real' ? '실존' : '환상')],
   ['장소', (r) => r.placeName],
   ['제목', (r) => r.title],
   ['인원', (r) => r.partySize],
-  ['멤버', (r) => r.members.join(' / ')],
-  ['장비', (r) => r.gear],
-  ['채비', (r) => r.rig],
-  ['미끼', (r) => r.bait],
-  ['날씨', (r) => r.weather],
-  ['물때', (r) => r.tide],
-  ['바람', (r) => r.wind],
-  ['수온', (r) => r.waterTemp],
-  ['조과', (r) => r.catches],
-  ['메뉴', (r) => r.menu],
-  ['가격', (r) => r.price],
+  ['동행', (r) => r.members.join(' / ')],
   ['별점', (r) => r.rating],
+  ['날씨', (r) => r.weather],
+  ['기온', (r) => r.temperature],
+  ['교통', (r) => r.transport],
+  ['숙소', (r) => r.lodging],
+  ['비용', (r) => r.cost],
+  ['인상 깊은 곳', (r) => r.highlights],
+  ['들어간 길', (r) => r.gateway],
+  ['만난 존재', (r) => r.encounters],
+  ['가져온 것', (r) => r.souvenir],
   ['사진 수', (r) => r.photos.length],
   ['메모', (r) => r.memo],
 ];
@@ -45,7 +44,7 @@ export const toBackupJson = (
 ) =>
   JSON.stringify(
     {
-      app: 'ngmg',
+      app: 'newworld',
       version: 1,
       exportedAt,
       places,

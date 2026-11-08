@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Haptics from 'expo-haptics';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Controller, useForm, type Control, type FieldPath } from 'react-hook-form';
 import { Linking } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -15,7 +15,7 @@ import {
   type PlaceKind,
   type TripRecord,
 } from '@/shared/api';
-import { getTide, toErrorMessage, useUnsavedGuard } from '@/shared/lib';
+import { toErrorMessage, useUnsavedGuard } from '@/shared/lib';
 import { AppText, StickyBottomCta, Button, Field, TagInput, Touchable } from '@/shared/ui';
 import {
   recordFormSchema,
@@ -23,7 +23,7 @@ import {
   toRecordInput,
   type RecordFormValues,
 } from '../model/schema';
-import { collectMembers, findLastFishing } from '../model/history';
+import { collectMembers } from '../model/history';
 import { DateField } from './date-field';
 import { PhotoPicker } from './photo-picker';
 import { RatingField } from './rating-field';
@@ -72,15 +72,24 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 );
 
 type RecordFormProps = {
-  placeId: string;
+  /** 이미 저장된 장소. 없으면 저장하는 순간 resolvePlaceId로 만듭니다. */
+  placeId?: string;
+  resolvePlaceId?: () => Promise<string>;
   kind: PlaceKind;
   record?: TripRecord;
-  /** 날씨와 물때를 불러올 장소 좌표 */
+  /** 날씨를 불러올 장소 좌표 */
   coordinate?: { latitude: number; longitude: number };
   onSaved: (record: TripRecord) => void;
 };
 
-export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: RecordFormProps) => {
+export const RecordForm = ({
+  placeId,
+  resolvePlaceId,
+  kind,
+  record,
+  coordinate,
+  onSaved,
+}: RecordFormProps) => {
   const save = useSaveRecord(record?.id);
   const history = useRecords();
   const [loadingConditions, setLoadingConditions] = useState(false);
@@ -103,11 +112,6 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
     () => collectMembers(history.data ?? [], kind),
     [history.data, kind],
   );
-  const lastFishing = useMemo(
-    () => findLastFishing(history.data ?? [], placeId),
-    [history.data, placeId],
-  );
-
   /** 사용자가 이미 적은 칸은 덮어쓰지 않습니다. */
   const fillEmpty = (values: Partial<Record<TextName, string>>) => {
     let filled = 0;
@@ -120,61 +124,61 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
     return filled;
   };
 
-  const loadLastGear = () => {
-    if (!lastFishing) return;
-    const filled = fillEmpty({
-      gear: lastFishing.gear,
-      rig: lastFishing.rig,
-      bait: lastFishing.bait,
-      partySize: lastFishing.partySize?.toString() ?? '',
-    });
-    if (getValues('members').length === 0 && lastFishing.members.length > 0) {
-      setValue('members', lastFishing.members, { shouldDirty: true });
-    }
-    toast.success(filled > 0 ? '지난 장비와 채비를 불러왔습니다.' : '비어 있는 칸이 없습니다.');
-  };
-
   const loadConditions = async () => {
     if (!coordinate || loadingConditions) return;
     const visitedAt = getValues('visitedAt');
     const { latitude, longitude } = coordinate;
-    const tide = getTide(new Date(visitedAt), latitude, longitude);
-    fillEmpty({ tide: `${tide.name} (음력 ${tide.lunarDay}일, ${tide.system})` });
     setLoadingConditions(true);
     try {
       const conditions = await fetchConditions(latitude, longitude, visitedAt);
       if (!conditions) throw new Error('no data');
       fillEmpty({
         weather: conditions.weather,
-        wind: conditions.wind,
-        waterTemp: conditions.waterTemp?.toString() ?? '',
+        temperature: conditions.temperature?.toString() ?? '',
       });
-      toast.success('날씨와 물때를 채웠습니다. 실제와 다르면 고쳐 주세요.');
+      toast.success('날씨를 채웠습니다. 실제와 다르면 고쳐 주세요.');
     } catch {
-      toast.warning('물때만 채웠습니다. 날씨는 연결 후 다시 불러와 주세요.');
+      toast.warning('날씨를 불러오지 못했습니다. 연결 후 다시 시도해 주세요.');
     } finally {
       setLoadingConditions(false);
     }
   };
 
-  const submit = handleSubmit((values) => {
-    if (save.isPending) return;
-    save.mutate(
-      { record: toRecordInput(placeId, kind, values), keptPhotos: kept, newPhotos: added },
-      {
-        onSuccess: (saved) => {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          toast.success(savedMessage('기록'));
-          allowLeave();
-          onSaved(saved);
-        },
-        onError: (error) =>
-          toast.error(
-            toErrorMessage(error, '기록을 저장하지 못했습니다. 입력한 내용은 그대로 있습니다.'),
-          ),
-      },
+  // isPending은 다음 렌더에야 바뀌고 장소 생성도 먼저 끝나야 하므로 ref로 중복 저장을 막습니다.
+  const submitting = useRef(false);
+  const unlock = () => {
+    submitting.current = false;
+  };
+  const failed = (error: unknown) => {
+    unlock();
+    toast.error(
+      toErrorMessage(error, '기록을 저장하지 못했습니다. 입력한 내용은 그대로 있습니다.'),
     );
-  });
+  };
+
+  const submit = () =>
+    handleSubmit(async (values) => {
+      if (submitting.current) return;
+      submitting.current = true;
+      try {
+        const resolved = placeId ?? (await resolvePlaceId?.());
+        if (!resolved) throw new Error('여행지를 찾을 수 없습니다.');
+        save.mutate(
+          { record: toRecordInput(resolved, kind, values), keptPhotos: kept, newPhotos: added },
+          {
+            onSuccess: (saved) => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              toast.success(savedMessage('기록'));
+              allowLeave();
+              onSaved(saved);
+            },
+            onError: failed,
+          },
+        );
+      } catch (error) {
+        failed(error);
+      }
+    })();
 
   return (
     <View flex={1}>
@@ -194,17 +198,17 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
             control={control}
             name="title"
             label="제목"
-            placeholder={kind === 'fishing' ? '예: 가을 감성돔 출조' : '예: 철수 후 점심'}
+            placeholder={kind === 'real' ? '예: 새벽의 태양의 문' : '예: 복사꽃 숲을 따라서'}
           />
           <PhotoPicker kept={kept} added={added} onChangeKept={setKept} onChangeAdded={setAdded} />
         </Section>
-        <Section title={kind === 'fishing' ? '출조 인원' : '함께한 사람'}>
+        <Section title="함께한 사람">
           <TextField
             control={control}
             name="partySize"
             label="인원 (명)"
             numeric
-            placeholder="예: 3"
+            placeholder="예: 2"
           />
           <Controller
             control={control}
@@ -212,7 +216,7 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
             render={({ field }) => (
               <TagInput
                 testID="record-member"
-                label={kind === 'fishing' ? '출조 멤버' : '동행'}
+                label="동행"
                 placeholder="이름 입력"
                 value={field.value}
                 onChange={field.onChange}
@@ -221,40 +225,31 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
             )}
           />
         </Section>
-        {kind === 'fishing' ? (
+        <Section title="감동">
+          <Controller
+            control={control}
+            name="rating"
+            render={({ field }) => <RatingField value={field.value} onChange={field.onChange} />}
+          />
+        </Section>
+        {kind === 'real' ? (
           <>
-            <Section title="장비와 채비">
-              {!record && lastFishing ? (
-                <Button
-                  testID="record-load-last"
-                  variant="outline"
-                  label="지난 기록의 장비·채비 불러오기"
-                  onPress={loadLastGear}
-                />
-              ) : null}
+            <Section title="인상 깊은 곳">
               <TextField
                 control={control}
-                name="gear"
-                label="출조 장비"
+                name="highlights"
+                label="내용"
                 multiline
-                placeholder="낚싯대, 릴, 원줄 등"
+                placeholder="가장 오래 머문 곳, 잊지 못할 장면"
               />
-              <TextField
-                control={control}
-                name="rig"
-                label="채비"
-                multiline
-                placeholder="찌, 목줄, 바늘 등"
-              />
-              <TextField control={control} name="bait" label="미끼" placeholder="예: 크릴" />
             </Section>
-            <Section title="조건">
+            <Section title="여행 정보">
               {coordinate ? (
                 <YStack gap={8}>
                   <Button
                     testID="record-load-conditions"
                     variant="outline"
-                    label="날씨·물때 불러오기"
+                    label="그날 날씨 불러오기"
                     loading={loadingConditions}
                     onPress={loadConditions}
                   />
@@ -265,53 +260,57 @@ export const RecordForm = ({ placeId, kind, record, coordinate, onSaved }: Recor
                     justifyContent="center"
                   >
                     <AppText size="caption" tone="muted">
-                      날씨 정보 Open-Meteo. 물때는 음력으로 계산한 값입니다. 이 버튼을 누르면 장소
-                      좌표가 Open-Meteo로 전송됩니다.
+                      날씨 정보 Open-Meteo. 이 버튼을 누르면 장소 좌표가 Open-Meteo로 전송됩니다.
                     </AppText>
                   </Touchable>
                 </YStack>
               ) : null}
               <TextField control={control} name="weather" label="날씨" placeholder="예: 맑음" />
-              <TextField control={control} name="tide" label="물때" placeholder="예: 7물, 들물" />
-              <TextField control={control} name="wind" label="바람" placeholder="예: 북동풍 3m/s" />
               <TextField
                 control={control}
-                name="waterTemp"
-                label="수온 (℃)"
+                name="temperature"
+                label="기온 (℃)"
                 numeric
-                placeholder="예: 19.5"
+                placeholder="예: 24"
               />
-            </Section>
-            <Section title="조과">
               <TextField
                 control={control}
-                name="catches"
-                label="조과"
-                multiline
-                placeholder="어종, 크기, 마릿수"
+                name="transport"
+                label="교통"
+                placeholder="예: 쿠스코에서 기차와 셔틀버스"
+              />
+              <TextField control={control} name="lodging" label="숙소" placeholder="묵은 곳" />
+              <TextField
+                control={control}
+                name="cost"
+                label="비용 (원)"
+                numeric
+                placeholder="예: 450000"
               />
             </Section>
           </>
         ) : (
-          <Section title="식사">
+          <Section title="상상 여행">
             <TextField
               control={control}
-              name="menu"
-              label="메뉴"
+              name="gateway"
+              label="들어간 길"
               multiline
-              placeholder="먹은 메뉴"
+              placeholder="어떤 책, 영화, 꿈으로 갔나요?"
             />
             <TextField
               control={control}
-              name="price"
-              label="가격 (원)"
-              numeric
-              placeholder="예: 45000"
+              name="encounters"
+              label="만난 존재"
+              multiline
+              placeholder="그곳에서 만난 이들"
             />
-            <Controller
+            <TextField
               control={control}
-              name="rating"
-              render={({ field }) => <RatingField value={field.value} onChange={field.onChange} />}
+              name="souvenir"
+              label="가져온 것"
+              multiline
+              placeholder="기억에 남은 말, 풍경, 깨달음"
             />
           </Section>
         )}

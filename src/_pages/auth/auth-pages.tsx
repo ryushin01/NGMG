@@ -30,12 +30,12 @@ export const SignInPage = () => {
           <Image
             source={require('~/assets/icon.png')}
             style={{ width: 88, height: 88, borderRadius: 20 }}
-            accessibilityLabel="낚고먹고 앱 아이콘, 감성돔"
+            accessibilityLabel="신세계 앱 아이콘, 별빛 아래의 계단식 피라미드"
           />
           <AppText size="headline" accessibilityRole="header">
-            낚고먹고
+            신세계
           </AppText>
-          <AppText tone="muted">낚시 포인트와 맛집을 한곳에 기록하세요</AppText>
+          <AppText tone="muted">현실의 유적부터 전설의 땅까지</AppText>
         </YStack>
         {backend.mode === 'demo' ? (
           <View backgroundColor="brandSoft" padding={12} borderRadius={6} marginBottom={20}>

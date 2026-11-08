@@ -48,7 +48,7 @@ const as = async (uid, sql, params) => {
 const insertPlace = (uid, name) =>
   as(
     uid,
-    `insert into public.places (name, kind, latitude, longitude) values ($1, 'fishing', 34, 127) returning id`,
+    `insert into public.places (name, kind, latitude, longitude) values ($1, 'real', 34, 127) returning id`,
     [name],
   );
 
@@ -74,7 +74,7 @@ test('소유자를 다른 사용자로 지정해 넣을 수 없습니다', async
   await assert.rejects(
     as(
       B,
-      `insert into public.places (user_id, name, kind, latitude, longitude) values ($1, 'x', 'fishing', 1, 1)`,
+      `insert into public.places (user_id, name, kind, latitude, longitude) values ($1, 'x', 'real', 1, 1)`,
       [A],
     ),
     /row-level security/,
@@ -109,7 +109,7 @@ test('값 범위 제약을 위반하면 거부합니다', async () => {
   await assert.rejects(
     as(
       A,
-      `insert into public.places (name, kind, latitude, longitude) values ('x', 'fishing', 91, 1)`,
+      `insert into public.places (name, kind, latitude, longitude) values ('x', 'real', 91, 1)`,
     ),
     /check/,
   );

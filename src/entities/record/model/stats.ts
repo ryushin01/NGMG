@@ -5,16 +5,15 @@ export type RankItem = { label: string; count: number };
 
 export type RecordStats = {
   total: number;
-  fishing: number;
-  restaurant: number;
+  real: number;
+  fantasy: number;
   photos: number;
   /** 1월부터 12월까지의 기록 수 */
   monthly: number[];
   places: RankItem[];
-  baits: RankItem[];
   members: RankItem[];
   averageRating: number | null;
-  averagePrice: number | null;
+  averageCost: number | null;
 };
 
 const rank = (values: string[]): RankItem[] => {
@@ -44,18 +43,16 @@ export const computeStats = (records: TripRecord[], year: number): RecordStats =
   const inYear = records.filter((record) => dayjs(record.visitedAt).year() === year);
   const monthly = Array.from({ length: 12 }, () => 0);
   for (const record of inYear) monthly[dayjs(record.visitedAt).month()] += 1;
-  const fishing = inYear.filter((record) => record.placeKind === 'fishing');
-  const restaurant = inYear.filter((record) => record.placeKind === 'restaurant');
+  const real = inYear.filter((record) => record.placeKind === 'real');
   return {
     total: inYear.length,
-    fishing: fishing.length,
-    restaurant: restaurant.length,
+    real: real.length,
+    fantasy: inYear.length - real.length,
     photos: inYear.reduce((sum, record) => sum + record.photos.length, 0),
     monthly,
     places: rank(inYear.map((record) => record.placeName)),
-    baits: rank(fishing.map((record) => record.bait)),
     members: rank(inYear.flatMap((record) => record.members)),
-    averageRating: average(restaurant.map((record) => record.rating).filter(present)),
-    averagePrice: average(restaurant.map((record) => record.price).filter(present)),
+    averageRating: average(inYear.map((record) => record.rating).filter(present)),
+    averageCost: average(real.map((record) => record.cost).filter(present)),
   };
 };

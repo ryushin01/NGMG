@@ -7,10 +7,12 @@ export const placeSchema = z.object({
     .trim()
     .min(1, '장소 이름을 입력해 주세요.')
     .max(100, '100자 이내로 입력해 주세요.'),
-  kind: z.enum(['fishing', 'restaurant']),
+  kind: z.enum(['real', 'fantasy']),
   address: z.string(),
   latitude: z.number(),
   longitude: z.number(),
   memo: z.string(),
   tags: z.array(z.string()),
+  catalogId: z.string().nullable(),
+  wishlisted: z.boolean(),
 }) satisfies z.ZodType<PlaceInput>;

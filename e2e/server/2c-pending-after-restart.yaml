@@ -1,5 +1,5 @@
 # 올리지 못한 변경이 앱을 다시 켜도 남아 있습니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - stopApp
 - launchApp

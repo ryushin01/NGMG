@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Copy, ExternalLink, MapPin, Share2 } from 'lucide-react-native';
 import { Alert, Platform, ScrollView, Share } from 'react-native';
 import { toast } from 'sonner-native';
@@ -84,6 +84,8 @@ export const PlaceDetailPage = () => {
   }
 
   const data = place.data;
+  // 수록된 여행지는 도감 상세가 정보와 기록을 함께 보여 줍니다.
+  if (data.catalogId) return <Redirect href={`/destination/${data.catalogId}`} />;
   const coordinate = { latitude: data.latitude, longitude: data.longitude };
 
   const confirmDelete = () => {

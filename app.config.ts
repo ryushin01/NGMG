@@ -1,23 +1,23 @@
 import type { ExpoConfig } from 'expo/config';
 
 const config: ExpoConfig = {
-  name: '낚고먹고',
-  slug: 'ngmg',
-  scheme: 'ngmg',
-  version: '1.0.0',
+  name: '신세계',
+  slug: 'newworld',
+  scheme: 'newworld',
+  version: '2.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
   backgroundColor: '#ffffff',
   ios: {
     supportsTablet: false,
-    bundleIdentifier: 'com.ryushin01.ngmg',
+    bundleIdentifier: 'com.ryushin01.newworld',
     infoPlist: { CFBundleDevelopmentRegion: 'ko', ITSAppUsesNonExemptEncryption: false },
   },
   android: {
-    package: 'com.ryushin01.ngmg',
+    package: 'com.ryushin01.newworld',
     adaptiveIcon: {
-      backgroundColor: '#00a8ff',
+      backgroundColor: '#2a2233',
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',
       monochromeImage: './assets/android-icon-monochrome.png',
@@ -56,7 +56,7 @@ const config: ExpoConfig = {
     [
       'expo-image-picker',
       {
-        photosPermission: '출조와 맛집 기록에 사진을 첨부하기 위해 사진 보관함에 접근합니다.',
+        photosPermission: '여행 기록에 사진을 첨부하기 위해 사진 보관함에 접근합니다.',
         cameraPermission: '기록에 첨부할 사진을 촬영하기 위해 카메라를 사용합니다.',
       },
     ],

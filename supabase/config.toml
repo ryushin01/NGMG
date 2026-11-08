@@ -1,8 +1,8 @@
-project_id = "ngmg"
+project_id = "newworld"
 
 [auth]
-site_url = "ngmg://"
-additional_redirect_urls = ["ngmg://", "exp+ngmg://**"]
+site_url = "newworld://"
+additional_redirect_urls = ["newworld://", "exp+newworld://**"]
 enable_signup = true
 
 [auth.email]

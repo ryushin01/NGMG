@@ -2,7 +2,7 @@ import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import { createMMKV } from 'react-native-mmkv';
 
-const KEY_NAME = 'ngmg.mmkv.key';
+const KEY_NAME = 'newworld.mmkv.key';
 
 type KeyValueStore = {
   getString: (key: string) => string | undefined;
@@ -34,7 +34,7 @@ const createMemoryStore = (): KeyValueStore => {
  */
 export const createStore = (): KeyValueStore => {
   try {
-    return createMMKV({ id: 'ngmg', encryptionKey: getEncryptionKey() });
+    return createMMKV({ id: 'newworld', encryptionKey: getEncryptionKey() });
   } catch (error) {
     console.warn('보안 저장소를 열지 못해 메모리 저장소를 사용합니다.', error);
     return createMemoryStore();

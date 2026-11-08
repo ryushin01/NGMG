@@ -3,30 +3,29 @@ import { recordsToCsv, toBackupJson } from './serialize';
 
 const record = {
   visitedAt: '2026-11-01',
-  placeKind: 'fishing',
-  placeName: '거문도, 동쪽',
+  placeKind: 'real',
+  placeName: '페트라, 동쪽',
   title: '=SUM(A1)',
   partySize: 2,
   members: ['민수', '지훈'],
   memo: '줄\n바꿈 "따옴표"',
-  gear: '',
-  rig: '',
-  bait: '',
-  weather: '',
-  tide: '',
-  wind: '',
-  waterTemp: null,
-  catches: '',
-  menu: '',
-  price: null,
   rating: null,
+  weather: '',
+  temperature: null,
+  transport: '',
+  lodging: '',
+  cost: null,
+  highlights: '',
+  gateway: '',
+  encounters: '',
+  souvenir: '',
   photos: [{ id: '1', path: 'u/r/a.jpg', url: 'https://signed', width: 1, height: 1 }],
 } as unknown as TripRecord;
 
 it('CSV 값을 이스케이프하고 수식 실행을 막습니다', () => {
   const csv = recordsToCsv([record]);
   expect(csv.startsWith('﻿날짜,분류')).toBe(true);
-  expect(csv).toContain('"거문도, 동쪽"');
+  expect(csv).toContain('"페트라, 동쪽"');
   expect(csv).toContain("'=SUM(A1)");
   expect(csv).toContain('"줄\n바꿈 ""따옴표"""');
   expect(csv).toContain('민수 / 지훈');

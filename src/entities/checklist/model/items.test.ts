@@ -1,5 +1,6 @@
 import {
   buildDefaultItems,
+  buildFantasyItems,
   copyList,
   groupChecklist,
   listNames,
@@ -17,8 +18,8 @@ const item = (category: string, position = 0) => ({
 });
 
 it('기본 분류 순서대로 묶고 사용자 분류는 뒤에 둡니다', () => {
-  const sections = groupChecklist([item('기타'), item('안전'), item('장비')]);
-  expect(sections.map((section) => section.category)).toEqual(['장비', '안전', '기타']);
+  const sections = groupChecklist([item('기타'), item('건강·안전'), item('복장')]);
+  expect(sections.map((section) => section.category)).toEqual(['복장', '건강·안전', '기타']);
 });
 
 it('기본 목록은 고유한 id와 순서를 가지며 체크되어 있지 않습니다', () => {
@@ -27,7 +28,14 @@ it('기본 목록은 고유한 id와 순서를 가지며 체크되어 있지 않
   expect(new Set(items.map((i) => i.id)).size).toBe(items.length);
   expect(items.map((i) => i.position)).toEqual(items.map((_, index) => index));
   expect(items.every((i) => !i.checked)).toBe(true);
-  expect(items.map((i) => i.title)).toContain('구명조끼');
+  expect(items.map((i) => i.title)).toContain('여권·비자');
+});
+
+it('환상 여행 목록은 별도의 준비물로 시작합니다', () => {
+  let n = 0;
+  const items = buildFantasyItems(() => `id-${(n += 1)}`, '아발론');
+  expect(items.every((i) => i.listName === '아발론')).toBe(true);
+  expect(items.map((i) => i.title)).toContain('원전 한 권');
 });
 
 it('다음 순서는 가장 큰 값 다음입니다', () => {

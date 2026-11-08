@@ -3,25 +3,25 @@ import { defaultConfig } from '@tamagui/config/v6';
 import { createTamagui } from 'tamagui';
 
 /**
- * 브랜드 색 #00a8ff는 흰 배경과의 명도 대비가 2.6:1이라 작은 글자에 쓸 수 없습니다.
- * 글자와 주요 버튼은 ink, 강조 글자는 brandText를 쓰고 brand는 면과 아이콘에 씁니다.
+ * 실존 유적은 사암색(brand), 환상 세계는 보라색(fantasy)으로 나눕니다.
+ * brand는 작은 글자 대비가 낮을 수 있어 글자와 주요 버튼은 ink, 강조 글자는 brandText를 씁니다.
  */
 export const lightPalette = {
-  brand: '#00a8ff',
-  brandText: '#006ea8',
-  brandSoft: '#ebf6fe',
-  brandBanner: '#b0e0ff',
-  ink: '#1a254f',
-  inkPressed: '#2a3873',
-  text: '#20242c',
-  muted: '#5f6673',
-  line: '#e6e8ec',
-  surfaceMuted: '#f4f5f7',
+  brand: '#c2792b',
+  brandText: '#85491a',
+  brandSoft: '#f8efe3',
+  brandBanner: '#eed9bc',
+  ink: '#2a2233',
+  inkPressed: '#40354c',
+  text: '#26222b',
+  muted: '#625d6b',
+  line: '#e8e4df',
+  surfaceMuted: '#f5f2ee',
   surface: '#ffffff',
   danger: '#c8321a',
-  coral: '#ff6b4a',
-  coralText: '#b23a1d',
-  coralSoft: '#fff0ec',
+  fantasy: '#7a5af8',
+  fantasyText: '#5b3fd1',
+  fantasySoft: '#f0ecfe',
 };
 
 /**
@@ -29,21 +29,21 @@ export const lightPalette = {
  * ink 버튼 위 surface 글자처럼 짝지어 쓴 곳의 대비가 그대로 유지됩니다.
  */
 export const darkPalette: typeof lightPalette = {
-  brand: '#00a8ff',
-  brandText: '#5cc6ff',
-  brandSoft: '#14303f',
-  brandBanner: '#0e4a6b',
-  ink: '#e9edf7',
-  inkPressed: '#c9d0e3',
-  text: '#e7e9ee',
-  muted: '#a3aab6',
-  line: '#2c313b',
-  surfaceMuted: '#1a1e26',
-  surface: '#12151c',
+  brand: '#d99a55',
+  brandText: '#ecc08f',
+  brandSoft: '#33261a',
+  brandBanner: '#57402a',
+  ink: '#f0ebe5',
+  inkPressed: '#d6cfc5',
+  text: '#ebe7e2',
+  muted: '#aca6b2',
+  line: '#322d38',
+  surfaceMuted: '#201c26',
+  surface: '#16131b',
   danger: '#ff8a75',
-  coral: '#ff6b4a',
-  coralText: '#ff9d86',
-  coralSoft: '#3a1f18',
+  fantasy: '#9d85ff',
+  fantasyText: '#c2b2ff',
+  fantasySoft: '#272042',
 };
 
 /**

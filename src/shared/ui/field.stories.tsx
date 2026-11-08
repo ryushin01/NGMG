@@ -4,7 +4,7 @@ import { Field } from './field';
 const meta: Meta<typeof Field> = {
   title: 'shared/Field',
   component: Field,
-  args: { label: '장소 이름', placeholder: '예: 동쪽 갯바위' },
+  args: { label: '장소 이름', placeholder: '예: 태양의 신전' },
 };
 export default meta;
 type Story = StoryObj<typeof Field>;

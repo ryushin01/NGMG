@@ -1,13 +1,11 @@
 # 기록 CSV와 전체 JSON을 만들어 공유 화면을 엽니다.
-appId: com.ryushin01.ngmg
+appId: com.ryushin01.newworld
 ---
 - launchApp:
     clearState: true
 - runFlow: _sign-in.yaml
 - tapOn:
-    id: open-drawer
-- tapOn:
-    id: drawer-account
+    id: tab-my
 - extendedWaitUntil:
     visible:
       id: export-csv
