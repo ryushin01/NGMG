@@ -58,6 +58,17 @@ const upsertById = <T extends { id: string }>(list: T[], item: T) =>
 
 const emptyPlaceStats = { recordCount: 0, lastVisitedAt: null };
 
+/** 통화가 생기기 전에 기기에 저장된 기록은 원화로 봅니다. */
+const withCurrency = <T extends { currency?: string }>(record: T) => ({
+  ...record,
+  currency: record.currency ?? 'KRW',
+});
+
+const withOpCurrency = (op: OutboxOp): OutboxOp =>
+  op.type === 'record.create' || op.type === 'record.update'
+    ? { ...op, input: { ...op.input, record: withCurrency(op.input.record) } }
+    : op;
+
 /**
  * 서버에서 마지막으로 받은 값 위에 아직 올리지 못한 변경을 순서대로 덮어씁니다.
  * 서버 응답에 이미 반영된 변경이 다시 적용되어도 결과가 같아야 합니다.
@@ -211,8 +222,9 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     if (next === userId) return;
     userId = next;
     const read = (key: string) => (userId ? deps.storage.getItem(key) : null);
-    ops = JSON.parse(read(outboxKey()) ?? '[]') as OutboxOp[];
-    snapshot = { ...EMPTY_SNAPSHOT, ...JSON.parse(read(snapshotKey()) ?? 'null') };
+    ops = (JSON.parse(read(outboxKey()) ?? '[]') as OutboxOp[]).map(withOpCurrency);
+    const saved: Snapshot = { ...EMPTY_SNAPSHOT, ...JSON.parse(read(snapshotKey()) ?? 'null') };
+    snapshot = { ...saved, records: saved.records && saved.records.map(withCurrency) };
     publish();
     if (userId) void flush();
   };

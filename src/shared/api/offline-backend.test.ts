@@ -460,3 +460,35 @@ describe('여정', () => {
     expect(server.trips).toEqual([]);
   });
 });
+
+describe('통화가 생기기 전의 기기 데이터', () => {
+  it('보관된 기록과 대기 중인 변경을 원화로 복원합니다', async () => {
+    const { backend, sync, store, signInAs } = setup();
+    store.set(
+      'newworld.snapshot.a',
+      JSON.stringify({
+        places: [],
+        records: [{ id: 'old', visitedAt: '2026-01-01' }],
+        checklist: [],
+      }),
+    );
+    store.set(
+      'newworld.outbox.a',
+      JSON.stringify([
+        {
+          id: 'op',
+          type: 'record.update',
+          recordId: 'old',
+          label: '기록',
+          status: 'failed',
+          input: { record: { visitedAt: '2026-01-02' }, keptPhotos: [], newPhotos: [] },
+        },
+      ]),
+    );
+    sync.setOnline(false);
+    signInAs('a');
+    expect((await backend.records.get('old')).currency).toBe('KRW');
+    const [op] = sync.getState().ops;
+    expect(op.type === 'record.update' && op.input.record.currency).toBe('KRW');
+  });
+});

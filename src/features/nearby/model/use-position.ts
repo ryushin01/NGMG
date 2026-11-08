@@ -18,8 +18,12 @@ const read = async (): Promise<Position | null> => {
 export const usePosition = () => {
   const [position, setPosition] = useState<Position | null>(null);
   const request = async () => {
-    const { granted } = await Location.requestForegroundPermissionsAsync();
-    if (!granted) return false;
+    try {
+      const { granted } = await Location.requestForegroundPermissionsAsync();
+      if (!granted) return false;
+    } catch {
+      return false;
+    }
     const found = await read();
     setPosition(found);
     return !!found;

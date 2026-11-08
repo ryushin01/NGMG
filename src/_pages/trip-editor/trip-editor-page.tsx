@@ -31,10 +31,12 @@ export const TripEditPage = () => {
       <Header title="여정 수정" />
       {trip.data ? (
         <TripForm trip={trip.data} onSaved={() => router.back()} />
-      ) : trip.isError ? (
-        <MessageView message={toErrorMessage(trip.error)} />
-      ) : (
+      ) : trip.isPending ? (
         <LoadingView />
+      ) : (
+        <MessageView
+          message={trip.isError ? toErrorMessage(trip.error) : '여정을 찾을 수 없습니다.'}
+        />
       )}
     </View>
   );
