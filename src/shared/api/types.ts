@@ -61,6 +61,8 @@ export type TripRecord = {
   transport: string;
   lodging: string;
   cost: number | null;
+  /** ISO 4217 세 글자 통화 코드 */
+  currency: string;
   highlights: string;
   // 환상 세계 여행
   gateway: string;
@@ -94,6 +96,18 @@ export type ChecklistItem = {
   position: number;
   /** 여행별로 나눈 목록의 이름 */
   listName: string;
+};
+
+/** 수록 여행지를 순서대로 묶은 여행 계획 */
+export type Trip = {
+  id: string;
+  title: string;
+  /** YYYY-MM-DD */
+  startDate: string | null;
+  endDate: string | null;
+  /** 수록 여행지 id의 방문 순서 */
+  stops: string[];
+  memo: string;
 };
 
 export type Session = { userId: string; email: string };
@@ -137,6 +151,12 @@ export type Backend = {
     /** 같은 id가 있으면 덮어씁니다. */
     upsert(items: ChecklistItem[]): Promise<void>;
     remove(ids: string[]): Promise<void>;
+  };
+  trips: {
+    list(): Promise<Trip[]>;
+    /** 같은 id가 있으면 덮어씁니다. */
+    save(trip: Trip): Promise<Trip>;
+    remove(id: string): Promise<void>;
   };
   search: {
     places(query: string): Promise<SearchResult[]>;

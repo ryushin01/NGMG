@@ -1,4 +1,4 @@
-import type { ChecklistItem, Place, TripRecord } from '@/shared/api';
+import type { ChecklistItem, Place, Trip, TripRecord } from '@/shared/api';
 
 const csvCell = (value: string | number | null) => {
   const text = value === null ? '' : String(value);
@@ -20,6 +20,7 @@ const COLUMNS: [string, (record: TripRecord) => string | number | null][] = [
   ['교통', (r) => r.transport],
   ['숙소', (r) => r.lodging],
   ['비용', (r) => r.cost],
+  ['통화', (r) => r.currency],
   ['인상 깊은 곳', (r) => r.highlights],
   ['들어간 길', (r) => r.gateway],
   ['만난 존재', (r) => r.encounters],
@@ -41,6 +42,7 @@ export const toBackupJson = (
   records: TripRecord[],
   checklist: ChecklistItem[],
   exportedAt: string,
+  trips: Trip[] = [],
 ) =>
   JSON.stringify(
     {
@@ -53,6 +55,7 @@ export const toBackupJson = (
         photos: record.photos.map(({ path, width, height }) => ({ path, width, height })),
       })),
       checklist,
+      trips,
     },
     null,
     2,

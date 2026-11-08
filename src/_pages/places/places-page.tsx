@@ -3,14 +3,15 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { View, XStack } from 'tamagui';
-import { PlaceRow, usePlaces } from '@/entities/place';
+import { isListedPlace, PlaceRow, usePlaces } from '@/entities/place';
 import type { PlaceKind } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
 import { BottomCta, Chip, Divider, Field, Header, LoadingView, MessageView } from '@/shared/ui';
 
-type Filter = PlaceKind | 'all';
+type Filter = PlaceKind | 'all' | 'wish';
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: '전체' },
+  { value: 'wish', label: '가고 싶어요' },
   { value: 'real', label: '실존 유적' },
   { value: 'fantasy', label: '환상 세계' },
 ];
@@ -21,22 +22,20 @@ export const PlacesPage = () => {
   const [filter, setFilter] = useState<Filter>('all');
   const [keyword, setKeyword] = useState('');
   const [tag, setTag] = useState<string | null>(null);
-  const tags = useMemo(
-    () => [...new Set((places.data ?? []).flatMap((place) => place.tags))],
-    [places.data],
-  );
+  const listed = useMemo(() => (places.data ?? []).filter(isListedPlace), [places.data]);
+  const tags = useMemo(() => [...new Set(listed.flatMap((place) => place.tags))], [listed]);
   const data = useMemo(() => {
     const term = keyword.trim();
-    return (places.data ?? []).filter(
+    return listed.filter(
       (place) =>
-        (filter === 'all' || place.kind === filter) &&
+        (filter === 'all' || (filter === 'wish' ? place.wishlisted : place.kind === filter)) &&
         (!tag || place.tags.includes(tag)) &&
         (!term ||
           place.name.includes(term) ||
           place.address.includes(term) ||
           place.memo.includes(term)),
     );
-  }, [filter, keyword, places.data, tag]);
+  }, [filter, keyword, listed, tag]);
 
   return (
     <View flex={1} backgroundColor="surface">
@@ -51,10 +50,17 @@ export const PlacesPage = () => {
           returnKeyType="search"
         />
       </View>
-      <XStack gap={8} paddingHorizontal={20} paddingBottom={12} accessibilityRole="radiogroup">
+      <XStack
+        gap={8}
+        flexWrap="wrap"
+        paddingHorizontal={20}
+        paddingBottom={12}
+        accessibilityRole="radiogroup"
+      >
         {FILTERS.map((item) => (
           <Chip
             key={item.value}
+            testID={`places-filter-${item.value}`}
             label={item.label}
             selected={filter === item.value}
             onPress={() => setFilter(item.value)}

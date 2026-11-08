@@ -8,6 +8,7 @@ import type {
   PlaceInput,
   RecordSaveInput,
   Session,
+  Trip,
   TripRecord,
 } from './types';
 
@@ -20,7 +21,9 @@ type OpBody =
   | { type: 'record.create' | 'record.update'; recordId: string; input: QueuedRecord }
   | { type: 'record.remove'; recordId: string }
   | { type: 'checklist.upsert'; items: ChecklistItem[] }
-  | { type: 'checklist.remove'; ids: string[] };
+  | { type: 'checklist.remove'; ids: string[] }
+  | { type: 'trip.save'; trip: Trip }
+  | { type: 'trip.remove'; tripId: string };
 
 export type OutboxOp = OpBody & {
   id: string;
@@ -33,8 +36,16 @@ type Snapshot = {
   places: Place[] | null;
   records: TripRecord[] | null;
   checklist: ChecklistItem[] | null;
+  trips: Trip[] | null;
 };
-type View = { places: Place[]; records: TripRecord[]; checklist: ChecklistItem[] };
+type View = {
+  places: Place[];
+  records: TripRecord[];
+  checklist: ChecklistItem[];
+  trips: Trip[];
+};
+
+const EMPTY_SNAPSHOT: Snapshot = { places: null, records: null, checklist: null, trips: null };
 
 const QUEUED_PREFIX = 'queued:';
 const OFFLINE_ERROR = 'Network request failed';
@@ -46,6 +57,17 @@ const upsertById = <T extends { id: string }>(list: T[], item: T) =>
     : [item, ...list];
 
 const emptyPlaceStats = { recordCount: 0, lastVisitedAt: null };
+
+/** 통화가 생기기 전에 기기에 저장된 기록은 원화로 봅니다. */
+const withCurrency = <T extends { currency?: string }>(record: T) => ({
+  ...record,
+  currency: record.currency ?? 'KRW',
+});
+
+const withOpCurrency = (op: OutboxOp): OutboxOp =>
+  op.type === 'record.create' || op.type === 'record.update'
+    ? { ...op, input: { ...op.input, record: withCurrency(op.input.record) } }
+    : op;
 
 /**
  * 서버에서 마지막으로 받은 값 위에 아직 올리지 못한 변경을 순서대로 덮어씁니다.
@@ -59,6 +81,7 @@ export const applyOps = (
   let places = snapshot.places ?? [];
   let records = snapshot.records ?? [];
   let checklist = snapshot.checklist ?? [];
+  let trips = snapshot.trips ?? [];
 
   const toRecord = (id: string, input: QueuedRecord): TripRecord => {
     const place = places.find((item) => item.id === input.record.placeId);
@@ -116,6 +139,12 @@ export const applyOps = (
       case 'checklist.remove':
         checklist = checklist.filter((item) => !op.ids.includes(item.id));
         break;
+      case 'trip.save':
+        trips = upsertById(trips, op.trip);
+        break;
+      case 'trip.remove':
+        trips = trips.filter((item) => item.id !== op.tripId);
+        break;
     }
   }
 
@@ -131,6 +160,7 @@ export const applyOps = (
     places: withStats,
     records: sortedRecords,
     checklist: [...checklist].sort((a, b) => a.position - b.position),
+    trips,
   };
 };
 
@@ -164,7 +194,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
   let userId: string | null = null;
   let online = true;
   let ops: OutboxOp[] = [];
-  let snapshot: Snapshot = { places: null, records: null, checklist: null };
+  let snapshot: Snapshot = { ...EMPTY_SNAPSHOT };
   let state: SyncState = { online, ops };
   let running: Promise<void> | null = null;
   const results = new Map<string, { value?: unknown; error?: unknown }>();
@@ -192,12 +222,9 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     if (next === userId) return;
     userId = next;
     const read = (key: string) => (userId ? deps.storage.getItem(key) : null);
-    ops = JSON.parse(read(outboxKey()) ?? '[]') as OutboxOp[];
-    snapshot = JSON.parse(read(snapshotKey()) ?? 'null') ?? {
-      places: null,
-      records: null,
-      checklist: null,
-    };
+    ops = (JSON.parse(read(outboxKey()) ?? '[]') as OutboxOp[]).map(withOpCurrency);
+    const saved: Snapshot = { ...EMPTY_SNAPSHOT, ...JSON.parse(read(snapshotKey()) ?? 'null') };
+    snapshot = { ...saved, records: saved.records && saved.records.map(withCurrency) };
     publish();
     if (userId) void flush();
   };
@@ -241,6 +268,10 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         return base.checklist.upsert(op.items);
       case 'checklist.remove':
         return base.checklist.remove(op.ids);
+      case 'trip.save':
+        return base.trips.save(op.trip);
+      case 'trip.remove':
+        return base.trips.remove(op.tripId);
     }
   };
 
@@ -261,6 +292,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
           places: snapshot.places && applied.places,
           records: snapshot.records && applied.records,
           checklist: applied.checklist,
+          trips: snapshot.trips && applied.trips,
         };
       }
     }
@@ -420,7 +452,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         ops = [];
         removeUnusedPhotos(names);
         userId = null;
-        snapshot = { places: null, records: null, checklist: null };
+        snapshot = { ...EMPTY_SNAPSHOT };
         publish();
       },
     },
@@ -531,6 +563,19 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
           `체크리스트 ${ids.length}개 삭제`,
           () => undefined,
         );
+      },
+    },
+    trips: {
+      async list() {
+        await refresh('trips', () => base.trips.list());
+        return view().trips;
+      },
+      save(trip) {
+        return write({ type: 'trip.save', trip }, `여정 저장: ${trip.title}`, () => trip);
+      },
+      async remove(id) {
+        const title = view().trips.find((trip) => trip.id === id)?.title ?? '';
+        await write({ type: 'trip.remove', tripId: id }, `여정 삭제: ${title}`, () => undefined);
       },
     },
     search: base.search,

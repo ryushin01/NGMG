@@ -1,0 +1,121 @@
+# 전설의 현장, 코스로 여정 만들기, 연대표, 여권, 가고 싶어요 목록
+appId: com.ryushin01.newworld
+---
+- launchApp:
+    clearState: true
+- runFlow: _sign-in.yaml
+- tapOn:
+    id: tab-fantasy
+- extendedWaitUntil:
+    visible:
+      id: world-search-fantasy
+    timeout: 8000
+- tapOn:
+    id: world-search-fantasy
+- inputText: 카멜롯
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: destination-camelot
+    timeout: 8000
+- tapOn:
+    id: destination-camelot
+- extendedWaitUntil:
+    visible:
+      id: destination-title
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: related-stonehenge
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: related-stonehenge
+- extendedWaitUntil:
+    visible: 스톤헨지
+    timeout: 8000
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+# 코스로 여정을 만들고 체크리스트까지 이어 갑니다.
+- tapOn:
+    id: world-courses-fantasy
+- extendedWaitUntil:
+    visible:
+      id: course-plan-arthur
+    timeout: 8000
+- tapOn:
+    id: course-plan-arthur
+- extendedWaitUntil:
+    visible:
+      id: trip-title
+    timeout: 8000
+- assertVisible: 여행지 4곳
+- tapOn:
+    id: trip-save
+- extendedWaitUntil:
+    visible:
+      id: trip-detail-title
+    timeout: 8000
+- assertVisible: 아서왕의 길
+- assertVisible: 4곳 중 1곳 다녀옴
+- scrollUntilVisible:
+    element:
+      id: trip-checklist
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: trip-checklist
+- extendedWaitUntil:
+    visible: 21개 중 0개 챙김
+    timeout: 8000
+- assertVisible:
+    id: checklist-list-아서왕의 길
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+# 연대표와 여권
+- tapOn:
+    id: world-timeline-fantasy
+- extendedWaitUntil:
+    visible:
+      id: timeline-row-gobekli-tepe
+    timeout: 8000
+- tapOn:
+    id: timeline-fantasy
+- assertNotVisible:
+    id: timeline-row-gobekli-tepe
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+- tapOn:
+    id: world-passport-fantasy
+- extendedWaitUntil:
+    visible:
+      id: passport-summary
+    timeout: 8000
+- assertVisible: 실존 유적 1/25 · 환상 세계 1/20
+- tapOn: 뒤로 가기
+- waitForAnimationToEnd
+# 하트를 끄면 내 여행지에서 사라집니다.
+- tapOn:
+    id: tab-my
+- tapOn:
+    id: my-places
+- extendedWaitUntil:
+    visible:
+      id: places-filter-wish
+    timeout: 8000
+- tapOn:
+    id: places-filter-wish
+- extendedWaitUntil:
+    visible:
+      id: place-row-p2
+    timeout: 8000
+- assertNotVisible:
+    id: place-row-p1

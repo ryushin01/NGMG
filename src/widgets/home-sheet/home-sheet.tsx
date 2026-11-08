@@ -1,10 +1,12 @@
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ArrowRight, ChevronRight, ListChecks, MapPin, Square, X } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
 import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { KindBadge } from '@/entities/place';
+import { findDestination } from '@/entities/destination';
 import { RecordRow, useRecords } from '@/entities/record';
 import type { Place, PlaceKind } from '@/shared/api';
 import { formatDate } from '@/shared/lib';
@@ -152,6 +154,7 @@ export const HomeContent = ({
 /** 핀을 눌렀을 때 보여 주는 간결한 장소 정보 */
 export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => void }) => {
   const router = useRouter();
+  const destination = place.catalogId ? findDestination(place.catalogId) : undefined;
   return (
     <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
       <YStack gap={10} testID="place-summary" accessibilityLiveRegion="polite">
@@ -182,6 +185,19 @@ export const PlaceSummary = ({ place, onClose }: { place: Place; onClose: () => 
           기록 {place.recordCount}건
           {place.lastVisitedAt ? ` · 최근 방문 ${formatDate(place.lastVisitedAt)}` : ''}
         </AppText>
+        {destination ? (
+          <XStack gap={12} alignItems="center">
+            <Image
+              source={destination.image}
+              style={{ width: 72, height: 72, borderRadius: 8 }}
+              contentFit="cover"
+              accessibilityIgnoresInvertColors
+            />
+            <AppText flex={1} numberOfLines={3}>
+              {destination.tagline}
+            </AppText>
+          </XStack>
+        ) : null}
         {place.memo ? <AppText numberOfLines={2}>{place.memo}</AppText> : null}
         {place.tags.length > 0 ? (
           <XStack gap={6} flexWrap="wrap">

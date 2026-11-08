@@ -1,7 +1,7 @@
 # NewWorld - 신세계
 
 [![CI](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-2.0.0-c2792b)
+![version](https://img.shields.io/badge/version-2.1.0-c2792b)
 
 피라미드와 잉카 유적부터 아발론과 아르카디아까지, 현실과 상상의 여행지를 탐험하고 기록하는 모바일 앱입니다.
 
@@ -36,6 +36,9 @@
 | 지도         | 실존·환상 핀 구분, 핀 묶음, 위성 지도, 현재 위치, 직접 위치 지정, 세계 장소 검색             |
 | 여행 기록    | 실존: 날씨, 기온, 교통, 숙소, 비용 / 환상: 들어간 길, 만난 존재, 가져온 것 / 사진 10장, 별점 |
 | 가고 싶어요  | 여행지 저장, 다녀옴 표시, 도감 달성률                                                        |
+| 전설의 현장  | 전설과 실제 장소 연결, 추천 코스 6개, 시대순 연대표, 저작권이 끝난 원전 읽기 링크            |
+| 여정         | 여행지를 순서대로 묶기, 코스에서 시작, 경로 지도, 여정별 체크리스트                          |
+| 여권·주변    | 여행지별 스탬프와 공유 이미지, 가까운 순 정렬, 현장 도착 시 바로 기록                        |
 | 체크리스트   | 유적 여행·환상 여행 기본 목록, 여행별 목록 복사, 오프라인 체크                               |
 | 통계         | 도감 달성률, 연도별 여행 횟수, 자주 간 곳, 동행, 평균 별점과 비용                            |
 | 계정·동기화  | 이메일 가입과 로그인, 서버 동기화, 오프라인 저장, CSV·JSON 내보내기, 계정 삭제               |
@@ -44,15 +47,15 @@
 
 ![React, TypeScript, Supabase, PostgreSQL, Jest, pnpm, GitHub Actions](https://skillicons.dev/icons?i=react,ts,supabase,postgres,jest,pnpm,githubactions)
 
-| 구분        | 사용 기술                                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------- |
-| 프레임워크  | Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router                                             |
-| UI          | Tamagui 3, Reanimated 4, Gesture Handler, Bottom Sheet, FlashList, Keyboard Controller, sonner-native, Lucide |
-| 지도·위치   | react-native-maps, supercluster, expo-location                                                                |
-| 상태·데이터 | TanStack Query, zustand, MMKV, React Hook Form, Zod, dayjs                                                    |
-| 서버        | Supabase(Postgres, RLS, Auth, Storage, Edge Functions), OpenStreetMap Photon, Open-Meteo                      |
-| 품질        | ESLint, Prettier, husky, lint-staged, Jest, React Native Testing Library, PGlite, Maestro, Storybook          |
-| 배포        | EAS Build, GitHub Actions                                                                                     |
+| 구분        | 사용 기술                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 프레임워크  | Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router                                                        |
+| UI          | Tamagui 3, Reanimated 4, Gesture Handler, Bottom Sheet, FlashList, Keyboard Controller, sonner-native, Lucide, view-shot |
+| 지도·위치   | react-native-maps, supercluster, expo-location                                                                           |
+| 상태·데이터 | TanStack Query, zustand, MMKV, React Hook Form, Zod, dayjs                                                               |
+| 서버        | Supabase(Postgres, RLS, Auth, Storage, Edge Functions), OpenStreetMap Photon, Open-Meteo                                 |
+| 품질        | ESLint, Prettier, husky, lint-staged, Jest, React Native Testing Library, PGlite, Maestro, Storybook                     |
+| 배포        | EAS Build, GitHub Actions                                                                                                |
 
 ## 시작하기
 
@@ -90,8 +93,8 @@ src/
 ├─ _app/       Provider, 루트·탭 레이아웃
 ├─ _pages/     화면
 ├─ widgets/    지도, 홈 시트, 사진 갤러리, 동기화 배너
-├─ features/   인증, 여행지 저장, 장소 검색, 장소·기록 작성, 내보내기
-├─ entities/   세션, 여행지 도감, 장소, 기록, 체크리스트
+├─ features/   인증, 여행지 저장, 주변 위치, 장소 검색, 장소·기록·여정 작성, 내보내기
+├─ entities/   세션, 여행지 도감, 장소, 기록, 여정, 체크리스트
 └─ shared/     API, UI, 공통 유틸
 ```
 

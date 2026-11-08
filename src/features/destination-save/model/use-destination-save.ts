@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
 import type { Destination } from '@/entities/destination';
-import { backend } from '@/shared/api';
+import { placeKeys } from '@/entities/place';
+import { backend, type Place } from '@/shared/api';
 import { savedByCatalogId, toCatalogPlaceInput } from './merge';
 
 /**
@@ -10,6 +11,22 @@ import { savedByCatalogId, toCatalogPlaceInput } from './merge';
  */
 const findSaved = async (destination: Destination) =>
   savedByCatalogId(await backend.places.list()).get(destination.id);
+
+const toggled = (places: Place[], destination: Destination): Place[] =>
+  places.some((place) => place.catalogId === destination.id)
+    ? places.map((place) =>
+        place.catalogId === destination.id ? { ...place, wishlisted: !place.wishlisted } : place,
+      )
+    : [
+        ...places,
+        {
+          ...toCatalogPlaceInput(destination, true),
+          id: `catalog:${destination.id}`,
+          recordCount: 0,
+          lastVisitedAt: null,
+          createdAt: '',
+        },
+      ];
 
 /** 빠르게 두 번 눌러도 장소가 두 개 생기지 않도록 여행지별로 잠급니다. */
 export const useToggleWish = () => {
@@ -21,6 +38,16 @@ export const useToggleWish = () => {
       if (!saved) return backend.places.create(toCatalogPlaceInput(destination, true));
       const { id, recordCount, lastVisitedAt, createdAt, ...input } = saved;
       return backend.places.update(id, { ...input, wishlisted: !saved.wishlisted });
+    },
+    // 서버 응답을 기다리지 않고 하트부터 바꿉니다. 실패하면 되돌립니다.
+    onMutate: async (destination: Destination) => {
+      await client.cancelQueries({ queryKey: placeKeys.all });
+      const previous = client.getQueryData<Place[]>(placeKeys.all);
+      if (previous) client.setQueryData(placeKeys.all, toggled(previous, destination));
+      return { previous };
+    },
+    onError: (_error, _destination, context) => {
+      if (context?.previous) client.setQueryData(placeKeys.all, context.previous);
     },
     onSettled: () => client.invalidateQueries(),
   });

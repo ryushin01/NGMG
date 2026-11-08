@@ -1,6 +1,6 @@
 {
   "name": "newworld",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.14",
@@ -56,6 +56,7 @@
     "react-native-screens": "~4.30.1",
     "react-native-svg": "15.16.0",
     "react-native-url-polyfill": "^4.0.0",
+    "react-native-view-shot": "6.1.1",
     "react-native-worklets": "0.13.0",
     "react-test-renderer": "^19.3.1",
     "sonner-native": "^0.27.0",

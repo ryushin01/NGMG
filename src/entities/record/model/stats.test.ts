@@ -19,6 +19,7 @@ const record = (overrides: Partial<TripRecord>) =>
     photos: [],
     rating: null,
     cost: null,
+    currency: 'KRW',
     visitedAt: '2026-03-10T03:00:00.000Z',
     ...overrides,
   }) as TripRecord;
@@ -31,6 +32,7 @@ describe('computeStats', () => {
     record({ placeKind: 'fantasy', placeName: '아발론' }),
     record({ placeKind: 'fantasy', placeName: '아발론' }),
     record({ visitedAt: '2025-01-01T03:00:00.000Z' }),
+    record({ visitedAt: '2025-02-01T03:00:00.000Z', cost: 99, currency: 'USD' }),
   ];
 
   it('해당 연도만 집계합니다', () => {
@@ -53,6 +55,7 @@ describe('computeStats', () => {
     expect(stats.averageRating).toBe(4);
     expect(stats.averageCost).toBe(10000);
     expect(computeStats([], 2026).averageRating).toBeNull();
+    expect(computeStats(records, 2025).averageCost).toBeNull();
   });
 });
 

@@ -1,5 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView } from 'react-native';
 import { toast } from 'sonner-native';
@@ -41,7 +42,8 @@ export const ChecklistPage = () => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<string>(CHECKLIST_CATEGORIES[0]);
 
-  const [selected, setSelected] = useState<string | null>(null);
+  const params = useLocalSearchParams<{ list?: string }>();
+  const [selected, setSelected] = useState<string | null>(params.list ?? null);
   const [newListName, setNewListName] = useState<string | null>(null);
 
   const allItems = checklist.data ?? [];

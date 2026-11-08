@@ -2,15 +2,17 @@ import { Image } from 'expo-image';
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ExternalLink, Heart, MapPin, Share2 } from 'lucide-react-native';
+import { useState } from 'react';
 import { Platform, ScrollView, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
-import { findDestination, type Destination } from '@/entities/destination';
-import { KindBadge, usePlaces } from '@/entities/place';
+import { findDestination, linksOf, READING_LINKS, type Destination } from '@/entities/destination';
+import { KindBadge, KindIcon, usePlaces } from '@/entities/place';
 import { RecordRow, useRecords } from '@/entities/record';
 import { savedByCatalogId, useToggleWish } from '@/features/destination-save';
-import { formatCoordinate, toErrorMessage } from '@/shared/lib';
+import { useAutoPosition } from '@/features/nearby';
+import { distanceKm, formatCoordinate, toErrorMessage } from '@/shared/lib';
 import {
   AppIcon,
   AppMapView,
@@ -18,6 +20,7 @@ import {
   BottomCta,
   Divider,
   Header,
+  ListRow,
   MessageView,
   Tag,
   Touchable,
@@ -35,6 +38,9 @@ const openInMaps = ({ latitude, longitude, name }: Destination) => {
       : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`,
   );
 };
+
+const SOLID_AFTER = 230;
+const ON_SITE_KM = 5;
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <YStack gap={8}>
@@ -104,6 +110,8 @@ export const DestinationDetailPage = () => {
   const saved = savedByCatalogId(places.data ?? []).get(id);
   const records = useRecords(saved?.id);
   const myRecords = saved ? (records.data ?? []) : [];
+  const [solid, setSolid] = useState(false);
+  const position = useAutoPosition();
 
   if (!destination) {
     return (
@@ -117,10 +125,24 @@ export const DestinationDetailPage = () => {
   const coordinate = { latitude: destination.latitude, longitude: destination.longitude };
   const wished = saved?.wishlisted ?? false;
   const fantasy = destination.realm === 'fantasy';
+  const onSite = !fantasy && !!position && distanceKm(position, destination) <= ON_SITE_KM;
+  const links = linksOf(destination.id).flatMap((link) => {
+    const target = findDestination(link.id);
+    return target ? [{ target, note: link.note }] : [];
+  });
+  const reading = READING_LINKS[destination.id] ?? [];
 
   return (
     <View flex={1} backgroundColor="surface">
-      <ScrollView style={{ marginTop: top }} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        style={{ marginTop: top }}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        scrollEventThrottle={64}
+        onScroll={(event) => {
+          const next = event.nativeEvent.contentOffset.y > SOLID_AFTER;
+          if (next !== solid) setSolid(next);
+        }}
+      >
         <View height={300} backgroundColor="surfaceMuted">
           <Image
             source={destination.image}
@@ -152,9 +174,30 @@ export const DestinationDetailPage = () => {
           <IconAction
             label="공유"
             icon={Share2}
-            onPress={() => Share.share({ message: `${destination.name}\n${destination.tagline}` })}
+            onPress={() =>
+              Share.share({
+                message: `${destination.name}\n${destination.tagline}\n${Linking.createURL(`/destination/${destination.id}`)}`,
+              })
+            }
           />
         </XStack>
+        {onSite ? (
+          <View paddingHorizontal={20} paddingBottom={12}>
+            <Touchable
+              testID="destination-on-site"
+              onPress={() => router.push(`/record/new?catalogId=${destination.id}`)}
+              accessibilityLabel="지금 현장에 있어요, 바로 기록 남기기"
+              backgroundColor="brandSoft"
+              borderRadius={8}
+              padding={14}
+              justifyContent="center"
+            >
+              <AppText tone="ink" bold>
+                지금 현장에 있어요. 바로 기록을 남겨 보세요.
+              </AppText>
+            </Touchable>
+          </View>
+        ) : null}
         <View height={8} backgroundColor="surfaceMuted" />
         <YStack padding={20} gap={24}>
           <Section title="소개">
@@ -173,6 +216,7 @@ export const DestinationDetailPage = () => {
                 <AppText size="caption" tone="muted">
                   입장권, 운영 시간, 여행경보는 바뀔 수 있으니 떠나기 전에 공식 안내를 확인하세요.
                 </AppText>
+                <LinkLine label="외교부 해외안전여행 열기" url="https://www.0404.go.kr/" />
               </Section>
             </>
           ) : (
@@ -182,6 +226,9 @@ export const DestinationDetailPage = () => {
               </Section>
               <Section title="이곳으로 가는 길">
                 <BulletList items={destination.gateways} />
+                {reading.map((book) => (
+                  <LinkLine key={book.url} label={`읽기: ${book.label}`} url={book.url} />
+                ))}
               </Section>
             </>
           )}
@@ -220,6 +267,25 @@ export const DestinationDetailPage = () => {
             </View>
           </Section>
         </YStack>
+        {links.length > 0 ? (
+          <>
+            <View height={8} backgroundColor="surfaceMuted" />
+            <AppText size="title" padding={20} paddingBottom={6} accessibilityRole="header">
+              전설의 현장
+            </AppText>
+            {links.map(({ target, note }) => (
+              <ListRow
+                key={target.id}
+                testID={`related-${target.id}`}
+                title={target.name}
+                subtitle={note}
+                icon={<KindIcon kind={target.realm} />}
+                chevron
+                onPress={() => router.push(`/destination/${target.id}`)}
+              />
+            ))}
+          </>
+        ) : null}
         <View height={8} backgroundColor="surfaceMuted" />
         <AppText size="title" padding={20} paddingBottom={6} accessibilityRole="header">
           내 기록 {myRecords.length}건
@@ -249,6 +315,25 @@ export const DestinationDetailPage = () => {
           />
         </YStack>
       </ScrollView>
+      {solid ? (
+        <View
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          height={top + 60}
+          backgroundColor="surface"
+          borderBottomWidth={1}
+          borderBottomColor="line"
+          justifyContent="flex-end"
+          alignItems="center"
+          paddingBottom={18}
+        >
+          <AppText size="row" tone="ink" numberOfLines={1} maxWidth="60%">
+            {destination.name}
+          </AppText>
+        </View>
+      ) : null}
       <View position="absolute" top={top + 8} left={16}>
         <Touchable
           onPress={() => router.back()}

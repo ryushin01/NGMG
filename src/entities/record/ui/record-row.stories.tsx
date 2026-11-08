@@ -18,6 +18,7 @@ const record: TripRecord = {
   transport: '',
   lodging: '',
   cost: null,
+  currency: 'KRW',
   highlights: '문지기의 집에서 내려다본 전경',
   gateway: '',
   encounters: '',

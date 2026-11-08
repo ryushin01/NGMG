@@ -113,6 +113,14 @@ export const AccountPage = () => {
           <Divider />
           <LinkRow testID="my-places" label="내 여행지" onPress={() => router.push('/places')} />
           <Divider />
+          <LinkRow testID="my-trips" label="내 여정" onPress={() => router.push('/trips')} />
+          <Divider />
+          <LinkRow
+            testID="my-passport"
+            label="여행 여권"
+            onPress={() => router.push('/passport')}
+          />
+          <Divider />
           <LinkRow
             testID="my-checklist"
             label="여행 체크리스트"

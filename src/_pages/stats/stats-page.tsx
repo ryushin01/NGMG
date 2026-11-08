@@ -118,7 +118,7 @@ export const StatsPage = () => {
                   ) : null}
                   {stats.averageCost !== null ? (
                     <Stat
-                      label="유적 여행 평균 비용"
+                      label="유적 여행 평균 비용(원화 기록)"
                       value={formatPrice(Math.round(stats.averageCost))}
                     />
                   ) : null}

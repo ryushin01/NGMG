@@ -5,7 +5,7 @@ import { View, XStack, YStack } from 'tamagui';
 import { KindBadge } from '@/entities/place';
 import { useDeleteRecord, useRecord } from '@/entities/record';
 import type { TripRecord } from '@/shared/api';
-import { formatDateTime, formatPrice, toErrorMessage } from '@/shared/lib';
+import { formatDateTime, formatMoney, toErrorMessage } from '@/shared/lib';
 import {
   AppText,
   Button,
@@ -44,7 +44,7 @@ const buildSections = (record: TripRecord): [string, Item[]][] => {
           ['기온', record.temperature !== null ? `${record.temperature}℃` : ''],
           ['교통', record.transport],
           ['숙소', record.lodging],
-          ['비용', record.cost !== null ? formatPrice(record.cost) : ''],
+          ['비용', record.cost !== null ? formatMoney(record.cost, record.currency) : ''],
         ],
       ],
     ];

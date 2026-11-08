@@ -31,7 +31,7 @@ export const Button = ({
       onPress={inactive ? undefined : onPress}
       accessibilityLabel={label}
       accessibilityState={{ disabled: !!inactive, busy: !!loading }}
-      height={52}
+      minHeight={52}
       borderRadius={6}
       alignItems="center"
       justifyContent="center"
@@ -74,7 +74,7 @@ export const BottomCta = ({
       backgroundColor={inactive ? 'muted' : 'ink press:inkPressed'}
       paddingBottom={bottom}
     >
-      <XStack height={60} alignItems="center" justifyContent="center">
+      <XStack minHeight={60} alignItems="center" justifyContent="center">
         {loading ? (
           <ActivityIndicator color={colors.surface} />
         ) : (

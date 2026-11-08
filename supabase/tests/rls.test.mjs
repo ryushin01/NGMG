@@ -154,3 +154,24 @@ test('체크리스트 항목은 기본 목록에 들어가고 목록 이름은 �
     /check/,
   );
 });
+
+test('여정은 본인 것만 보이고 날짜 순서와 통화 형식을 검사합니다', async () => {
+  const id = '00000000-0000-0000-0000-0000000000d1';
+  await as(A, `insert into public.trips (id, title, stops) values ('${id}', '코스', '{petra}')`);
+  assert.equal((await as(A, 'select * from public.trips')).rows.length, 1);
+  assert.equal((await as(B, 'select * from public.trips')).rows.length, 0);
+  await assert.rejects(
+    as(
+      B,
+      `insert into public.trips (id, title) values ('${id}', '탈취')
+       on conflict (id) do update set title = excluded.title`,
+    ),
+  );
+  await assert.rejects(
+    as(
+      A,
+      `insert into public.trips (title, start_date, end_date) values ('x', '2027-05-09', '2027-05-01')`,
+    ),
+    /check/,
+  );
+});
