@@ -214,7 +214,7 @@ export const SearchPage = () => {
         )}
       </YStack>
       <AppText size="caption" tone="muted" textAlign="center" paddingBottom={4}>
-        장소 검색 데이터 © OpenStreetMap 기여자
+        해외 지명은 영어로 검색하세요 · 데이터 © OpenStreetMap 기여자
       </AppText>
       <KeyboardStickyView offset={{ closed: 0, opened: bottom }}>
         <Touchable
