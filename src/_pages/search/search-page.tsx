@@ -8,7 +8,7 @@ import { Input, View, XStack, YStack } from 'tamagui';
 import { searchDestinations } from '@/entities/destination';
 import { KindIcon, usePlaces } from '@/entities/place';
 import { usePlaceSearch } from '@/features/place-search';
-import type { SearchResult } from '@/shared/api';
+import { backend, type SearchResult } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
 import {
   AppIcon,
@@ -214,7 +214,9 @@ export const SearchPage = () => {
         )}
       </YStack>
       <AppText size="caption" tone="muted" textAlign="center" paddingBottom={4}>
-        해외 지명은 영어로 검색하세요 · 데이터 © OpenStreetMap 기여자
+        {backend.mode === 'demo'
+          ? '데이터 © OpenStreetMap 기여자'
+          : '해외 지명은 영어로 검색하세요 · 데이터 © OpenStreetMap 기여자'}
       </AppText>
       <KeyboardStickyView offset={{ closed: 0, opened: bottom }}>
         <Touchable
