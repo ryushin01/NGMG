@@ -16,10 +16,6 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: sign-in-submit
 - runFlow: _after-sign-in.yaml
-- extendedWaitUntil:
-    visible:
-      id: add-place-here
-    timeout: 20000
 - tapOn:
     id: tab-map
 - extendedWaitUntil:
@@ -75,9 +71,9 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: checklist-defaults
 - extendedWaitUntil:
-    visible: 24개 중 0개 챙김
+    visible: 21개 중 0개 챙김
     timeout: 15000
 - tapOn:
     id: checklist-item-여권·비자
-- assertVisible: 24개 중 1개 챙김
+- assertVisible: 21개 중 1개 챙김
 - waitForAnimationToEnd

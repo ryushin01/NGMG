@@ -10,7 +10,7 @@ export type SearchResult = {
 export type NominatimPlace = {
   place_id: number;
   name?: string;
-  display_name: string;
+  display_name?: string;
   lat: string;
   lon: string;
 };
@@ -22,15 +22,21 @@ export const normalizeResults = (places: NominatimPlace[]): SearchResult[] => {
     const latitude = Number(place.lat);
     const longitude = Number(place.lon);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return [];
-    const name = place.name || place.display_name.split(',')[0].trim();
+    const address = place.display_name ?? '';
+    const name = place.name || address.split(',')[0].trim();
+    if (!name) return [];
     const key = `${name}|${latitude}|${longitude}`;
     if (seen.has(key)) return [];
     seen.add(key);
-    return [
-      { id: `osm:${place.place_id}`, name, address: place.display_name, latitude, longitude },
-    ];
+    return [{ id: `osm:${place.place_id}`, name, address, latitude, longitude }];
   });
 };
 
 export const pickReverseAddress = (place: { display_name?: string } | null): string =>
   place?.display_name ?? '';
+
+export const isValidCoordinate = (latitude: unknown, longitude: unknown) =>
+  typeof latitude === 'number' &&
+  typeof longitude === 'number' &&
+  Math.abs(latitude) <= 90 &&
+  Math.abs(longitude) <= 180;

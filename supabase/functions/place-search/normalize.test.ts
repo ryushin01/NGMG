@@ -1,4 +1,4 @@
-import { normalizeResults, pickReverseAddress } from './normalize';
+import { isValidCoordinate, normalizeResults, pickReverseAddress } from './normalize';
 
 it('중복과 잘못된 좌표를 제거하고 이름이 없으면 주소 첫 부분을 씁니다', () => {
   const results = normalizeResults([
@@ -14,4 +14,16 @@ it('중복과 잘못된 좌표를 제거하고 이름이 없으면 주소 첫 �
 it('주소가 없으면 빈 문자열을 돌려줍니다', () => {
   expect(pickReverseAddress({ display_name: '페트라, 요르단' })).toBe('페트라, 요르단');
   expect(pickReverseAddress(null)).toBe('');
+});
+
+it('주소와 이름이 모두 없는 결과는 건너뜁니다', () => {
+  expect(normalizeResults([{ place_id: 5, lat: '1', lon: '1' }])).toEqual([]);
+});
+
+it('좌표 범위를 벗어나거나 숫자가 아니면 거부합니다', () => {
+  expect(isValidCoordinate(-13.5, -71.9)).toBe(true);
+  expect(isValidCoordinate(91, 0)).toBe(false);
+  expect(isValidCoordinate(0, 181)).toBe(false);
+  expect(isValidCoordinate(Number.NaN, 0)).toBe(false);
+  expect(isValidCoordinate('1', 0)).toBe(false);
 });

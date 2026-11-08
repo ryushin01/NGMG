@@ -18,11 +18,17 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: my-checklist
 - extendedWaitUntil:
-    visible: 24개 중 2개 챙김
+    visible: 21개 중 2개 챙김
     timeout: 20000
 - runFlow: _back-to-home.yaml
 - tapOn:
     id: tab-my
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
 - tapOn:
     id: sign-out
 - extendedWaitUntil:

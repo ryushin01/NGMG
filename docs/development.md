@@ -24,9 +24,11 @@ pnpm run ios       # 또는 pnpm run android
 | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | 서버 연결. 없으면 데모 모드입니다.                   |
 | `GOOGLE_MAPS_ANDROID_API_KEY`                               | Android 지도. iOS는 Apple 지도를 써서 필요 없습니다. |
 
-장소 검색은 Edge Function에서 OpenStreetMap Nominatim을 호출하므로 별도 키가 필요 없습니다.
+장소 검색은 Edge Function에서 OpenStreetMap Nominatim을 호출하므로 별도 키가 필요 없습니다. 공용 서버는 초당 1건으로 제한되므로 공개 배포 전에 유료 지오코더나 자체 서버로 바꿉니다.
 
 ## 서버 준비 (Supabase)
+
+> **주의:** `20261108000000_ruins_travel.sql`은 이전 낚시·맛집 기록의 전용 칸을 삭제하며 되돌릴 수 없습니다. 기존 데이터가 있는 서버는 `npx supabase db dump --data-only`로 백업한 뒤 `db push`를 실행합니다.
 
 ```bash
 npx supabase login
@@ -58,9 +60,9 @@ npx supabase functions deploy delete-account
 
 ## 외부 데이터
 
-| 항목             | 출처                                  | 비고                                                                                                                          |
-| ---------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 날씨, 바람, 수온 | [Open-Meteo](https://open-meteo.com/) | API 키가 없습니다. 버튼을 누를 때만 장소 좌표를 보냅니다. 무료 API는 비상업 용도 조건이므로 상용 배포 전 요금제를 확인합니다. |
+| 항목       | 출처                                  | 비고                                                                                                                          |
+| ---------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 날씨, 기온 | [Open-Meteo](https://open-meteo.com/) | API 키가 없습니다. 버튼을 누를 때만 장소 좌표를 보냅니다. 무료 API는 비상업 용도 조건이므로 상용 배포 전 요금제를 확인합니다. |
 
 ## 테스트
 
