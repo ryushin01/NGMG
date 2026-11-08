@@ -11,8 +11,14 @@ appId: com.ryushin01.newworld
     visible:
       id: home-search
     timeout: 8000
+# 지도 시트가 올라오는 도중에는 탭이 검색창에 닿지 않습니다.
+- waitForAnimationToEnd
 - tapOn:
     id: home-search
+- extendedWaitUntil:
+    visible:
+      id: search-input
+    timeout: 8000
 - inputText: 쿠스코
 - extendedWaitUntil:
     visible:

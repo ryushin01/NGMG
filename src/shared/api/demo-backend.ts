@@ -1,4 +1,5 @@
-import { compressPhoto } from '../lib/photo';
+import { compressPhoto, photoStore } from '../lib/photo';
+import { storageAdapter } from '../lib/storage';
 import { DEMO_PLACES, DEMO_RECORDS, DEMO_SEARCH } from './demo-data';
 import type {
   Backend,
@@ -13,18 +14,99 @@ import type {
 
 /**
  * Supabase 환경 변수가 없을 때 쓰는 가상 데이터 백엔드입니다.
- * 앱을 끄면 초기화됩니다. 화면 확인, 스크린샷, E2E 테스트에 사용합니다.
+ * 서버 없이 앱을 체험할 수 있도록 변경 내용을 이 기기에 저장합니다.
  */
-let session: Session | null = null;
+const STATE_KEY = 'newworld.demo.state';
+const PHOTO_PREFIX = 'demo-photo:';
+
+type DemoState = {
+  session: Session | null;
+  places: Place[];
+  records: TripRecord[];
+  checklists: [string, ChecklistItem[]][];
+  trips: [string, Trip[]][];
+  sequence: number;
+};
+
+/** iOS는 앱 업데이트 때 컨테이너 경로가 바뀌므로 저장한 파일 이름으로 주소를 다시 만듭니다. */
+const withPhotoUrls = (record: TripRecord): TripRecord => ({
+  ...record,
+  photos: record.photos.map((photo) =>
+    photo.path.startsWith(PHOTO_PREFIX)
+      ? { ...photo, url: photoStore.uriOf(photo.path.slice(PHOTO_PREFIX.length)) }
+      : photo,
+  ),
+});
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasId = (value: unknown) => isObject(value) && typeof value.id === 'string';
+
+const isRecord = (value: unknown) =>
+  hasId(value) &&
+  typeof (value as { visitedAt?: unknown }).visitedAt === 'string' &&
+  Array.isArray((value as { photos?: unknown }).photos) &&
+  (value as { photos: unknown[] }).photos.every(
+    (photo) => isObject(photo) && typeof photo.path === 'string',
+  );
+
+const isOwnerEntry = (value: unknown) =>
+  Array.isArray(value) &&
+  value.length === 2 &&
+  typeof value[0] === 'string' &&
+  Array.isArray(value[1]) &&
+  value[1].every(hasId);
+
+/** 배열이 아니면 없는 값으로 보고, 형식이 틀린 항목은 버립니다. */
+const validItems = <T>(value: unknown, isValid: (item: unknown) => boolean) =>
+  Array.isArray(value) ? (value.filter(isValid) as T[]) : undefined;
+
+/** 형식이 틀린 저장값 때문에 앱이 시작되지 못하는 일이 없도록 칸별로 검사합니다. */
+const loadState = (): Partial<DemoState> => {
+  try {
+    const value: unknown = JSON.parse(storageAdapter.getItem(STATE_KEY) ?? '{}');
+    if (!isObject(value)) return {};
+    const state = value;
+    const session = state.session as Session | null | undefined;
+    return {
+      session: typeof session?.userId === 'string' ? session : null,
+      places: validItems<Place>(state.places, hasId),
+      records: validItems<TripRecord>(state.records, isRecord),
+      checklists: validItems<[string, ChecklistItem[]]>(state.checklists, isOwnerEntry),
+      trips: validItems<[string, Trip[]]>(state.trips, isOwnerEntry),
+      sequence: typeof state.sequence === 'number' ? state.sequence : undefined,
+    };
+  } catch {
+    return {};
+  }
+};
+
+const saved = loadState();
+
+let session: Session | null = saved.session ?? null;
 const listeners = new Set<(session: Session | null) => void>();
+const persist = () => {
+  const state: DemoState = {
+    session,
+    places,
+    records,
+    checklists: [...checklists],
+    trips: [...trips],
+    sequence,
+  };
+  storageAdapter.setItem(STATE_KEY, JSON.stringify(state));
+};
+
 const setSession = (next: Session | null) => {
   session = next;
+  persist();
   listeners.forEach((listener) => listener(next));
 };
 
-let places: Place[] = [...DEMO_PLACES];
-let records: TripRecord[] = [...DEMO_RECORDS];
-let sequence = 1000;
+let places: Place[] = saved.places ?? [...DEMO_PLACES];
+let records: TripRecord[] = (saved.records ?? [...DEMO_RECORDS]).map(withPhotoUrls);
+let sequence = saved.sequence ?? 1000;
 const nextId = () => `demo-${(sequence += 1)}`;
 
 let offline = false;
@@ -40,13 +122,19 @@ const wait = async () => {
 };
 
 /** 계정별 저장을 확인할 수 있도록 체크리스트만 이메일별로 나눕니다. */
-const checklists = new Map<string, ChecklistItem[]>();
+const checklists = new Map<string, ChecklistItem[]>(saved.checklists);
 const myChecklist = () => checklists.get(session?.userId ?? '') ?? [];
-const trips = new Map<string, Trip[]>();
+const trips = new Map<string, Trip[]>(saved.trips);
 const myTrips = () => trips.get(session?.userId ?? '') ?? [];
-const setMyTrips = (items: Trip[]) => trips.set(session?.userId ?? '', items);
+const setMyTrips = (items: Trip[]) => {
+  trips.set(session?.userId ?? '', items);
+  persist();
+};
 
-const setMyChecklist = (items: ChecklistItem[]) => checklists.set(session?.userId ?? '', items);
+const setMyChecklist = (items: ChecklistItem[]) => {
+  checklists.set(session?.userId ?? '', items);
+  persist();
+};
 
 const withStats = (place: Place): Place => {
   const own = records.filter((record) => record.placeId === place.id);
@@ -59,6 +147,17 @@ const withStats = (place: Place): Place => {
         .sort()
         .at(-1) ?? null,
   };
+};
+
+const removePhotos = (photos: Photo[]) => {
+  for (const photo of photos) {
+    if (!photo.path.startsWith(PHOTO_PREFIX)) continue;
+    try {
+      photoStore.remove(photo.path.slice(PHOTO_PREFIX.length));
+    } catch {
+      // 파일을 지우지 못해도 데모 동작에는 영향이 없습니다.
+    }
+  }
 };
 
 const findPlace = (id: string) => {
@@ -77,13 +176,18 @@ const toRecord = async (id: string, input: RecordSaveInput): Promise<TripRecord>
   const place = findPlace(input.record.placeId);
   // 서버 모드와 같은 압축 경로가 실제 기기에서 동작하는지 함께 검증합니다.
   const compressed = await Promise.all(input.newPhotos.map(compressPhoto));
-  const added: Photo[] = compressed.map((photo) => ({
-    id: nextId(),
-    path: photo.uri,
-    url: photo.uri,
-    width: photo.width,
-    height: photo.height,
-  }));
+  const added: Photo[] = await Promise.all(
+    compressed.map(async (photo) => {
+      const name = await photoStore.save(photo.uri);
+      return {
+        id: nextId(),
+        path: `${PHOTO_PREFIX}${name}`,
+        url: photoStore.uriOf(name),
+        width: photo.width,
+        height: photo.height,
+      };
+    }),
+  );
   return {
     ...input.record,
     id,
@@ -123,11 +227,14 @@ export const demoBackend: Backend = {
       await wait();
     },
     async deleteAccount() {
-      places = [];
-      records = [];
+      // 데모는 계정이 없으므로 처음 예시 데이터로 되돌립니다.
+      const photos = records.flatMap((record) => record.photos);
+      places = [...DEMO_PLACES];
+      records = [...DEMO_RECORDS];
       checklists.delete(session?.userId ?? '');
       trips.delete(session?.userId ?? '');
       setSession(null);
+      removePhotos(photos);
     },
   },
   places: {
@@ -149,6 +256,7 @@ export const demoBackend: Backend = {
         createdAt: new Date().toISOString(),
       };
       places = [place, ...places.filter((item) => item.id !== place.id)];
+      persist();
       return place;
     },
     async update(id, input) {
@@ -159,12 +267,18 @@ export const demoBackend: Backend = {
           ? { ...record, placeName: input.name, placeKind: input.kind }
           : record,
       );
+      persist();
       return findPlace(id);
     },
     async remove(id) {
       await wait();
+      const photos = records
+        .filter((record) => record.placeId === id)
+        .flatMap((record) => record.photos);
       places = places.filter((place) => place.id !== id);
       records = records.filter((record) => record.placeId !== id);
+      persist();
+      removePhotos(photos);
     },
   },
   records: {
@@ -182,17 +296,25 @@ export const demoBackend: Backend = {
       await wait();
       const record = await toRecord(id ?? nextId(), input);
       records = [record, ...records.filter((item) => item.id !== record.id)];
+      persist();
       return record;
     },
     async update(id, input) {
       await wait();
       const record = await toRecord(id, input);
+      const kept = new Set(record.photos.map((photo) => photo.id));
+      const dropped = findRecord(id).photos.filter((photo) => !kept.has(photo.id));
       records = records.map((item) => (item.id === id ? record : item));
+      persist();
+      removePhotos(dropped);
       return record;
     },
     async remove(id) {
       await wait();
+      const { photos } = findRecord(id);
       records = records.filter((record) => record.id !== id);
+      persist();
+      removePhotos(photos);
     },
   },
   checklist: {

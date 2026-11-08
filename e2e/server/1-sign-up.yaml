@@ -11,9 +11,11 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: field-email
 - inputText: ${EMAIL}
+- waitForAnimationToEnd
 - tapOn:
     id: field-password
 - runFlow: _close-password-sheet.yaml
+- waitForAnimationToEnd
 - tapOn:
     id: field-password
 - inputText: first-password

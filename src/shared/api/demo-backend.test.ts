@@ -1,6 +1,13 @@
 import { demoBackend as api } from './demo-backend';
 
-jest.mock('../lib/photo', () => ({ compressPhoto: jest.fn(async () => ({})) }));
+jest.mock('../lib/photo', () => ({
+  compressPhoto: jest.fn(async () => ({ uri: 'file:///c.jpg' })),
+  photoStore: {
+    save: jest.fn(async () => 'a.jpg'),
+    uriOf: (name: string) => `file:///${name}`,
+    remove: jest.fn(),
+  },
+}));
 
 const baseRecord = (placeId: string) => ({
   placeId,
