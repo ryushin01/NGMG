@@ -24,7 +24,7 @@ pnpm run ios       # 또는 pnpm run android
 | `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` | 서버 연결. 없으면 데모 모드입니다.                   |
 | `GOOGLE_MAPS_ANDROID_API_KEY`                               | Android 지도. iOS는 Apple 지도를 써서 필요 없습니다. |
 
-장소 검색은 Edge Function에서 OpenStreetMap Nominatim을 호출하므로 별도 키가 필요 없습니다. 공용 서버는 초당 1건으로 제한되므로 공개 배포 전에 유료 지오코더나 자체 서버로 바꿉니다.
+장소 검색은 Edge Function에서 OpenStreetMap 기반 [Photon](https://photon.komoot.io/) 공개 서버를 호출하므로 별도 키가 필요 없습니다. 공개 서버는 사용량 보장이 없고 한국어 지명은 잘 찾지 못하므로, 공개 배포 전에 자체 서버나 유료 지오코더로 바꿉니다. 공용 Nominatim은 Supabase Edge의 접속을 403으로 차단합니다.
 
 ## 서버 준비 (Supabase)
 
