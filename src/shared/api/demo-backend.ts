@@ -38,9 +38,24 @@ const withPhotoUrls = (record: TripRecord): TripRecord => ({
   ),
 });
 
+const arrayOr = <T>(value: unknown): T[] | undefined =>
+  Array.isArray(value) ? (value as T[]) : undefined;
+
+/** 형식이 틀린 저장값 때문에 앱이 시작되지 못하는 일이 없도록 칸별로 검사합니다. */
 const loadState = (): Partial<DemoState> => {
   try {
-    return JSON.parse(storageAdapter.getItem(STATE_KEY) ?? '{}') as Partial<DemoState>;
+    const value: unknown = JSON.parse(storageAdapter.getItem(STATE_KEY) ?? '{}');
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
+    const state = value as Record<string, unknown>;
+    const session = state.session as Session | null | undefined;
+    return {
+      session: typeof session?.userId === 'string' ? session : null,
+      places: arrayOr<Place>(state.places),
+      records: arrayOr<TripRecord>(state.records),
+      checklists: arrayOr<[string, ChecklistItem[]]>(state.checklists),
+      trips: arrayOr<[string, Trip[]]>(state.trips),
+      sequence: typeof state.sequence === 'number' ? state.sequence : undefined,
+    };
   } catch {
     return {};
   }
@@ -192,12 +207,13 @@ export const demoBackend: Backend = {
     },
     async deleteAccount() {
       // 데모는 계정이 없으므로 처음 예시 데이터로 되돌립니다.
-      records.forEach((record) => removePhotos(record.photos));
+      const photos = records.flatMap((record) => record.photos);
       places = [...DEMO_PLACES];
       records = [...DEMO_RECORDS];
       checklists.delete(session?.userId ?? '');
       trips.delete(session?.userId ?? '');
       setSession(null);
+      removePhotos(photos);
     },
   },
   places: {
@@ -235,10 +251,13 @@ export const demoBackend: Backend = {
     },
     async remove(id) {
       await wait();
-      records.filter((record) => record.placeId === id).forEach((r) => removePhotos(r.photos));
+      const photos = records
+        .filter((record) => record.placeId === id)
+        .flatMap((record) => record.photos);
       places = places.filter((place) => place.id !== id);
       records = records.filter((record) => record.placeId !== id);
       persist();
+      removePhotos(photos);
     },
   },
   records: {
@@ -263,16 +282,18 @@ export const demoBackend: Backend = {
       await wait();
       const record = await toRecord(id, input);
       const kept = new Set(record.photos.map((photo) => photo.id));
-      removePhotos(findRecord(id).photos.filter((photo) => !kept.has(photo.id)));
+      const dropped = findRecord(id).photos.filter((photo) => !kept.has(photo.id));
       records = records.map((item) => (item.id === id ? record : item));
       persist();
+      removePhotos(dropped);
       return record;
     },
     async remove(id) {
       await wait();
-      removePhotos(findRecord(id).photos);
+      const { photos } = findRecord(id);
       records = records.filter((record) => record.id !== id);
       persist();
+      removePhotos(photos);
     },
   },
   checklist: {

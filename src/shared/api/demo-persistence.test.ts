@@ -106,6 +106,40 @@ it('저장값이 깨졌으면 예시 데이터로 시작합니다', async () => 
   expect((await relaunch().places.list()).length).toBeGreaterThan(0);
 });
 
+it.each(['null', '3', '[]', '{"records":1,"checklists":2,"trips":"x","session":5}'])(
+  '형식이 틀린 저장값(%s)이어도 예시 데이터로 시작합니다',
+  async (value) => {
+    mockValues.set('newworld.demo.state', value);
+    const api = relaunch();
+    expect(api.auth.getCachedSession()).toBeNull();
+    expect((await api.places.list()).length).toBeGreaterThan(0);
+    expect((await api.records.list()).length).toBeGreaterThan(0);
+  },
+);
+
+it('상태를 저장한 뒤에 사진 파일을 지웁니다', async () => {
+  const api = relaunch();
+  const place = await api.places.create(input);
+  const saved = await api.records.create({
+    record: record(place.id),
+    keptPhotos: [],
+    newPhotos: [{ uri: 'file:///a.jpg', width: 10, height: 10 }],
+  });
+  const { photoStore } = jest.requireMock('../lib/photo') as {
+    photoStore: { remove: jest.Mock };
+  };
+  photoStore.remove.mockClear();
+  // 삭제 코드가 예외를 삼키므로 그 시점의 저장값을 기록해 두고 밖에서 검증합니다.
+  let storedAtRemoval = '';
+  photoStore.remove.mockImplementation(() => {
+    storedAtRemoval = mockValues.get('newworld.demo.state') as string;
+  });
+  await api.records.remove(saved.id);
+  expect(photoStore.remove).toHaveBeenCalledTimes(1);
+  const state = JSON.parse(storedAtRemoval) as { records: { id: string }[] };
+  expect(state.records.map((item) => item.id)).not.toContain(saved.id);
+});
+
 it('계정 삭제는 예시 데이터로 되돌립니다', async () => {
   const api = relaunch();
   await api.auth.signIn('guest@newworld.demo', 'demo');
