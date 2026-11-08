@@ -117,6 +117,26 @@ it.each(['null', '3', '[]', '{"records":1,"checklists":2,"trips":"x","session":5
   },
 );
 
+it('배열 안의 잘못된 항목만 버리고 시작합니다', async () => {
+  mockValues.set(
+    'newworld.demo.state',
+    JSON.stringify({
+      places: [1, { id: 'p', name: '남은 장소' }],
+      records: [
+        { id: 'r1', photos: [] },
+        { id: 'r2', visitedAt: '2026-01-01', photos: [1] },
+        { id: 'r3', visitedAt: '2026-01-01', photos: [] },
+      ],
+      checklists: [1, ['a'], ['a', [1]], ['guest', [{ id: 'c' }]]],
+      trips: [null, ['guest', 'x']],
+    }),
+  );
+  const api = relaunch();
+  expect((await api.places.list()).map((place) => place.id)).toEqual(['p']);
+  expect((await api.records.list()).map((item) => item.id)).toEqual(['r3']);
+  expect(await api.trips.list()).toEqual([]);
+});
+
 it('상태를 저장한 뒤에 사진 파일을 지웁니다', async () => {
   const api = relaunch();
   const place = await api.places.create(input);

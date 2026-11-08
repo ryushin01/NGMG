@@ -38,22 +38,43 @@ const withPhotoUrls = (record: TripRecord): TripRecord => ({
   ),
 });
 
-const arrayOr = <T>(value: unknown): T[] | undefined =>
-  Array.isArray(value) ? (value as T[]) : undefined;
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasId = (value: unknown) => isObject(value) && typeof value.id === 'string';
+
+const isRecord = (value: unknown) =>
+  hasId(value) &&
+  typeof (value as { visitedAt?: unknown }).visitedAt === 'string' &&
+  Array.isArray((value as { photos?: unknown }).photos) &&
+  (value as { photos: unknown[] }).photos.every(
+    (photo) => isObject(photo) && typeof photo.path === 'string',
+  );
+
+const isOwnerEntry = (value: unknown) =>
+  Array.isArray(value) &&
+  value.length === 2 &&
+  typeof value[0] === 'string' &&
+  Array.isArray(value[1]) &&
+  value[1].every(hasId);
+
+/** 배열이 아니면 없는 값으로 보고, 형식이 틀린 항목은 버립니다. */
+const validItems = <T>(value: unknown, isValid: (item: unknown) => boolean) =>
+  Array.isArray(value) ? (value.filter(isValid) as T[]) : undefined;
 
 /** 형식이 틀린 저장값 때문에 앱이 시작되지 못하는 일이 없도록 칸별로 검사합니다. */
 const loadState = (): Partial<DemoState> => {
   try {
     const value: unknown = JSON.parse(storageAdapter.getItem(STATE_KEY) ?? '{}');
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) return {};
-    const state = value as Record<string, unknown>;
+    if (!isObject(value)) return {};
+    const state = value;
     const session = state.session as Session | null | undefined;
     return {
       session: typeof session?.userId === 'string' ? session : null,
-      places: arrayOr<Place>(state.places),
-      records: arrayOr<TripRecord>(state.records),
-      checklists: arrayOr<[string, ChecklistItem[]]>(state.checklists),
-      trips: arrayOr<[string, Trip[]]>(state.trips),
+      places: validItems<Place>(state.places, hasId),
+      records: validItems<TripRecord>(state.records, isRecord),
+      checklists: validItems<[string, ChecklistItem[]]>(state.checklists, isOwnerEntry),
+      trips: validItems<[string, Trip[]]>(state.trips, isOwnerEntry),
       sequence: typeof state.sequence === 'number' ? state.sequence : undefined,
     };
   } catch {
