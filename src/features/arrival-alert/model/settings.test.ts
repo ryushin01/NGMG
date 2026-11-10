@@ -91,3 +91,14 @@ it('지역 등록에 실패하면 켠 설정을 되돌립니다', async () => {
   await expect(enableArrivalAlert(new Set())).rejects.toThrow('fail');
   expect(isArrivalAlertEnabled()).toBe(false);
 });
+
+it('지역 감시를 지원하지 않는 기기면 끈 채로 그 이유를 돌려줍니다', async () => {
+  grant(true, true, true);
+  jest.mocked(Location.startGeofencingAsync).mockRejectedValueOnce(
+    Object.assign(new Error('Geofencing is not available'), {
+      code: 'ERR_GEOFENCING_UNAVAILABLE',
+    }),
+  );
+  await expect(enableArrivalAlert(new Set())).resolves.toBe('unavailable');
+  expect(isArrivalAlertEnabled()).toBe(false);
+});

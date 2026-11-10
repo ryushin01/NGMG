@@ -23,7 +23,15 @@ const readChecked = (): Set<string> => {
 export const isArrivalAlertEnabled = () => storageAdapter.getItem(ENABLED_KEY) === '1';
 
 export type EnableResult =
-  'enabled' | 'location-denied' | 'background-denied' | 'notification-denied';
+  | 'enabled'
+  | 'location-denied'
+  | 'background-denied'
+  | 'notification-denied'
+  /** 지역 감시를 지원하지 않는 기기(일부 시뮬레이터 등) */
+  | 'unavailable';
+
+const isGeofencingUnavailable = (error: unknown) =>
+  (error as { code?: string } | null)?.code === 'ERR_GEOFENCING_UNAVAILABLE';
 
 /** 위치(사용 중 → 항상)와 알림 권한을 차례로 받고 지역을 등록합니다. */
 export const enableArrivalAlert = async (
@@ -48,6 +56,7 @@ export const enableArrivalAlert = async (
   } catch (error) {
     // 지역을 등록하지 못했으면 다음 실행 때 켜진 것처럼 보이지 않도록 되돌립니다.
     await disableArrivalAlert().catch(() => undefined);
+    if (isGeofencingUnavailable(error)) return 'unavailable';
     throw error;
   }
   return 'enabled';
