@@ -10,7 +10,7 @@ import { View, XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
 import { DESTINATIONS, Stamp } from '@/entities/destination';
 import { usePlaces } from '@/entities/place';
-import { BadgeMedal, evaluateBadges } from '@/features/badges';
+import { BadgeMedal, BadgeShare, evaluateBadges } from '@/features/badges';
 import { savedByCatalogId } from '@/features/destination-save';
 import { AppText, Button, Header } from '@/shared/ui';
 
@@ -26,6 +26,7 @@ export const PassportPage = () => {
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
+  const [badgeShareOpen, setBadgeShareOpen] = useState(false);
   const size = (width - GUTTER * 2 - GAP * (COLUMNS - 1)) / COLUMNS - 8;
 
   const saved = useMemo(() => savedByCatalogId(places.data ?? []), [places.data]);
@@ -130,6 +131,13 @@ export const PassportPage = () => {
           <AppText size="caption" tone="muted">
             여행지 상세에서 현장 인증을 하면 스탬프와 함께 뱃지를 모을 수 있어요.
           </AppText>
+          <Button
+            testID="passport-badge-share"
+            variant="outline"
+            label="뱃지 이미지 공유"
+            disabled={earned.length === 0}
+            onPress={() => setBadgeShareOpen(true)}
+          />
           <XStack flexWrap="wrap" gap={8} testID="passport-badges">
             {[...earned, ...badges.filter((item) => !item.earned)].map((status) => (
               <BadgeMedal key={status.badge.id} status={status} size={64} />
@@ -139,6 +147,11 @@ export const PassportPage = () => {
         {section('real', '실존 유적')}
         {section('fantasy', '환상 세계')}
       </ScrollView>
+      <BadgeShare
+        statuses={badges}
+        visible={badgeShareOpen}
+        onClose={() => setBadgeShareOpen(false)}
+      />
     </View>
   );
 };

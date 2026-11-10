@@ -43,6 +43,30 @@ export const DESTINATION_LINKS: DestinationLink[] = [
     b: 'terracotta',
     note: '무릉도원의 주민들은 진나라의 난을 피해 숨어든 사람들입니다.',
   },
+  { a: 'eden', b: 'dilmun', note: '딜문의 신화를 에덴 이야기의 먼 뿌리로 보는 학자도 있습니다.' },
+  { a: 'hades', b: 'elysion', note: '베르길리우스는 엘리시온을 명계 안의 낙원으로 그렸습니다.' },
+  { a: 'valhalla', b: 'asgard', note: '발할라는 아스가르드에 있는 오딘의 전당입니다.' },
+  {
+    a: 'yomi',
+    b: 'takamagahara',
+    note: '저승에서 돌아온 이자나기가 몸을 씻을 때 아마테라스가 태어납니다.',
+  },
+  {
+    a: 'xibalba',
+    b: 'chichen-itza',
+    note: '대구기장의 공놀이는 쌍둥이 영웅이 시발바에서 벌인 공놀이와 이어집니다.',
+  },
+  {
+    a: 'aztlan',
+    b: 'teotihuacan',
+    note: '아스틀란을 떠나온 메시카는 폐허가 된 테오티우아칸을 신들이 태어난 곳으로 여겼습니다.',
+  },
+  { a: 'ys', b: 'atlantis', note: '바다에 잠긴 도시라 브르타뉴의 아틀란티스라고도 부릅니다.' },
+  {
+    a: 'nirai-kanai',
+    b: 'penglai',
+    note: '동쪽 바다 너머의 낙원이라는 점에서 봉래 전설과 닮았습니다.',
+  },
 ];
 
 export const linksOf = (id: string) =>
