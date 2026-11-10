@@ -150,6 +150,12 @@ export const AccountPage = () => {
                 onPress={() => router.push('/password')}
               />
               <Divider />
+              <LinkRow
+                testID="my-recovery-code"
+                label="복구 코드 다시 발급"
+                onPress={() => router.push('/recovery-code')}
+              />
+              <Divider />
             </>
           )}
           <LinkRow testID="my-places" label="내 여행지" onPress={() => router.push('/places')} />

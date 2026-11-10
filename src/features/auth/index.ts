@@ -1,2 +1,11 @@
+export { useRecoveryCodeStore } from './model/recovery-store';
 export { nickname, profileSchema, realName, username } from './model/schema';
-export { ChangePasswordForm, FormField, SignInForm, SignUpForm } from './ui/auth-forms';
+export {
+  ChangePasswordForm,
+  FormField,
+  RecoverForm,
+  ResetRecoveryCodeForm,
+  SignInForm,
+  SignUpForm,
+} from './ui/auth-forms';
+export { RecoveryCodeModal } from './ui/recovery-code-modal';

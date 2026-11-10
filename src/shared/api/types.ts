@@ -128,6 +128,11 @@ export type Session = { userId: string; username: string };
 
 export type SignUpInput = { username: string; password: string; nickname: string; name: string };
 
+export type RecoverInput = { username: string; code: string; password: string };
+
+/** 비밀번호를 잊었을 때 쓰는 일회용 코드. 원문은 발급할 때 한 번만 돌려주고 해시로만 저장합니다. */
+export type RecoveryCodeResult = { recoveryCode: string | null };
+
 export type Profile = {
   /** 다른 화면에 보이는 이름 */
   nickname: string;
@@ -149,8 +154,12 @@ export type Backend = {
     isReady(): Promise<boolean>;
     subscribe(listener: (session: Session | null) => void): () => void;
     signIn(username: string, password: string): Promise<void>;
-    /** 가입하면 바로 로그인합니다. 메일 인증이 없습니다. */
-    signUp(input: SignUpInput): Promise<void>;
+    /** 가입하면 바로 로그인하고 복구 코드를 돌려줍니다. 코드를 저장하지 못하면 null입니다. */
+    signUp(input: SignUpInput): Promise<RecoveryCodeResult>;
+    /** 복구 코드로 비밀번호를 바꾸고 로그인합니다. 쓴 코드는 버리고 새 코드를 돌려줍니다. */
+    recover(input: RecoverInput): Promise<RecoveryCodeResult>;
+    /** 지금 비밀번호를 확인한 뒤 복구 코드를 새로 발급합니다. */
+    resetRecoveryCode(currentPassword: string): Promise<RecoveryCodeResult>;
     /** 가입 없이 둘러보는 데모 계정으로 들어갑니다(데모 모드 전용). */
     browse(): Promise<void>;
     signOut(): Promise<void>;

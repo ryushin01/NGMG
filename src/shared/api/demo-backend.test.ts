@@ -125,6 +125,61 @@ it('둘러보기는 비밀번호 없이 들어가고 닉네임을 정해 둡니�
   expect((await api.profile.get()).nickname).toBe('둘러보는 여행자');
 });
 
+it('복구 코드로 비밀번호를 바꾸면 로그인하고, 쓴 코드는 버리고 새 코드를 줍니다', async () => {
+  await api.auth.signOut();
+  const { recoveryCode } = await api.auth.signUp({
+    username: 'recover1',
+    password: 'password1',
+    nickname: '복구',
+    name: '',
+  });
+  expect(recoveryCode).toMatch(/^[A-HJKMNP-TV-Z2-9]{12}$/);
+  await api.auth.signOut();
+  const lower = `${recoveryCode!.slice(0, 4).toLowerCase()}-${recoveryCode!.slice(4)}`;
+  const next = await api.auth.recover({ username: 'recover1', code: lower, password: 'password9' });
+  expect(api.auth.getCachedSession()?.username).toBe('recover1');
+  expect(next.recoveryCode).not.toBe(recoveryCode);
+  await api.auth.signOut();
+  await expect(
+    api.auth.recover({ username: 'recover1', code: recoveryCode!, password: 'password8' }),
+  ).rejects.toThrow('Invalid recovery code');
+  await api.auth.signIn('recover1', 'password9');
+  // 다시 발급하면 이전 코드는 쓸 수 없습니다.
+  const reset = await api.auth.resetRecoveryCode('password9');
+  await api.auth.signOut();
+  await expect(
+    api.auth.recover({ username: 'recover1', code: next.recoveryCode!, password: 'password7' }),
+  ).rejects.toThrow('Invalid recovery code');
+  await api.auth.recover({
+    username: 'recover1',
+    code: reset.recoveryCode!,
+    password: 'password7',
+  });
+  await expect(api.auth.resetRecoveryCode('wrong-pass')).rejects.toThrow();
+});
+
+it('복구 코드를 5번 틀리면 15분 동안 맞는 코드도 받지 않습니다', async () => {
+  await api.auth.signOut();
+  const { recoveryCode } = await api.auth.signUp({
+    username: 'recover2',
+    password: 'password1',
+    nickname: '잠금',
+    name: '',
+  });
+  await api.auth.signOut();
+  for (let i = 0; i < 5; i += 1) {
+    await expect(
+      api.auth.recover({ username: 'recover2', code: 'AAAABBBBCCCC', password: 'password2' }),
+    ).rejects.toThrow('Invalid recovery code');
+  }
+  await expect(
+    api.auth.recover({ username: 'recover2', code: recoveryCode!, password: 'password2' }),
+  ).rejects.toThrow('Recovery locked');
+  jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 15 * 60 * 1000 + 1);
+  await api.auth.recover({ username: 'recover2', code: recoveryCode!, password: 'password2' });
+  jest.mocked(Date.now).mockRestore();
+});
+
 it('이름과 주소로 검색합니다', async () => {
   expect((await api.search.places('쿠스')).map((item) => item.name)).toContain('쿠스코');
   expect(await api.search.places('없는장소')).toEqual([]);

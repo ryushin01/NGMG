@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isRecoveryCode, normalizeRecoveryCode } from '@/shared/lib';
 
 /** 아이디는 영문 소문자로 맞춰 저장합니다. 대문자로 입력해도 같은 아이디입니다. */
 export const username = z
@@ -34,3 +35,19 @@ export const changePasswordSchema = z
   })
   .refine(samePassword, mismatch);
 export const profileSchema = z.object({ nickname, name: realName });
+
+export const recoverSchema = z
+  .object({
+    username,
+    code: z
+      .string()
+      .min(1, '복구 코드를 입력해 주세요.')
+      .refine(isRecoveryCode, '복구 코드는 영문과 숫자 12자입니다.')
+      .transform(normalizeRecoveryCode),
+    password,
+    passwordConfirm: z.string(),
+  })
+  .refine(samePassword, mismatch);
+export const currentPasswordSchema = z.object({
+  current: z.string().min(1, '지금 비밀번호를 입력해 주세요.'),
+});

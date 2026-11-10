@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { useSessionBootstrap, useSessionStore } from '@/entities/session';
 // 백그라운드 도착 작업은 앱이 깨어날 때 가장 먼저 정의되어야 하므로 루트에서 불러옵니다.
 import { useNotificationLink } from '@/features/arrival-alert';
+import { RecoveryCodeModal } from '@/features/auth';
 import { useAppFonts, useColors } from '@/shared/ui';
 import { Providers } from './providers';
 
@@ -68,12 +69,16 @@ const Navigator = () => {
           <Stack.Screen name="sync" />
           <Stack.Screen name="profile-edit" />
           <Stack.Screen name="password" />
+          <Stack.Screen name="recovery-code" />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="sign-up" />
+          <Stack.Screen name="recover" />
         </Stack.Protected>
       </Stack>
+      {/* 가입·복구·다시 발급 직후 한 번만 복구 코드를 보여 줍니다. */}
+      <RecoveryCodeModal />
     </>
   );
 };

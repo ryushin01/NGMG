@@ -11,6 +11,8 @@ const B = '00000000-0000-0000-0000-00000000000b';
 const db = new PGlite();
 await db.exec(`
   create role authenticated nologin;
+  create role service_role nologin;
+  create role anon nologin;
   create schema auth;
   create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb);
   create function auth.uid() returns uuid language sql stable as
@@ -33,9 +35,20 @@ for (const file of readdirSync(migrations).sort()) {
   await db.exec(readFileSync(new URL(file, migrations), 'utf8'));
 }
 await db.exec(`
-  grant usage on schema public to authenticated;
+  grant usage on schema public to authenticated, service_role;
   grant all on all tables in schema public to authenticated;
+  grant usage on schema private to service_role;
+  grant all on all tables in schema private to service_role;
 `);
+
+const asService = async (sql, params) => {
+  await db.exec('reset role; set role service_role;');
+  try {
+    return await db.query(sql, params);
+  } finally {
+    await db.exec('reset role');
+  }
+};
 
 const as = async (uid, sql, params) => {
   await db.exec(`reset role; set test.uid = '${uid}'; set role authenticated;`);
@@ -233,4 +246,36 @@ test('닉네임이 없거나 맞지 않으면 이메일 앞부분이나 여행�
   );
   assert.equal((await as(D, 'select nickname from public.profiles')).rows[0].nickname, 'traveler');
   assert.equal((await as(E, 'select nickname from public.profiles')).rows[0].nickname, '여행자');
+});
+
+test('복구 코드는 본인만 저장하고, 확인은 서비스 키로만 하며 5번 틀리면 잠깁니다', async () => {
+  const F = '00000000-0000-0000-0000-00000000000f';
+  const hash = (c) => c.repeat(64);
+  await db.exec(`insert into auth.users values ('${F}', 'frank@users.newworld.app', null)`);
+  await as(F, `select public.set_recovery_code('${hash('a')}')`);
+  // 해시가 든 private 스키마와 확인 함수는 앱(authenticated)에서 쓸 수 없습니다.
+  await assert.rejects(as(F, 'select * from private.recovery_codes'));
+  await assert.rejects(as(F, `select public.verify_recovery_code('frank', '${hash('a')}')`));
+  await assert.rejects(as(F, `select public.set_recovery_code('not-a-hash')`), /check/);
+
+  const verify = async (code) =>
+    (await asService(`select public.verify_recovery_code('frank', '${hash(code)}') as id`)).rows[0]
+      .id;
+  assert.equal(await verify('a'), F);
+  for (let i = 0; i < 4; i += 1) assert.equal(await verify('b'), null);
+  assert.equal(await verify('a'), F, '4번까지는 맞는 코드로 풀립니다');
+  for (let i = 0; i < 5; i += 1) assert.equal(await verify('b'), null);
+  await assert.rejects(verify('a'), /Recovery locked/);
+  assert.equal(await verify('a').catch(() => 'locked'), 'locked');
+
+  await asService(`update private.recovery_codes set locked_until = null where user_id = '${F}'`);
+  await asService(`select public.replace_recovery_code('${F}', '${hash('c')}')`);
+  assert.equal(await verify('a'), null, '쓴 코드는 버립니다');
+  assert.equal(await verify('c'), F);
+  assert.equal(await verify('c').then(() => 'ok'), 'ok');
+  assert.equal(
+    (await asService(`select public.verify_recovery_code('nobody', '${hash('c')}') as id`)).rows[0]
+      .id,
+    null,
+  );
 });
