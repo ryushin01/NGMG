@@ -72,15 +72,20 @@ const ProfileEditForm = ({
     >
       <YStack alignItems="center" gap={12}>
         <ProfileAvatar nickname={typedNickname || initial.nickname} uri={preview} size={112} />
-        <XStack gap={8}>
-          <Button testID="avatar-pick" variant="outline" label="사진 고르기" onPress={pick} />
+        {/* 버튼이 글자 폭으로 줄어들지 않도록 가로를 나눠 채웁니다. */}
+        <XStack gap={8} alignSelf="stretch">
+          <View flex={1}>
+            <Button testID="avatar-pick" variant="outline" label="사진 고르기" onPress={pick} />
+          </View>
           {preview ? (
-            <Button
-              testID="avatar-remove"
-              variant="outline"
-              label="사진 지우기"
-              onPress={() => setAvatar(null)}
-            />
+            <View flex={1}>
+              <Button
+                testID="avatar-remove"
+                variant="outline"
+                label="사진 지우기"
+                onPress={() => setAvatar(null)}
+              />
+            </View>
           ) : null}
         </XStack>
       </YStack>

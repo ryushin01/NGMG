@@ -26,11 +26,25 @@ type FormFieldProps<T extends FieldValues> = {
 // 비밀번호 칸이 둘이면 iOS가 강력한 암호 시트를 입력 중에 다시 띄워 글자 입력을 끊습니다.
 // 앱에 연결된 도메인이 없어 그 암호를 저장해 쓸 수도 없으므로 새 비밀번호는 시트가 뜨지 않는 유형을 씁니다.
 const KIND_PROPS = {
-  username: { textContentType: 'username', autoComplete: 'username', autoCapitalize: 'none' },
-  password: { textContentType: 'password', autoComplete: 'current-password', secret: true },
-  'new-password': { textContentType: 'oneTimeCode', autoComplete: 'new-password', secret: true },
-  nickname: { textContentType: 'nickname', autoComplete: 'nickname', autoCapitalize: 'none' },
-  name: { textContentType: 'name', autoComplete: 'name', autoCapitalize: 'none' },
+  username: {
+    textContentType: 'username',
+    autoComplete: 'username',
+    keyboardType: 'ascii-capable',
+  },
+  password: {
+    textContentType: 'password',
+    autoComplete: 'current-password',
+    keyboardType: 'default',
+    secret: true,
+  },
+  'new-password': {
+    textContentType: 'oneTimeCode',
+    autoComplete: 'new-password',
+    keyboardType: 'default',
+    secret: true,
+  },
+  nickname: { textContentType: 'nickname', autoComplete: 'nickname', keyboardType: 'default' },
+  name: { textContentType: 'name', autoComplete: 'name', keyboardType: 'default' },
 } as const;
 
 export const FormField = <T extends FieldValues>({
@@ -172,6 +186,7 @@ export const SignUpForm = () => {
         kind="name"
         required={false}
         hint="본인만 볼 수 있습니다."
+        onSubmit={submit}
       />
       <AppText size="caption" tone="muted">
         이메일 없이 가입하므로 비밀번호를 잊으면 찾을 수 없습니다. 로그인한 상태에서는 MY에서

@@ -104,16 +104,22 @@ appId: com.ryushin01.newworld
 - inputText: otheruser
 - tapOn:
     id: field-password
+- runFlow: server/_close-password-sheet.yaml
+- tapOn:
+    id: field-password
 - inputText: other-password
+- tapOn:
+    id: field-passwordConfirm
+- runFlow: server/_close-password-sheet.yaml
 - tapOn:
     id: field-passwordConfirm
 - inputText: other-password
 - tapOn:
     id: field-nickname
 - inputText: 다른여행자
+# 키보드가 가입 버튼을 가리므로 키보드의 다음 키로 닫은 뒤 누릅니다.
+- pressKey: Enter
 - runFlow: _hide-keyboard-android.yaml
-# 시스템 키보드 닫기 명령이 간헐적으로 실패해 글자가 없는 곳을 눌러 닫습니다.
-- tapOn: 회원가입
 - tapOn:
     id: sign-up-submit
 - runFlow:

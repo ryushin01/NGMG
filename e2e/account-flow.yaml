@@ -18,7 +18,7 @@ appId: com.ryushin01.newworld
 - assertVisible: '.*구름이 걷히던 아침.*'
 - tapOn:
     id: tab-my
-- assertVisible: '@guest'
+- assertVisible: 둘러보는 여행자, 아이디 guest
 - scrollUntilVisible:
     element:
       id: sign-out
