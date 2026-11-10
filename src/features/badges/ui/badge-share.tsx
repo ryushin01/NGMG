@@ -6,11 +6,11 @@ import { View, XStack, YStack } from 'tamagui';
 import { useCaptureShare } from '@/shared/lib';
 import { Button } from '@/shared/ui';
 import type { BadgeStatus } from '../model/badges';
-import { BadgeCard } from './badge-card';
+import { BadgeCard, type BadgeOwner } from './badge-card';
 
 type BadgeShareContentProps = {
   statuses: BadgeStatus[];
-  owner?: string;
+  owner?: BadgeOwner;
   /** 닫기 버튼의 글자. 축하 창 안에서는 '뒤로'로 씁니다. */
   closeLabel?: string;
   onClose: () => void;
@@ -62,7 +62,7 @@ export const BadgeShareContent = ({
 
 type BadgeShareProps = {
   statuses: BadgeStatus[];
-  owner?: string;
+  owner?: BadgeOwner;
   visible: boolean;
   onClose: () => void;
 };

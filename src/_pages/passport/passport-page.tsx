@@ -9,7 +9,7 @@ import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
 import { DESTINATIONS, Stamp } from '@/entities/destination';
-import { useProfile } from '@/entities/profile';
+import { ProfileAvatar, useProfile } from '@/entities/profile';
 import { usePlaces } from '@/entities/place';
 import { BadgeMedal, BadgeShare, evaluateBadges } from '@/features/badges';
 import { savedByCatalogId } from '@/features/destination-save';
@@ -24,7 +24,8 @@ export const PassportPage = () => {
   const router = useRouter();
   const places = usePlaces();
   const checkins = useCheckins();
-  const nickname = useProfile().data?.nickname;
+  const profile = useProfile().data;
+  const nickname = profile?.nickname;
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
@@ -96,9 +97,14 @@ export const PassportPage = () => {
             padding={20}
           >
             <YStack gap={14}>
-              <AppText size="headline" tone="inverse">
-                {nickname ? `${nickname}의 신세계 여행 여권` : '신세계 여행 여권'}
-              </AppText>
+              <XStack gap={12} alignItems="center">
+                {profile ? (
+                  <ProfileAvatar nickname={profile.nickname} uri={profile.avatarUrl} size={52} />
+                ) : null}
+                <AppText size="headline" tone="inverse" flex={1}>
+                  {nickname ? `${nickname}의 신세계 여행 여권` : '신세계 여행 여권'}
+                </AppText>
+              </XStack>
               <AppText tone="inverse" testID="passport-summary">
                 실존 유적 {count('real')} · 환상 세계 {count('fantasy')}
               </AppText>
@@ -157,7 +163,7 @@ export const PassportPage = () => {
       </ScrollView>
       <BadgeShare
         statuses={badges}
-        owner={nickname}
+        owner={profile}
         visible={badgeShareOpen}
         onClose={() => setBadgeShareOpen(false)}
       />

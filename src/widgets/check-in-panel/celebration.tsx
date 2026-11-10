@@ -27,7 +27,7 @@ export const Celebration = ({
   onClose,
   onOpenPassport,
 }: CelebrationProps) => {
-  const owner = useProfile().data?.nickname;
+  const owner = useProfile().data;
   // 새 모달을 겹치지 않고 같은 창을 뱃지 카드 화면으로 바꿉니다.
   const [sharing, setSharingState] = useState(false);
   const setSharing = (next: boolean) => {
