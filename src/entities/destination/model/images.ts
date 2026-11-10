@@ -3,7 +3,7 @@ import type { Destination } from './types';
 
 export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'imageCredit'>> = {
   'abu-simbel': {
-    image: require('~/assets/destinations/abu-simbel.jpg'),
+    image: require('~/assets/destinations/abu-simbel.webp'),
     imageCredit: {
       author: 'youssef_alam',
       license: 'CC BY 3.0',
@@ -11,7 +11,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   acropolis: {
-    image: require('~/assets/destinations/acropolis.jpg'),
+    image: require('~/assets/destinations/acropolis.webp'),
     imageCredit: {
       author: 'Giles Laurent',
       license: 'CC BY-SA 4.0',
@@ -19,7 +19,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'angkor-wat': {
-    image: require('~/assets/destinations/angkor-wat.jpg'),
+    image: require('~/assets/destinations/angkor-wat.webp'),
     imageCredit: {
       author: 'Bjørn Christian Tørrissen',
       license: 'CC BY-SA 4.0',
@@ -27,7 +27,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   arcadia: {
-    image: require('~/assets/destinations/arcadia.jpg'),
+    image: require('~/assets/destinations/arcadia.webp'),
     imageCredit: {
       author: 'Thomas Cole',
       license: 'Public domain',
@@ -35,7 +35,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   asgard: {
-    image: require('~/assets/destinations/asgard.jpg'),
+    image: require('~/assets/destinations/asgard.webp'),
     imageCredit: {
       author: 'Emil Doepler',
       license: 'Public domain',
@@ -43,7 +43,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   atlantis: {
-    image: require('~/assets/destinations/atlantis.jpg'),
+    image: require('~/assets/destinations/atlantis.webp'),
     imageCredit: {
       author: 'Athanasius Kircher',
       license: 'Public domain',
@@ -51,7 +51,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   avalon: {
-    image: require('~/assets/destinations/avalon.jpg'),
+    image: require('~/assets/destinations/avalon.webp'),
     imageCredit: {
       author: 'Edward Burne-Jones',
       license: 'Public domain',
@@ -59,7 +59,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   bagan: {
-    image: require('~/assets/destinations/bagan.jpg'),
+    image: require('~/assets/destinations/bagan.webp'),
     imageCredit: {
       author: 'Corto Maltese 1999',
       license: 'CC BY 2.0',
@@ -67,7 +67,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   borobudur: {
-    image: require('~/assets/destinations/borobudur.jpg'),
+    image: require('~/assets/destinations/borobudur.webp'),
     imageCredit: {
       author: 'Heri nugroho',
       license: 'CC BY-SA 4.0',
@@ -75,7 +75,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   camelot: {
-    image: require('~/assets/destinations/camelot.jpg'),
+    image: require('~/assets/destinations/camelot.webp'),
     imageCredit: {
       author: 'Gustave Doré',
       license: 'Public domain',
@@ -83,7 +83,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   carthage: {
-    image: require('~/assets/destinations/carthage.jpg'),
+    image: require('~/assets/destinations/carthage.webp'),
     imageCredit: {
       author: 'Tamerlan Dulaev',
       license: 'CC BY-SA 4.0',
@@ -91,7 +91,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'chichen-itza': {
-    image: require('~/assets/destinations/chichen-itza.jpg'),
+    image: require('~/assets/destinations/chichen-itza.webp'),
     imageCredit: {
       author: 'Daniel Schwen',
       license: 'CC BY-SA 4.0',
@@ -99,7 +99,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   cibola: {
-    image: require('~/assets/destinations/cibola.jpg'),
+    image: require('~/assets/destinations/cibola.webp'),
     imageCredit: {
       author: 'Frederic Remington',
       license: 'Public domain',
@@ -107,7 +107,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   colosseum: {
-    image: require('~/assets/destinations/colosseum.jpg'),
+    image: require('~/assets/destinations/colosseum.webp'),
     imageCredit: {
       author: 'FeaturedPics',
       license: 'CC BY-SA 4.0',
@@ -115,7 +115,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'el-dorado': {
-    image: require('~/assets/destinations/el-dorado.jpg'),
+    image: require('~/assets/destinations/el-dorado.webp'),
     imageCredit: {
       author: 'Camilo.Errante',
       license: 'CC BY-SA 4.0',
@@ -123,7 +123,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   elysion: {
-    image: require('~/assets/destinations/elysion.jpg'),
+    image: require('~/assets/destinations/elysion.webp'),
     imageCredit: {
       author: 'Christina Gkioka',
       license: 'CC BY-SA 4.0',
@@ -131,7 +131,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   ephesus: {
-    image: require('~/assets/destinations/ephesus.jpg'),
+    image: require('~/assets/destinations/ephesus.webp'),
     imageCredit: {
       author: 'Benh LIEU SONG',
       license: 'CC BY-SA 3.0',
@@ -139,7 +139,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   giza: {
-    image: require('~/assets/destinations/giza.jpg'),
+    image: require('~/assets/destinations/giza.webp'),
     imageCredit: {
       author: 'KennyOMG',
       license: 'CC BY-SA 4.0',
@@ -147,7 +147,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'gobekli-tepe': {
-    image: require('~/assets/destinations/gobekli-tepe.jpg'),
+    image: require('~/assets/destinations/gobekli-tepe.webp'),
     imageCredit: {
       author: 'Teomancimit',
       license: 'CC BY-SA 3.0',
@@ -155,7 +155,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'great-zimbabwe': {
-    image: require('~/assets/destinations/great-zimbabwe.jpg'),
+    image: require('~/assets/destinations/great-zimbabwe.webp'),
     imageCredit: {
       author: 'Andrew Moore',
       license: 'CC BY-SA 2.0',
@@ -163,7 +163,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   gyeongju: {
-    image: require('~/assets/destinations/gyeongju.jpg'),
+    image: require('~/assets/destinations/gyeongju.webp'),
     imageCredit: {
       author: '작자 미상',
       license: 'Public domain',
@@ -171,7 +171,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   hampi: {
-    image: require('~/assets/destinations/hampi.jpg'),
+    image: require('~/assets/destinations/hampi.webp'),
     imageCredit: {
       author: 'iMahesh',
       license: 'CC BY-SA 4.0',
@@ -179,7 +179,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   ieodo: {
-    image: require('~/assets/destinations/ieodo.jpg'),
+    image: require('~/assets/destinations/ieodo.webp'),
     imageCredit: {
       author: '해양과학기지_Korea Ocean Research Station',
       license: 'CC BY 3.0',
@@ -187,7 +187,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   karnak: {
-    image: require('~/assets/destinations/karnak.jpg'),
+    image: require('~/assets/destinations/karnak.webp'),
     imageCredit: {
       author: 'René Hourdry',
       license: 'CC BY-SA 4.0',
@@ -195,7 +195,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   knossos: {
-    image: require('~/assets/destinations/knossos.jpg'),
+    image: require('~/assets/destinations/knossos.webp'),
     imageCredit: {
       author: 'Moonik',
       license: 'CC BY-SA 3.0',
@@ -203,7 +203,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   kunlun: {
-    image: require('~/assets/destinations/kunlun.jpg'),
+    image: require('~/assets/destinations/kunlun.webp'),
     imageCredit: {
       author: '작자 미상',
       license: 'CC BY-SA 3.0',
@@ -211,7 +211,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'machu-picchu': {
-    image: require('~/assets/destinations/machu-picchu.jpg'),
+    image: require('~/assets/destinations/machu-picchu.webp'),
     imageCredit: {
       author: 'Draceane',
       license: 'CC BY-SA 4.0',
@@ -219,7 +219,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   nazca: {
-    image: require('~/assets/destinations/nazca.jpg'),
+    image: require('~/assets/destinations/nazca.webp'),
     imageCredit: {
       author: 'Diego Delso',
       license: 'CC BY-SA 4.0',
@@ -227,7 +227,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   olympus: {
-    image: require('~/assets/destinations/olympus.jpg'),
+    image: require('~/assets/destinations/olympus.webp'),
     imageCredit: {
       author: 'kallerna',
       license: 'CC BY-SA 4.0',
@@ -235,7 +235,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'peach-blossom': {
-    image: require('~/assets/destinations/peach-blossom.jpg'),
+    image: require('~/assets/destinations/peach-blossom.webp'),
     imageCredit: {
       author: 'Zhang Hong',
       license: 'CC0',
@@ -243,7 +243,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   penglai: {
-    image: require('~/assets/destinations/penglai.jpg'),
+    image: require('~/assets/destinations/penglai.webp'),
     imageCredit: {
       author: 'Fanghong',
       license: 'CC BY-SA 3.0',
@@ -251,7 +251,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   petra: {
-    image: require('~/assets/destinations/petra.jpg'),
+    image: require('~/assets/destinations/petra.webp'),
     imageCredit: {
       author: 'Azurfrog',
       license: 'CC BY-SA 3.0',
@@ -259,7 +259,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   pompeii: {
-    image: require('~/assets/destinations/pompeii.jpg'),
+    image: require('~/assets/destinations/pompeii.webp'),
     imageCredit: {
       author: 'Carsten Steger',
       license: 'CC BY-SA 4.0',
@@ -267,7 +267,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'rapa-nui': {
-    image: require('~/assets/destinations/rapa-nui.jpg'),
+    image: require('~/assets/destinations/rapa-nui.webp'),
     imageCredit: {
       author: 'Ian Sewell',
       license: 'CC BY 2.5',
@@ -275,7 +275,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   shambhala: {
-    image: require('~/assets/destinations/shambhala.jpg'),
+    image: require('~/assets/destinations/shambhala.webp'),
     imageCredit: {
       author: '작자 미상',
       license: 'CC BY 4.0',
@@ -283,7 +283,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'shangri-la': {
-    image: require('~/assets/destinations/shangri-la.jpg'),
+    image: require('~/assets/destinations/shangri-la.webp'),
     imageCredit: {
       author: 'Colin W',
       license: 'CC BY-SA 3.0',
@@ -291,7 +291,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   stonehenge: {
-    image: require('~/assets/destinations/stonehenge.jpg'),
+    image: require('~/assets/destinations/stonehenge.webp'),
     imageCredit: {
       author: 'garethwiscombe',
       license: 'CC BY 2.0',
@@ -299,7 +299,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   sumeru: {
-    image: require('~/assets/destinations/sumeru.jpg'),
+    image: require('~/assets/destinations/sumeru.webp'),
     imageCredit: {
       author: 'Ondřej Žváček',
       license: 'CC BY 2.5',
@@ -307,7 +307,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   takamagahara: {
-    image: require('~/assets/destinations/takamagahara.jpg'),
+    image: require('~/assets/destinations/takamagahara.webp'),
     imageCredit: {
       author: 'Utagawa Kunisada (歌川国貞)',
       license: 'Public domain',
@@ -315,7 +315,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   teotihuacan: {
-    image: require('~/assets/destinations/teotihuacan.jpg'),
+    image: require('~/assets/destinations/teotihuacan.webp'),
     imageCredit: {
       author: 'Hdlrosa',
       license: 'CC BY-SA 4.0',
@@ -323,7 +323,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   terracotta: {
-    image: require('~/assets/destinations/terracotta.jpg'),
+    image: require('~/assets/destinations/terracotta.webp'),
     imageCredit: {
       author: 'xiquinhosilva',
       license: 'CC BY 2.0',
@@ -331,7 +331,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   thule: {
-    image: require('~/assets/destinations/thule.jpg'),
+    image: require('~/assets/destinations/thule.webp'),
     imageCredit: {
       author: 'Olaus Magnus',
       license: 'Public domain',
@@ -339,7 +339,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   tikal: {
-    image: require('~/assets/destinations/tikal.jpg'),
+    image: require('~/assets/destinations/tikal.webp'),
     imageCredit: {
       author: 'Mundo Maya',
       license: 'CC BY-SA 4.0',
@@ -347,7 +347,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'tir-na-nog': {
-    image: require('~/assets/destinations/tir-na-nog.jpg'),
+    image: require('~/assets/destinations/tir-na-nog.webp'),
     imageCredit: {
       author: 'Arthur Rackham',
       license: 'Public domain',
@@ -355,7 +355,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   utopia: {
-    image: require('~/assets/destinations/utopia.jpg'),
+    image: require('~/assets/destinations/utopia.webp'),
     imageCredit: {
       author: 'Original uploader was Marcok at it.wikipedia',
       license: 'Public domain',
@@ -363,7 +363,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   eden: {
-    image: require('~/assets/destinations/eden.jpg'),
+    image: require('~/assets/destinations/eden.webp'),
     imageCredit: {
       author: 'Thomas Cole',
       license: 'Public domain',
@@ -371,7 +371,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   dilmun: {
-    image: require('~/assets/destinations/dilmun.jpg'),
+    image: require('~/assets/destinations/dilmun.webp'),
     imageCredit: {
       author: 'Beireke1',
       license: 'CC0',
@@ -379,7 +379,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   aaru: {
-    image: require('~/assets/destinations/aaru.jpg'),
+    image: require('~/assets/destinations/aaru.webp'),
     imageCredit: {
       author: 'Charles K. Wilkinson (Metropolitan Museum of Art)',
       license: 'CC0',
@@ -387,7 +387,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   hades: {
-    image: require('~/assets/destinations/hades.jpg'),
+    image: require('~/assets/destinations/hades.webp'),
     imageCredit: {
       author: 'Joachim Patinir',
       license: 'Public domain',
@@ -395,7 +395,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   valhalla: {
-    image: require('~/assets/destinations/valhalla.jpg'),
+    image: require('~/assets/destinations/valhalla.webp'),
     imageCredit: {
       author: 'Avda',
       license: 'CC BY-SA 3.0',
@@ -403,7 +403,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   yomi: {
-    image: require('~/assets/destinations/yomi.jpg'),
+    image: require('~/assets/destinations/yomi.webp'),
     imageCredit: {
       author: 'ChiefHira',
       license: 'CC BY-SA 3.0',
@@ -411,7 +411,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   xibalba: {
-    image: require('~/assets/destinations/xibalba.jpg'),
+    image: require('~/assets/destinations/xibalba.webp'),
     imageCredit: {
       author: 'Antti T. Nissinen',
       license: 'CC BY 2.0',
@@ -419,7 +419,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   aztlan: {
-    image: require('~/assets/destinations/aztlan.jpg'),
+    image: require('~/assets/destinations/aztlan.webp'),
     imageCredit: {
       author: 'Luis Méndez Covarrubias',
       license: 'CC BY-SA 4.0',
@@ -427,7 +427,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   ys: {
-    image: require('~/assets/destinations/ys.jpg'),
+    image: require('~/assets/destinations/ys.webp'),
     imageCredit: {
       author: 'Évariste-Vital Luminais',
       license: 'Public domain',
@@ -435,7 +435,7 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
     },
   },
   'nirai-kanai': {
-    image: require('~/assets/destinations/nirai-kanai.jpg'),
+    image: require('~/assets/destinations/nirai-kanai.webp'),
     imageCredit: {
       author: 'そらみみ',
       license: 'CC BY-SA 4.0',

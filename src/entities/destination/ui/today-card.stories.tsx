@@ -9,7 +9,7 @@ const meta = {
       id: 'petra',
       name: '페트라',
       tagline: '붉은 사암을 깎아 만든 나바테아의 도시',
-      image: require('~/assets/destinations/petra.jpg'),
+      image: require('~/assets/destinations/petra.webp'),
     } as Destination,
     onPress: () => undefined,
   },
