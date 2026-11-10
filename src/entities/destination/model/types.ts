@@ -25,12 +25,18 @@ type DestinationBase = {
 
 export type RealDestination = DestinationBase & {
   realm: 'real';
+  /** 역사: 신화·전설이 얽힌 유적 / 사실: 기록과 발굴로만 알려진 유적 */
+  lore: 'history' | 'fact';
+  /** 역사로 분류한 이유가 된 신화·전설 한 줄 */
+  loreNote?: string;
   bestSeason: string;
   tips: string[];
 };
 
 export type FantasyDestination = DestinationBase & {
   realm: 'fantasy';
+  /** 신화: 신과 창세·낙원·저승의 이야기 / 전설: 영웅, 사라진 도시, 민간 전승, 문학에서 나온 곳 */
+  lore: 'myth' | 'legend';
   /** 처음 기록된 문헌이나 전승 */
   origin: string;
   /** 지도 핀이 실제로 무엇을 뜻하는지 */

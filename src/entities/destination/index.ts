@@ -1,7 +1,15 @@
 export { COURSES, findCourse, type Course } from './model/courses';
 export { pickDaily } from './model/daily';
 export { linksOf } from './model/links';
-export { MYTH_SPACE_LABELS, MYTH_SPACES, mythSpaceOf, type MythSpace } from './model/myth';
+export {
+  LORE_LABELS,
+  LORES_BY_REALM,
+  MYTH_SPACE_LABELS,
+  MYTH_SPACES,
+  mythSpaceOf,
+  type Lore,
+  type MythSpace,
+} from './model/myth';
 export { READING_LINKS } from './model/reading';
 export { TIMELINE_YEARS } from './model/timeline';
 export {

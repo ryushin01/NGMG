@@ -19,6 +19,9 @@ appId: com.ryushin01.newworld
     visible:
       id: world-search-fantasy
     timeout: 8000
+# 아발론은 전설로 분류됩니다.
+- tapOn:
+    id: world-lore-legend
 - tapOn:
     id: world-search-fantasy
 - inputText: 아발론

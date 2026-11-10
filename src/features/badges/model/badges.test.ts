@@ -7,7 +7,17 @@ jest.mock('@/entities/destination', () => {
     afterlife: ['hades', 'yomi', 'xibalba'],
     divine: [],
   };
-  const make = (id: string, realm: string, group: string) => ({ id, realm, group });
+  const make = (
+    id: string,
+    realm: string,
+    group: string,
+    lore = realm === 'real' ? 'fact' : 'myth',
+  ) => ({
+    id,
+    realm,
+    group,
+    lore,
+  });
   return {
     DESTINATIONS: [
       make('giza', 'real', '아프리카'),
@@ -16,8 +26,8 @@ jest.mock('@/entities/destination', () => {
       make('colosseum', 'real', '유럽'),
       make('rapa', 'real', '오세아니아'),
       make('stonehenge', 'real', '유럽'),
-      make('avalon', 'fantasy', '켈트·아서왕'),
-      make('camelot', 'fantasy', '켈트·아서왕'),
+      make('avalon', 'fantasy', '켈트·아서왕', 'legend'),
+      make('camelot', 'fantasy', '켈트·아서왕', 'legend'),
       make('eden', 'fantasy', '중동·이집트'),
       make('elysion', 'fantasy', '그리스·로마'),
       make('hades', 'fantasy', '그리스·로마'),

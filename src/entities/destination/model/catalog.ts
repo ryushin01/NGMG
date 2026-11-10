@@ -1,3 +1,4 @@
+import { LORE_LABELS } from './myth';
 import type { PlaceKind } from '@/shared/api';
 import { FANTASY_DESTINATIONS } from './catalog-fantasy';
 import { REAL_DESTINATIONS } from './catalog-real';
@@ -26,8 +27,8 @@ export const searchDestinations = (keyword: string, realm?: PlaceKind) => {
     (item) =>
       (!realm || item.realm === realm) &&
       (!term ||
-        [item.name, item.originalName, item.location, item.tagline].some((value) =>
-          value.toLowerCase().includes(term),
+        [item.name, item.originalName, item.location, item.tagline, LORE_LABELS[item.lore]].some(
+          (value) => value.toLowerCase().includes(term),
         )),
   );
 };

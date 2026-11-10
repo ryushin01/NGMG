@@ -28,9 +28,19 @@ it('코스의 경유지가 겹치지 않습니다', () => {
   for (const course of COURSES) expect(new Set(course.stops).size).toBe(course.stops.length);
 });
 
-it('신화 속 공간은 환상 세계이고 한 갈래에만 속합니다', () => {
+it('신화 공간은 신화로 분류된 곳이고 한 갈래에만 속합니다', () => {
   const all = Object.values(MYTH_SPACES).flat();
   expect(new Set(all).size).toBe(all.length);
-  const fantasy = new Set(FANTASY_DESTINATIONS.map((item) => item.id));
-  for (const id of all) expect(fantasy).toContain(id);
+  const myth = new Set(
+    FANTASY_DESTINATIONS.filter((item) => item.lore === 'myth').map((item) => item.id),
+  );
+  for (const id of all) expect(myth).toContain(id);
+});
+
+it('실존은 역사·사실, 환상은 신화·전설로 나누고 역사에는 얽힌 이야기를 답니다', () => {
+  for (const item of REAL_DESTINATIONS) {
+    expect(['history', 'fact']).toContain(item.lore);
+    if (item.lore === 'history') expect(item.loreNote).toBeTruthy();
+  }
+  for (const item of FANTASY_DESTINATIONS) expect(['myth', 'legend']).toContain(item.lore);
 });

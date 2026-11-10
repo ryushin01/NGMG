@@ -141,6 +141,7 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 사진은 위키미디어 공용의 Public domain, CC0, CC BY, CC BY-SA 파일만 800px로 줄여 `assets/destinations/`에 넣고, 저작자·라이선스·원본 링크를 `images.ts`에 함께 둡니다.
 - 환상 세계의 좌표는 실제 위치가 아니라 전승과 이어진 현실의 장소이며, 화면의 `locationNote`로 알립니다.
 - 입장 조건과 여행경보는 자주 바뀌므로 단정하지 않고 공식 안내를 확인하도록 안내합니다.
+- 분류(`lore`)는 환상 세계가 `myth`(신과 창세·낙원·저승)·`legend`(영웅, 사라진 도시, 민간 전승, 문학), 실존 유적이 `history`(신화·전설이 얽힌 곳, `loreNote`에 근거 한 줄)·`fact`입니다.
 - 전설과 실제 장소의 연결은 `links.ts`, 코스는 `courses.ts`, 연대표 정렬은 `timeline.ts`, 원전 링크는 `reading.ts`에 있습니다.
 
 ## 현장 인증과 뱃지

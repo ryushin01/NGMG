@@ -1,10 +1,4 @@
-import {
-  COURSES,
-  DESTINATIONS,
-  MYTH_SPACES,
-  mythSpaceOf,
-  type Destination,
-} from '@/entities/destination';
+import { COURSES, DESTINATIONS, MYTH_SPACES, type Destination } from '@/entities/destination';
 import type { CheckIn } from '@/shared/api';
 
 export type BadgeIcon =
@@ -69,7 +63,7 @@ const collector = (count: number, name: string): Badge => ({
 
 const CONTINENTS = ['아프리카', '아메리카', '아시아', '유럽', '오세아니아'];
 
-const isMyth = (item: StampedDestination) => mythSpaceOf(item.destination.id) !== undefined;
+const isMyth = (item: StampedDestination) => item.destination.lore === 'myth';
 const inSpace = (space: keyof typeof MYTH_SPACES) => (item: StampedDestination) =>
   MYTH_SPACES[space].includes(item.destination.id);
 
@@ -78,7 +72,7 @@ const MYTH_BADGES: Badge[] = [
   {
     id: 'myth-gate',
     name: '신화의 문',
-    description: '신화 속 공간의 현실 연고지에서 처음 인증했습니다',
+    description: '신화 속 장소의 현실 연고지에서 처음 인증했습니다',
     icon: 'door',
     tone: 'fantasy',
     progress: (stamped) => countUntil(stamped, 1, isMyth),
@@ -110,7 +104,7 @@ const MYTH_BADGES: Badge[] = [
   {
     id: 'myth-odyssey',
     name: '신화 대모험',
-    description: '신화 속 공간 10곳에서 인증했습니다',
+    description: '신화 속 장소 10곳에서 인증했습니다',
     icon: 'compass',
     tone: 'fantasy',
     progress: (stamped) => countUntil(stamped, 10, isMyth),

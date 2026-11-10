@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { Check, Heart } from 'lucide-react-native';
 import { View, XStack, YStack } from 'tamagui';
 import { AppIcon, AppText, Touchable } from '@/shared/ui';
+import { LORE_LABELS } from '../model/myth';
 import type { Destination } from '../model/types';
 
 type DestinationCardProps = {
@@ -27,7 +28,7 @@ export const DestinationCard = ({
     <Touchable
       testID={`destination-${destination.id}`}
       onPress={onPress}
-      accessibilityLabel={`${destination.name}, ${distance ? `${distance}, ` : ''}${destination.location}, ${destination.tagline}${visited ? ', 다녀옴' : ''}`}
+      accessibilityLabel={`${destination.name}, ${LORE_LABELS[destination.lore]}, ${distance ? `${distance}, ` : ''}${destination.location}, ${destination.tagline}${visited ? ', 다녀옴' : ''}`}
     >
       <YStack gap={10}>
         <View height={190} borderRadius={12} overflow="hidden" backgroundColor="surfaceMuted">
@@ -55,7 +56,7 @@ export const DestinationCard = ({
           </XStack>
           <AppText size="caption" tone="muted" numberOfLines={1}>
             {distance ? `${distance} · ` : ''}
-            {destination.location} · {destination.era}
+            {LORE_LABELS[destination.lore]} · {destination.location} · {destination.era}
           </AppText>
           <AppText numberOfLines={2}>{destination.tagline}</AppText>
         </YStack>
