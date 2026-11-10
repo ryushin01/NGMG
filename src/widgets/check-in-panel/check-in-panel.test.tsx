@@ -44,6 +44,11 @@ it('데모 인증으로 스탬프를 찍으면 축하 화면과 새 뱃지를 �
   expect(screen.getByText('스탬프를 찍었어요')).toBeTruthy();
   expect(screen.getByTestId('badge-first-step')).toBeTruthy();
   expect(screen.getByTestId('badge-legend-walker')).toBeTruthy();
+  await fireEvent.press(screen.getByTestId('checkin-share-badges'));
+  expect(screen.getByTestId('badge-card')).toBeTruthy();
+  expect(screen.getByText(/개 가운데 \d+개를 모았어요/)).toBeTruthy();
+  await fireEvent.press(screen.getByTestId('badge-share-close'));
+  expect(screen.getByText('스탬프를 찍었어요')).toBeTruthy();
   await fireEvent.press(screen.getByTestId('checkin-passport'));
   expect(mockPush).toHaveBeenCalledWith('/passport');
 });

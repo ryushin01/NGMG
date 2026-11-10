@@ -8,10 +8,19 @@ import { Button } from '@/shared/ui';
 import type { BadgeStatus } from '../model/badges';
 import { BadgeCard } from './badge-card';
 
-type BadgeShareProps = { statuses: BadgeStatus[]; visible: boolean; onClose: () => void };
+type BadgeShareContentProps = {
+  statuses: BadgeStatus[];
+  /** 닫기 버튼의 글자. 축하 창 안에서는 '뒤로'로 씁니다. */
+  closeLabel?: string;
+  onClose: () => void;
+};
 
-/** 뱃지 카드를 미리 보여 준 뒤 보이는 그대로 이미지로 찍어 공유합니다. */
-export const BadgeShare = ({ statuses, visible, onClose }: BadgeShareProps) => {
+/** 뱃지 카드와 공유 버튼. 보이는 그대로 이미지로 찍어 공유합니다. 다른 모달 안에도 넣을 수 있습니다. */
+export const BadgeShareContent = ({
+  statuses,
+  closeLabel = '닫기',
+  onClose,
+}: BadgeShareContentProps) => {
   const card = useRef<NativeView>(null);
   const { share, sharing } = useCaptureShare();
   const onShare = async () => {
@@ -20,32 +29,44 @@ export const BadgeShare = ({ statuses, visible, onClose }: BadgeShareProps) => {
     }
   };
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View
-        flex={1}
-        backgroundColor="rgba(0,0,0,0.6)"
-        alignItems="center"
-        justifyContent="center"
-        padding={16}
-        accessibilityViewIsModal
-      >
-        <YStack gap={16} alignItems="center">
-          <BadgeCard ref={card} statuses={statuses} dateLabel={dayjs().format('YYYY. M. D.')} />
-          <XStack gap={8} width={360} maxWidth="100%">
-            <View flex={1}>
-              <Button testID="badge-share-close" variant="outline" label="닫기" onPress={onClose} />
-            </View>
-            <View flex={1}>
-              <Button
-                testID="badge-share-confirm"
-                label="이미지 공유"
-                loading={sharing}
-                onPress={onShare}
-              />
-            </View>
-          </XStack>
-        </YStack>
-      </View>
-    </Modal>
+    <YStack gap={16} alignItems="center">
+      <BadgeCard ref={card} statuses={statuses} dateLabel={dayjs().format('YYYY. M. D.')} />
+      <XStack gap={8} width={360} maxWidth="100%">
+        <View flex={1}>
+          <Button
+            testID="badge-share-close"
+            variant="outline"
+            label={closeLabel}
+            onPress={onClose}
+          />
+        </View>
+        <View flex={1}>
+          <Button
+            testID="badge-share-confirm"
+            label="이미지 공유"
+            loading={sharing}
+            onPress={onShare}
+          />
+        </View>
+      </XStack>
+    </YStack>
   );
 };
+
+type BadgeShareProps = { statuses: BadgeStatus[]; visible: boolean; onClose: () => void };
+
+/** 뱃지 카드를 미리 보여 주는 모달. */
+export const BadgeShare = ({ statuses, visible, onClose }: BadgeShareProps) => (
+  <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <View
+      flex={1}
+      backgroundColor="rgba(0,0,0,0.6)"
+      alignItems="center"
+      justifyContent="center"
+      padding={16}
+      accessibilityViewIsModal
+    >
+      <BadgeShareContent statuses={statuses} onClose={onClose} />
+    </View>
+  </Modal>
+);

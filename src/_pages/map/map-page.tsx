@@ -77,9 +77,13 @@ export const MapPage = () => {
     () =>
       allPlaces.filter(
         (place) =>
-          (filter === 'all' || place.kind === filter) && (!tag || place.tags.includes(tag)),
+          (filter === 'all' ||
+            (filter === 'verified'
+              ? !!place.catalogId && verifiedIds.has(place.catalogId)
+              : place.kind === filter)) &&
+          (!tag || place.tags.includes(tag)),
       ),
-    [allPlaces, filter, tag],
+    [allPlaces, filter, tag, verifiedIds],
   );
   const tags = useMemo(
     () => [...new Set(allPlaces.flatMap((place) => place.tags))].slice(0, 12),

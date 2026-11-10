@@ -5,7 +5,7 @@ import { toast } from 'sonner-native';
 import { XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
 import type { Destination } from '@/entities/destination';
-import { newlyEarned, type BadgeStatus } from '@/features/badges';
+import { evaluateBadges, newlyEarned, type BadgeStatus } from '@/features/badges';
 import { CHECK_IN_RADIUS_KM, useCheckIn } from '@/features/check-in';
 import { isSupabaseConfigured } from '@/shared/config';
 import { formatDay, formatDistance } from '@/shared/lib';
@@ -21,6 +21,7 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
   const [celebration, setCelebration] = useState<{
     checkedAt: string;
     badges: BadgeStatus[];
+    allBadges: BadgeStatus[];
   } | null>(null);
   const mine = checkins.data?.find((item) => item.catalogId === destination.id);
   const fantasy = destination.realm === 'fantasy';
@@ -35,6 +36,7 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
         setCelebration({
           checkedAt: result.checkIn.checkedAt,
           badges: newlyEarned(result.before, result.after),
+          allBadges: evaluateBadges(result.after),
         });
         return;
       case 'already':
@@ -112,6 +114,7 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
         destination={destination}
         checkedAt={celebration?.checkedAt ?? null}
         badges={celebration?.badges ?? []}
+        allBadges={celebration?.allBadges ?? []}
         onClose={() => setCelebration(null)}
         onOpenPassport={() => {
           setCelebration(null);

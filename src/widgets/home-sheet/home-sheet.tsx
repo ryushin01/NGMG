@@ -12,12 +12,14 @@ import type { Place, PlaceKind } from '@/shared/api';
 import { formatDate } from '@/shared/lib';
 import { AppIcon, AppText, Button, Chip, Divider, Tag, Touchable } from '@/shared/ui';
 
-export type KindFilter = PlaceKind | 'all';
+/** verified는 현장 인증한 여행지만 보여 줍니다. */
+export type KindFilter = PlaceKind | 'all' | 'verified';
 
 const FILTERS: { value: KindFilter; label: string }[] = [
   { value: 'all', label: '전체' },
   { value: 'real', label: '실존' },
   { value: 'fantasy', label: '환상' },
+  { value: 'verified', label: '현장 인증' },
 ];
 
 type HomeContentProps = {
@@ -40,7 +42,7 @@ export const HomeContent = ({
   const checklist = useChecklist();
   const checklistSummary = summarizeChecklist(checklist.data ?? []);
   const visible = (records.data ?? [])
-    .filter((record) => filter === 'all' || record.placeKind === filter)
+    .filter((record) => filter === 'all' || filter === 'verified' || record.placeKind === filter)
     .slice(0, 5);
 
   return (
