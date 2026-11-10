@@ -63,9 +63,14 @@ await Promise.all(
     ['', '@2x', '@3x'].map((suffix) => rm(`assets/pins/${name}${suffix}.png`, { force: true })),
   ),
 );
+// 현장 인증한 곳은 오른쪽 위에 흰 원과 체크를 더해 색 없이도 구별합니다.
+const verified = (color) =>
+  `<circle cx="38" cy="10" r="9" fill="#ffffff" stroke="${color}" stroke-width="2.5"/><path d="M33.5 10.2 L36.8 13.4 L42.6 6.8" fill="none" stroke="${color}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>`;
 for (const [name, color, glyph] of [
   ['real', '#a9631f', ruin],
   ['fantasy', '#6a48e8', star],
+  ['real-verified', '#a9631f', ruin + verified('#a9631f')],
+  ['fantasy-verified', '#6a48e8', star + verified('#6a48e8')],
 ]) {
   for (const [suffix, scale] of [
     ['', 1],

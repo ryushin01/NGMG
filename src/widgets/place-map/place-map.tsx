@@ -15,6 +15,8 @@ export type PlaceMapHandle = {
 
 type PlaceMapProps = {
   places: Place[];
+  /** 현장 인증한 여행지의 catalogId */
+  verifiedIds?: ReadonlySet<string>;
   mapType: MapType;
   showsUserLocation: boolean;
   bottomInset: number;
@@ -24,7 +26,16 @@ type PlaceMapProps = {
 };
 
 export const PlaceMap = forwardRef<PlaceMapHandle, PlaceMapProps>(function PlaceMap(
-  { places, mapType, showsUserLocation, bottomInset, onSelectPlace, onPressMap, onLongPressMap },
+  {
+    places,
+    verifiedIds,
+    mapType,
+    showsUserLocation,
+    bottomInset,
+    onSelectPlace,
+    onPressMap,
+    onLongPressMap,
+  },
   ref,
 ) {
   const mapRef = useRef<MapView>(null);
@@ -65,7 +76,10 @@ export const PlaceMap = forwardRef<PlaceMapHandle, PlaceMapProps>(function Place
             testID={`pin-${item.place.id}`}
             coordinate={{ latitude: item.place.latitude, longitude: item.place.longitude }}
             kind={item.place.kind}
-            label={`${KIND_META[item.place.kind].label}, ${item.place.name}`}
+            verified={!!item.place.catalogId && !!verifiedIds?.has(item.place.catalogId)}
+            label={`${KIND_META[item.place.kind].label}, ${item.place.name}${
+              item.place.catalogId && verifiedIds?.has(item.place.catalogId) ? ', 현장 인증' : ''
+            }`}
             onPress={() => onSelectPlace(item.place)}
           />
         ) : (

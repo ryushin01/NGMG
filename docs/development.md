@@ -150,6 +150,7 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 회원마다 여행지 한 곳에 인증 하나만 남깁니다(`checkins`의 `unique(user_id, catalog_id)`). 다시 인증해도 처음 날짜가 유지됩니다.
 - 데모 모드(`.env` 없음)에서는 위치 없이 인증하는 버튼이 따로 나오고, `method = 'demo'`로 저장해 화면에 '데모 인증'으로 표시합니다.
 - 뱃지는 서버에 저장하지 않고 `features/badges`가 인증 목록으로 계산합니다. 신화 모험 뱃지는 `entities/destination/model/myth.ts`의 낙원·저승·신들의 거처 목록을 기준으로 셉니다(화면 분류에는 쓰지 않음). 조건을 채운 인증의 날짜가 획득일이며, 규칙을 바꾸면 기존 인증에도 바로 반영됩니다.
+- 지도에서는 인증한 여행지를 체크가 붙은 핀(`assets/pins/*-verified.png`, `pnpm run assets`로 생성)으로 바꿔 색 없이도 구별합니다.
 - 인증 후 축하 화면은 인증 전후 목록을 비교해 새로 받은 뱃지만 보여 줍니다(`widgets/check-in-panel`).
 - E2E(`e2e/checkin-flow.yaml`)는 Maestro `setLocation`으로 시뮬레이터 위치를 글래스턴베리에 두고 아발론을 인증합니다.
 

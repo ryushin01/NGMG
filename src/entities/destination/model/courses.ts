@@ -38,6 +38,26 @@ export const COURSES: Course[] = [
     summary: '세계의 배꼽이라 불린 섬에서 해가 지지 않는 북쪽 끝까지 갑니다.',
     stops: ['rapa-nui', 'thule', 'asgard'],
   },
+  {
+    id: 'afterlife',
+    title: '저승 순례',
+    summary:
+      '갈대의 들판에서 그리스의 명계와 일본의 요미를 지나 마야의 시발바까지 죽은 이들의 길을 따라갑니다.',
+    stops: ['aaru', 'hades', 'valhalla', 'yomi', 'chichen-itza', 'xibalba'],
+  },
+  {
+    id: 'paradise',
+    title: '잃어버린 낙원',
+    summary: '네 강이 흐르던 동산에서 바다 너머 신의 섬까지, 사람들이 그려 온 낙원을 모읍니다.',
+    stops: ['eden', 'dilmun', 'elysion', 'tir-na-nog', 'nirai-kanai'],
+  },
+  {
+    id: 'mesoamerica',
+    title: '아메리카 신들의 길',
+    summary:
+      '백로의 섬을 떠난 메시카의 이주 길을 따라 신들이 태어난 도시와 마야의 저승으로 갑니다.',
+    stops: ['aztlan', 'teotihuacan', 'chichen-itza', 'tikal', 'xibalba'],
+  },
 ];
 
 export const findCourse = (id: string) => COURSES.find((course) => course.id === id);

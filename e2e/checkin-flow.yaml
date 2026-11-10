@@ -67,8 +67,25 @@ appId: com.ryushin01.newworld
     timeout: 8000
 - assertVisible: 현장 인증 1 · 기념 뱃지 2/.*
 - scrollUntilVisible:
-    element:
-      id: stamp-avalon-verified
+    element: 아발론, 현장 인증 .*
     direction: DOWN
-    centerElement: true
+    timeout: 40000
 - takeScreenshot: checkin-passport
+# 받은 뱃지를 카드로 미리 보고 공유 창을 엽니다.
+- scrollUntilVisible:
+    element:
+      id: passport-badge-share
+    direction: UP
+    timeout: 40000
+- tapOn:
+    id: passport-badge-share
+- extendedWaitUntil:
+    visible:
+      id: badge-card
+    timeout: 8000
+- assertVisible: .*개를 모았어요
+- takeScreenshot: badge-card
+- tapOn:
+    id: badge-share-close
+- assertNotVisible:
+    id: badge-card
