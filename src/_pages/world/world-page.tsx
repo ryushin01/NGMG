@@ -18,7 +18,7 @@ import { usePlaces } from '@/entities/place';
 import { savedByCatalogId, useToggleWish } from '@/features/destination-save';
 import { usePosition } from '@/features/nearby';
 import type { PlaceKind } from '@/shared/api';
-import { distanceKm, formatDistance, toErrorMessage } from '@/shared/lib';
+import { distanceKm, formatDistance, toErrorMessage, useToday } from '@/shared/lib';
 import { AppText, Button, Chip, Field, MessageView } from '@/shared/ui';
 import { SyncBanner } from '@/widgets/sync-banner';
 
@@ -49,7 +49,8 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
 
   const saved = useMemo(() => savedByCatalogId(places.data ?? []), [places.data]);
   const all = useMemo(() => searchDestinations('', realm), [realm]);
-  const today = useMemo(() => pickDaily(DESTINATIONS, realm), [realm]);
+  const date = useToday();
+  const today = useMemo(() => pickDaily(DESTINATIONS, realm, date), [realm, date]);
   const visitedCount = all.filter((item) => (saved.get(item.id)?.recordCount ?? 0) > 0).length;
   const data = useMemo(() => {
     const found = searchDestinations(keyword, realm).filter(
