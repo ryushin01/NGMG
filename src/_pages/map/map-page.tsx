@@ -9,6 +9,7 @@ import type { LatLng, MapType } from 'react-native-maps';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, YStack } from 'tamagui';
+import { useCheckins } from '@/entities/checkin';
 import { DESTINATIONS } from '@/entities/destination';
 import { usePlaces } from '@/entities/place';
 import { mergeCatalogPlaces } from '@/features/destination-save';
@@ -57,6 +58,11 @@ export const MapPage = () => {
   const sheetPosition = useSharedValue(height - SHEET_COLLAPSED);
 
   const places = usePlaces();
+  const checkins = useCheckins();
+  const verifiedIds = useMemo(
+    () => new Set((checkins.data ?? []).map((item) => item.catalogId)),
+    [checkins.data],
+  );
   const [filter, setFilter] = useState<KindFilter>('all');
   const [tag, setTag] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -123,6 +129,7 @@ export const MapPage = () => {
       <PlaceMap
         ref={mapRef}
         places={visiblePlaces}
+        verifiedIds={verifiedIds}
         mapType={mapType}
         showsUserLocation={locationGranted}
         bottomInset={SHEET_COLLAPSED}

@@ -116,13 +116,26 @@ export const PassportPage = () => {
               </XStack>
             </YStack>
           </View>
-          <Button
-            testID="passport-share"
-            variant="outline"
-            label="여권 이미지 공유"
-            loading={sharing}
-            onPress={share}
-          />
+          <XStack gap={8}>
+            <View flex={1}>
+              <Button
+                testID="passport-share"
+                variant="outline"
+                label="여권 공유"
+                loading={sharing}
+                onPress={share}
+              />
+            </View>
+            <View flex={1}>
+              <Button
+                testID="passport-badge-share"
+                variant="outline"
+                label="뱃지 공유"
+                disabled={earned.length === 0}
+                onPress={() => setBadgeShareOpen(true)}
+              />
+            </View>
+          </XStack>
         </YStack>
         <YStack gap={12}>
           <AppText size="title" accessibilityRole="header">
@@ -131,13 +144,6 @@ export const PassportPage = () => {
           <AppText size="caption" tone="muted">
             여행지 상세에서 현장 인증을 하면 스탬프와 함께 뱃지를 모을 수 있어요.
           </AppText>
-          <Button
-            testID="passport-badge-share"
-            variant="outline"
-            label="뱃지 이미지 공유"
-            disabled={earned.length === 0}
-            onPress={() => setBadgeShareOpen(true)}
-          />
           <XStack flexWrap="wrap" gap={8} testID="passport-badges">
             {[...earned, ...badges.filter((item) => !item.earned)].map((status) => (
               <BadgeMedal key={status.badge.id} status={status} size={64} />
