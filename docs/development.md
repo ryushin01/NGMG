@@ -148,7 +148,7 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 인증은 `features/check-in`이 위치 권한을 받아 현재 위치와 여행지 좌표의 거리를 재고, 3km(`CHECK_IN_RADIUS_KM`) 안이면 저장합니다. 환상 세계는 화면에 보여 주는 현실의 연고지 좌표를 씁니다.
 - 회원마다 여행지 한 곳에 인증 하나만 남깁니다(`checkins`의 `unique(user_id, catalog_id)`). 다시 인증해도 처음 날짜가 유지됩니다.
 - 데모 모드(`.env` 없음)에서는 위치 없이 인증하는 버튼이 따로 나오고, `method = 'demo'`로 저장해 화면에 '데모 인증'으로 표시합니다.
-- 뱃지는 서버에 저장하지 않고 `features/badges`가 인증 목록으로 계산합니다. 조건을 채운 인증의 날짜가 획득일이며, 규칙을 바꾸면 기존 인증에도 바로 반영됩니다.
+- 뱃지는 서버에 저장하지 않고 `features/badges`가 인증 목록으로 계산합니다. 신화 모험 뱃지는 `entities/destination/model/myth.ts`의 낙원·저승·신들의 거처 목록을 기준으로 셉니다(화면 분류에는 쓰지 않음). 조건을 채운 인증의 날짜가 획득일이며, 규칙을 바꾸면 기존 인증에도 바로 반영됩니다.
 - 인증 후 축하 화면은 인증 전후 목록을 비교해 새로 받은 뱃지만 보여 줍니다(`widgets/check-in-panel`).
 - E2E(`e2e/checkin-flow.yaml`)는 Maestro `setLocation`으로 시뮬레이터 위치를 글래스턴베리에 두고 아발론을 인증합니다.
 

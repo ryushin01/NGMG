@@ -2,6 +2,11 @@ import type { CheckIn } from '@/shared/api';
 import { evaluateBadges, newlyEarned } from './badges';
 
 jest.mock('@/entities/destination', () => {
+  const spaces: Record<string, string[]> = {
+    paradise: ['eden', 'elysion'],
+    afterlife: ['hades', 'yomi', 'xibalba'],
+    divine: [],
+  };
   const make = (id: string, realm: string, group: string) => ({ id, realm, group });
   return {
     DESTINATIONS: [
@@ -13,8 +18,15 @@ jest.mock('@/entities/destination', () => {
       make('stonehenge', 'real', '유럽'),
       make('avalon', 'fantasy', '켈트·아서왕'),
       make('camelot', 'fantasy', '켈트·아서왕'),
+      make('eden', 'fantasy', '중동·이집트'),
+      make('elysion', 'fantasy', '그리스·로마'),
+      make('hades', 'fantasy', '그리스·로마'),
+      make('yomi', 'fantasy', '동양'),
+      make('xibalba', 'fantasy', '신대륙 전설'),
     ],
     COURSES: [{ id: 'arthur', title: '아서왕의 길', stops: ['stonehenge', 'camelot', 'avalon'] }],
+    MYTH_SPACES: spaces,
+    mythSpaceOf: (id: string) => Object.keys(spaces).find((space) => spaces[space].includes(id)),
   };
 });
 
@@ -65,4 +77,20 @@ it('이번 인증으로 새로 받은 뱃지만 골라냅니다', () => {
       .map((item) => item.badge.id)
       .sort(),
   ).toEqual(['course-arthur']);
+});
+
+it('신화 속 공간 인증으로 신화의 문과 갈래별 뱃지를 줍니다', () => {
+  const list = [
+    checkin('camelot', 1),
+    checkin('hades', 2),
+    checkin('yomi', 3),
+    checkin('xibalba', 4),
+  ];
+  expect(status(list, 'myth-gate')).toMatchObject({ earned: true, earnedAt: list[1].checkedAt });
+  expect(status(list, 'myth-afterlife')).toMatchObject({
+    earned: true,
+    earnedAt: list[3].checkedAt,
+  });
+  expect(status(list, 'myth-paradise')).toMatchObject({ earned: false, current: 0, target: 3 });
+  expect(status(list, 'myth-odyssey')).toMatchObject({ earned: false, current: 3, target: 10 });
 });

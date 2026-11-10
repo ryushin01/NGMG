@@ -1,13 +1,31 @@
-import { COURSES, DESTINATIONS, type Destination } from '@/entities/destination';
+import {
+  COURSES,
+  DESTINATIONS,
+  MYTH_SPACES,
+  mythSpaceOf,
+  type Destination,
+} from '@/entities/destination';
 import type { CheckIn } from '@/shared/api';
 
-export type BadgeIcon = 'footprints' | 'medal' | 'sparkles' | 'globe' | 'route';
+export type BadgeIcon =
+  | 'footprints'
+  | 'medal'
+  | 'sparkles'
+  | 'globe'
+  | 'route'
+  | 'door'
+  | 'paradise'
+  | 'afterlife'
+  | 'divine'
+  | 'compass';
 
 export type Badge = {
   id: string;
   name: string;
   description: string;
   icon: BadgeIcon;
+  /** 환상 세계 계열 뱃지는 보라색으로 보여 줍니다. */
+  tone: 'real' | 'fantasy';
   /** 인증 스탬프로 얼마나 채웠는지와 목표. 목표에 닿은 순간의 인증 날짜가 획득일입니다. */
   progress: (stamped: StampedDestination[]) => {
     current: number;
@@ -45,10 +63,59 @@ const collector = (count: number, name: string): Badge => ({
   name,
   description: `현장 인증 스탬프 ${count}개`,
   icon: 'medal',
+  tone: 'real',
   progress: (stamped) => countUntil(stamped, count, () => true),
 });
 
 const CONTINENTS = ['아프리카', '아메리카', '아시아', '유럽', '오세아니아'];
+
+const isMyth = (item: StampedDestination) => mythSpaceOf(item.destination.id) !== undefined;
+const inSpace = (space: keyof typeof MYTH_SPACES) => (item: StampedDestination) =>
+  MYTH_SPACES[space].includes(item.destination.id);
+
+/** 신화 속 공간 모험 뱃지. 낙원, 저승, 신들의 거처를 각각 모으고 모두 합쳐 셉니다. */
+const MYTH_BADGES: Badge[] = [
+  {
+    id: 'myth-gate',
+    name: '신화의 문',
+    description: '신화 속 공간의 현실 연고지에서 처음 인증했습니다',
+    icon: 'door',
+    tone: 'fantasy',
+    progress: (stamped) => countUntil(stamped, 1, isMyth),
+  },
+  {
+    id: 'myth-paradise',
+    name: '낙원을 찾아서',
+    description: '에덴, 엘리시온, 무릉도원 같은 낙원 3곳에서 인증했습니다',
+    icon: 'paradise',
+    tone: 'fantasy',
+    progress: (stamped) => countUntil(stamped, 3, inSpace('paradise')),
+  },
+  {
+    id: 'myth-afterlife',
+    name: '저승 순례자',
+    description: '하데스의 명계, 요미노쿠니, 시발바 같은 저승 3곳에서 인증했습니다',
+    icon: 'afterlife',
+    tone: 'fantasy',
+    progress: (stamped) => countUntil(stamped, 3, inSpace('afterlife')),
+  },
+  {
+    id: 'myth-divine',
+    name: '신들의 거처',
+    description: '올림포스, 아스가르드, 수미산 같은 신들의 거처 3곳에서 인증했습니다',
+    icon: 'divine',
+    tone: 'fantasy',
+    progress: (stamped) => countUntil(stamped, 3, inSpace('divine')),
+  },
+  {
+    id: 'myth-odyssey',
+    name: '신화 대모험',
+    description: '신화 속 공간 10곳에서 인증했습니다',
+    icon: 'compass',
+    tone: 'fantasy',
+    progress: (stamped) => countUntil(stamped, 10, isMyth),
+  },
+];
 
 export const BADGES: Badge[] = [
   {
@@ -56,6 +123,7 @@ export const BADGES: Badge[] = [
     name: '첫 발자국',
     description: '처음으로 현장 인증 스탬프를 찍었습니다',
     icon: 'footprints',
+    tone: 'real',
     progress: (stamped) => countUntil(stamped, 1, () => true),
   },
   collector(5, '스탬프 수집가'),
@@ -66,6 +134,7 @@ export const BADGES: Badge[] = [
     name: '전설을 걷다',
     description: '환상 세계의 현실 연고지에서 처음 인증했습니다',
     icon: 'sparkles',
+    tone: 'fantasy',
     progress: (stamped) => countUntil(stamped, 1, (item) => item.destination.realm === 'fantasy'),
   },
   {
@@ -73,6 +142,7 @@ export const BADGES: Badge[] = [
     name: '전설의 기록자',
     description: '환상 세계 연고지 5곳에서 인증했습니다',
     icon: 'sparkles',
+    tone: 'fantasy',
     progress: (stamped) => countUntil(stamped, 5, (item) => item.destination.realm === 'fantasy'),
   },
   {
@@ -80,6 +150,7 @@ export const BADGES: Badge[] = [
     name: '다섯 대륙',
     description: '아프리카, 아메리카, 아시아, 유럽, 오세아니아의 유적을 모두 인증했습니다',
     icon: 'globe',
+    tone: 'real',
     progress: (stamped) => {
       const seen: string[] = [];
       let earnedAt: string | null = null;
@@ -97,11 +168,13 @@ export const BADGES: Badge[] = [
       return { current: seen.length, target: CONTINENTS.length, earnedAt };
     },
   },
+  ...MYTH_BADGES,
   ...COURSES.map((course): Badge => ({
     id: `course-${course.id}`,
     name: `${course.title} 완주`,
     description: `${course.title} 코스의 ${course.stops.length}곳을 모두 인증했습니다`,
     icon: 'route',
+    tone: 'real',
     progress: (stamped) =>
       countUntil(stamped, course.stops.length, (item) =>
         course.stops.includes(item.destination.id),

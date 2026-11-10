@@ -25,13 +25,13 @@ import { SyncBanner } from '@/widgets/sync-banner';
 const COPY: Record<PlaceKind, { title: string; subtitle: string; placeholder: string }> = {
   real: {
     title: '실존 유적',
-    subtitle: '지금 비행기를 타면 갈 수 있는 곳',
+    subtitle: '역사가 남아 지금도 찾아갈 수 있는 곳',
     placeholder: '예: 피라미드, 페루, 마야',
   },
   fantasy: {
     title: '환상 세계',
-    subtitle: '책과 전설로만 닿을 수 있는 곳',
-    placeholder: '예: 아발론, 아서왕, 낙원',
+    subtitle: '신화와 전설로만 닿을 수 있는 곳',
+    placeholder: '예: 아발론, 저승, 낙원',
   },
 };
 

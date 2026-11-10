@@ -1,10 +1,15 @@
 import {
+  Compass,
+  Crown,
+  DoorOpen,
   Footprints,
+  Ghost,
   Globe,
   Lock,
   Medal,
   Route,
   Sparkles,
+  TreePalm,
   type LucideIcon,
 } from 'lucide-react-native';
 import { View, YStack } from 'tamagui';
@@ -17,12 +22,17 @@ const ICONS: Record<BadgeIcon, LucideIcon> = {
   sparkles: Sparkles,
   globe: Globe,
   route: Route,
+  door: DoorOpen,
+  paradise: TreePalm,
+  afterlife: Ghost,
+  divine: Crown,
+  compass: Compass,
 };
 
 /** 획득한 뱃지는 색과 날짜로, 아직이면 자물쇠와 진행도(3/5)로 보여 줍니다. 색에만 의존하지 않습니다. */
 export const BadgeMedal = ({ status, size = 72 }: { status: BadgeStatus; size?: number }) => {
   const { badge, earned, current, target, earnedAt } = status;
-  const fantasy = badge.icon === 'sparkles';
+  const fantasy = badge.tone === 'fantasy';
   return (
     <YStack
       testID={`badge-${badge.id}`}
