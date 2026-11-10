@@ -20,6 +20,12 @@ const readChecked = (): Set<string> => {
   }
 };
 
+/**
+ * 켜고 끌 때마다 바뀌는 번호입니다. 위치를 기다리던 이전 동기화(예: 로그아웃한 계정)가
+ * 그 사이 다시 켠 다른 계정의 지역을 덮어쓰지 않도록, 등록 직전에 같은 번호인지 확인합니다.
+ */
+let generation = 0;
+
 export const isArrivalAlertEnabled = () => storageAdapter.getItem(ENABLED_KEY) === '1';
 
 export type EnableResult =
@@ -50,6 +56,7 @@ export const enableArrivalAlert = async (
   }
   const notification = await Notifications.requestPermissionsAsync();
   if (!notification.granted) return 'notification-denied';
+  generation += 1;
   storageAdapter.setItem(ENABLED_KEY, '1');
   try {
     await syncArrivalRegions(checkedIds);
@@ -69,6 +76,7 @@ export const stopRegions = async () => {
 };
 
 export const disableArrivalAlert = async () => {
+  generation += 1;
   storageAdapter.removeItem(ENABLED_KEY);
   storageAdapter.removeItem(CHECKED_KEY);
   await stopRegions();
@@ -77,6 +85,7 @@ export const disableArrivalAlert = async () => {
 /** 켜져 있으면 지금 위치에서 가까운 미인증 여행지로 지역을 다시 고릅니다. '항상' 권한이 사라졌으면 설정도 끕니다. */
 export const syncArrivalRegions = async (checkedIds?: ReadonlySet<string>) => {
   if (!isArrivalAlertEnabled()) return;
+  const started = generation;
   if (checkedIds) storageAdapter.setItem(CHECKED_KEY, JSON.stringify([...checkedIds]));
   const checked = checkedIds ?? readChecked();
   const { granted } = await Location.getBackgroundPermissionsAsync();
@@ -88,8 +97,8 @@ export const syncArrivalRegions = async (checkedIds?: ReadonlySet<string>) => {
     (await Location.getLastKnownPositionAsync({ maxAge: 30 * 60 * 1000 })) ??
     (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }).catch(() => null));
   if (!position) return;
-  // 위치를 기다리는 사이 로그아웃 등으로 꺼졌으면 다시 켜지 않습니다.
-  if (!isArrivalAlertEnabled()) return;
+  // 위치를 기다리는 사이 꺼졌거나 다시 켜졌으면(다른 계정일 수 있음) 이 동기화는 버립니다.
+  if (!isArrivalAlertEnabled() || started !== generation) return;
   const regions = pickRegions(DESTINATIONS, checked, position.coords);
   // 모두 인증했으면 지켜볼 곳이 없으므로 등록만 멈추고 설정은 그대로 둡니다.
   if (regions.length === 0) {

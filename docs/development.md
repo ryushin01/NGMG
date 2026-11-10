@@ -79,7 +79,7 @@ npx supabase functions deploy recover-account
 
 E2E 흐름은 시작할 때 앱 데이터를 지우므로, 평소 쓰는 시뮬레이터의 계정과 기록을 지우지 않도록 `scripts/e2e-ios.sh`가 전용 시뮬레이터에서만 돌립니다.
 
-- `NewWorld E2E`(iPhone 17 Pro) 시뮬레이터가 없으면 만들고 켭니다. iOS 27 시뮬레이터는 지역 감시를 지원하지 않아(도착 알림이 `ERR_GEOFENCING_UNAVAILABLE`로 실패) iOS 26 중 가장 최신을 먼저 고릅니다. 다른 버전은 `E2E_RUNTIME`으로 지정하며, 버전마다 따로 만들어 씁니다.
+- `NewWorld E2E`(iPhone 17 Pro) 시뮬레이터가 없으면 만들고 켭니다. iOS 27 시뮬레이터는 지역 감시를 지원하지 않아(도착 알림이 `ERR_GEOFENCING_UNAVAILABLE`로 실패) iOS 26 중 가장 최신을 고르고, iOS 26이 없으면 설치 안내와 함께 멈춥니다. 다른 버전은 `E2E_RUNTIME`으로 지정하며, 버전마다 따로 만들어 씁니다.
 - Maestro에 필요한 Java가 시스템에 없으면 Homebrew `openjdk`나 Android Studio의 JBR을 씁니다.
 - Release 앱을 빌드해 설치하고 위치 권한(항상 허용)을 준 뒤 Maestro를 그 기기에서만 실행합니다.
 - 흐름 하나만: `pnpm run test:e2e e2e/checkin-flow.yaml` · 빌드 없이: `SKIP_BUILD=1 pnpm run test:e2e`

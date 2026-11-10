@@ -122,3 +122,20 @@ it('위치를 기다리는 사이 꺼지면 지역을 다시 등록하지 않습
   await pending;
   expect(Location.startGeofencingAsync).not.toHaveBeenCalled();
 });
+
+it('끈 뒤 다시 켜도 이전에 기다리던 동기화는 새 지역을 덮어쓰지 않습니다', async () => {
+  grant(true, true, true);
+  await enableArrivalAlert(new Set());
+  jest.mocked(Location.startGeofencingAsync).mockClear();
+  let resolvePosition: (value: unknown) => void = () => undefined;
+  jest
+    .mocked(Location.getLastKnownPositionAsync)
+    .mockReturnValueOnce(new Promise((resolve) => (resolvePosition = resolve)) as never);
+  const stale = syncArrivalRegions(new Set(['avalon']));
+  await disableArrivalAlert();
+  await enableArrivalAlert(new Set());
+  expect(Location.startGeofencingAsync).toHaveBeenCalledTimes(1);
+  resolvePosition({ coords: { latitude: 51.1442, longitude: -2.6986 } });
+  await stale;
+  expect(Location.startGeofencingAsync).toHaveBeenCalledTimes(1);
+});

@@ -11,15 +11,20 @@ DEVICE_NAME="NewWorld E2E"
 DEVICE_TYPE="com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"
 BUNDLE_ID="com.ryushin01.newworld"
 
-# iOS 27 시뮬레이터는 지역 감시(도착 알림)를 지원하지 않아 iOS 26 중 가장 최신을 먼저 고릅니다.
+# iOS 27 시뮬레이터는 지역 감시(도착 알림)를 지원하지 않아 iOS 26 중 가장 최신을 고릅니다. 없으면 멈춥니다.
 # 다른 버전을 쓰려면 E2E_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-27-0 처럼 넘깁니다.
 runtime=${E2E_RUNTIME:-$(xcrun simctl list runtimes -j | node -e "
   const list = JSON.parse(require('fs').readFileSync(0, 'utf8')).runtimes
     .filter((r) => r.platform === 'iOS' && r.isAvailable)
     .filter((r) => (r.supportedDeviceTypes ?? []).some((d) => d.identifier === '$DEVICE_TYPE'));
   const ios26 = list.filter((r) => r.version.startsWith('26.'));
-  process.stdout.write((ios26.at(-1) ?? list.at(-1)).identifier);
+  process.stdout.write(ios26.at(-1)?.identifier ?? '');
 ")}
+if [ -z "$runtime" ]; then
+  echo "iOS 26 시뮬레이터 런타임이 없습니다. Xcode > Settings > Components에서 iOS 26을 설치하거나," >&2
+  echo "E2E_RUNTIME으로 다른 런타임을 지정하세요(iOS 27은 도착 알림 흐름이 실패합니다)." >&2
+  exit 1
+fi
 
 # 그 iOS 버전의 같은 이름 기기가 있으면 쓰고, 없으면 만듭니다(다른 버전의 같은 이름 기기는 쓰지 않음).
 udid=$(xcrun simctl list devices available -j | node -e "
