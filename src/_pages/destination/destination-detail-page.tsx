@@ -35,6 +35,7 @@ import {
   Tag,
   Touchable,
 } from '@/shared/ui';
+import { CheckInPanel } from '@/widgets/check-in-panel';
 import { PlaceMarker } from '@/widgets/place-map';
 
 const openLink = (url: string) =>
@@ -218,6 +219,7 @@ export const DestinationDetailPage = () => {
             }
           />
         </XStack>
+        <CheckInPanel destination={destination} />
         {onSite ? (
           <View paddingHorizontal={20} paddingBottom={12}>
             <Touchable

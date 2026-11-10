@@ -39,12 +39,12 @@ npx supabase functions deploy place-search
 npx supabase functions deploy delete-account
 ```
 
-| 구성   | 내용                                                                               |
-| ------ | ---------------------------------------------------------------------------------- |
-| 테이블 | `places`, `records`, `record_photos`, `checklist_items`, 요약 뷰 `place_summaries` |
-| 저장소 | 비공개 버킷 `record-photos`, 경로 `{user_id}/{record_id}/{파일}`                   |
-| 권한   | 모든 테이블과 저장소에 RLS를 적용해 본인 데이터만 접근합니다.                      |
-| 함수   | `place-search`(주소·장소 검색, 좌표→주소), `delete-account`(계정과 사진 삭제)      |
+| 구성   | 내용                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------- |
+| 테이블 | `places`, `records`, `record_photos`, `checklist_items`, `trips`, `checkins`, 요약 뷰 `place_summaries` |
+| 저장소 | 비공개 버킷 `record-photos`, 경로 `{user_id}/{record_id}/{파일}`                                        |
+| 권한   | 모든 테이블과 저장소에 RLS를 적용해 본인 데이터만 접근합니다.                                           |
+| 함수   | `place-search`(주소·장소 검색, 좌표→주소), `delete-account`(계정과 사진 삭제)                           |
 
 ## 오프라인 동작
 
@@ -143,6 +143,15 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 입장 조건과 여행경보는 자주 바뀌므로 단정하지 않고 공식 안내를 확인하도록 안내합니다.
 - 전설과 실제 장소의 연결은 `links.ts`, 코스는 `courses.ts`, 연대표 정렬은 `timeline.ts`, 원전 링크는 `reading.ts`에 있습니다.
 
+## 현장 인증과 뱃지
+
+- 인증은 `features/check-in`이 위치 권한을 받아 현재 위치와 여행지 좌표의 거리를 재고, 3km(`CHECK_IN_RADIUS_KM`) 안이면 저장합니다. 환상 세계는 화면에 보여 주는 현실의 연고지 좌표를 씁니다.
+- 회원마다 여행지 한 곳에 인증 하나만 남깁니다(`checkins`의 `unique(user_id, catalog_id)`). 다시 인증해도 처음 날짜가 유지됩니다.
+- 데모 모드(`.env` 없음)에서는 위치 없이 인증하는 버튼이 따로 나오고, `method = 'demo'`로 저장해 화면에 '데모 인증'으로 표시합니다.
+- 뱃지는 서버에 저장하지 않고 `features/badges`가 인증 목록으로 계산합니다. 조건을 채운 인증의 날짜가 획득일이며, 규칙을 바꾸면 기존 인증에도 바로 반영됩니다.
+- 인증 후 축하 화면은 인증 전후 목록을 비교해 새로 받은 뱃지만 보여 줍니다(`widgets/check-in-panel`).
+- E2E(`e2e/checkin-flow.yaml`)는 Maestro `setLocation`으로 시뮬레이터 위치를 글래스턴베리에 두고 아발론을 인증합니다.
+
 ## 서버 적용 현황
 
-Supabase 프로젝트 `newworld`에는 `20261108000000`까지 적용되어 있습니다. 무료 플랜의 활성 프로젝트 한도 때문에 일시 중지한 상태이며, 앱은 `.env` 없이 데모 모드로 동작합니다. 다시 켜면 `npx supabase db push`로 `20261109000000_trips_currency.sql`(통화, 여정)을 적용합니다.
+Supabase 프로젝트 `newworld`에는 `20261108000000`까지 적용되어 있습니다. 무료 플랜의 활성 프로젝트 한도 때문에 일시 중지한 상태이며, 앱은 `.env` 없이 데모 모드로 동작합니다. 다시 켜면 `npx supabase db push`로 `20261109000000_trips_currency.sql`(통화, 여정)과 `20261110000000_checkins.sql`(현장 인증)을 적용합니다.

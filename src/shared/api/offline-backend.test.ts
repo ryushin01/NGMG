@@ -9,6 +9,7 @@ const setup = () => {
     records: [] as TripRecord[],
     checklist: [] as import('./types').ChecklistItem[],
     trips: [] as import('./types').Trip[],
+    checkins: [] as import('./types').CheckIn[],
     down: false,
     tokenBroken: false,
     rejectNext: false,
@@ -94,6 +95,19 @@ const setup = () => {
       remove: async (id: string) => {
         guard('trips.remove');
         server.trips = server.trips.filter((item) => item.id !== id);
+      },
+    },
+    checkins: {
+      list: async () => {
+        guard('checkins.list');
+        return server.checkins;
+      },
+      create: async (checkIn: import('./types').CheckIn) => {
+        guard('checkins.create');
+        const existing = server.checkins.find((item) => item.catalogId === checkIn.catalogId);
+        if (existing) return existing;
+        server.checkins = [...server.checkins, checkIn];
+        return checkIn;
       },
     },
     checklist: {
@@ -458,6 +472,43 @@ describe('여정', () => {
     sync.setOnline(true);
     await sync.flush();
     expect(server.trips).toEqual([]);
+  });
+});
+
+describe('현장 인증', () => {
+  const checkIn = (id: string, checkedAt: string) => ({
+    id,
+    catalogId: 'avalon',
+    checkedAt,
+    latitude: 51.1442,
+    longitude: -2.6986,
+    distanceKm: 0.4,
+    method: 'gps' as const,
+  });
+
+  it('끊긴 동안 찍은 스탬프를 보여 주고 연결되면 올립니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    await backend.checkins.list();
+    sync.setOnline(false);
+    const first = checkIn('c1', '2026-11-10T09:00:00.000Z');
+    expect(await backend.checkins.create(first)).toEqual(first);
+    expect(await backend.checkins.list()).toEqual([first]);
+    expect(server.checkins).toEqual([]);
+    sync.setOnline(true);
+    await sync.flush();
+    expect(server.checkins).toEqual([first]);
+    expect(sync.getState().ops).toEqual([]);
+  });
+
+  it('같은 여행지는 한 번만 찍히고 처음 인증을 돌려줍니다', async () => {
+    const { backend, signInAs } = setup();
+    signInAs('a');
+    const first = checkIn('c1', '2026-11-10T09:00:00.000Z');
+    await backend.checkins.create(first);
+    await backend.checkins.list();
+    expect(await backend.checkins.create(checkIn('c2', '2026-11-11T09:00:00.000Z'))).toEqual(first);
+    expect(await backend.checkins.list()).toEqual([first]);
   });
 });
 

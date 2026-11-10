@@ -63,7 +63,7 @@ beforeEach(() => {
   (global as never as { c: string }).c = 'one';
 });
 
-it('앱을 다시 켜도 로그인, 장소, 여정, 체크리스트가 남습니다', async () => {
+it('앱을 다시 켜도 로그인, 장소, 여정, 체크리스트, 현장 인증이 남습니다', async () => {
   const api = relaunch();
   await api.auth.signIn('guest@newworld.demo', 'demo');
   const place = await api.places.create(input);
@@ -78,12 +78,23 @@ it('앱을 다시 켜도 로그인, 장소, 여정, 체크리스트가 남습니
     listName: '기본',
   };
   await api.checklist.upsert([item]);
+  const checkIn = {
+    id: 'k',
+    catalogId: 'avalon',
+    checkedAt: '2026-11-10T09:00:00.000Z',
+    latitude: 51.1442,
+    longitude: -2.6986,
+    distanceKm: 0,
+    method: 'demo' as const,
+  };
+  await api.checkins.create(checkIn);
 
   const next = relaunch();
   expect(next.auth.getCachedSession()?.email).toBe('guest@newworld.demo');
   expect((await next.places.get(place.id)).name).toBe('내 유적');
   expect(await next.trips.list()).toEqual([trip]);
   expect(await next.checklist.list()).toEqual([item]);
+  expect(await next.checkins.list()).toEqual([checkIn]);
 });
 
 it('다시 켜면 사진 주소를 현재 앱 폴더 기준으로 만듭니다', async () => {
@@ -129,12 +140,14 @@ it('배열 안의 잘못된 항목만 버리고 시작합니다', async () => {
       ],
       checklists: [1, ['a'], ['a', [1]], ['guest', [{ id: 'c' }]]],
       trips: [null, ['guest', 'x']],
+      checkins: [1, ['guest', 'x'], ['guest', [{ id: 'k' }]]],
     }),
   );
   const api = relaunch();
   expect((await api.places.list()).map((place) => place.id)).toEqual(['p']);
   expect((await api.records.list()).map((item) => item.id)).toEqual(['r3']);
   expect(await api.trips.list()).toEqual([]);
+  expect(await api.checkins.list()).toEqual([]);
 });
 
 it('상태를 저장한 뒤에 사진 파일을 지웁니다', async () => {

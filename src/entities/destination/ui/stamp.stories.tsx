@@ -19,3 +19,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Stamped: Story = {};
 export const Empty: Story = { args: { year: null } };
+export const Verified: Story = { args: { verifiedAt: '2026-11-10T09:00:00.000Z' } };

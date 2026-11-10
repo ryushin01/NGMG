@@ -175,3 +175,29 @@ test('여정은 본인 것만 보이고 날짜 순서와 통화 형식을 검사
     /check/,
   );
 });
+
+test('현장 인증은 본인 것만 보이고 여행지마다 하나이며 방식과 좌표를 검사합니다', async () => {
+  const insert = (uid, catalog, extra = "51.1442, -2.6986, 0.4, 'gps'") =>
+    as(
+      uid,
+      `insert into public.checkins (catalog_id, latitude, longitude, distance_km, method)
+       values ('${catalog}', ${extra})`,
+    );
+  await insert(A, 'avalon');
+  await insert(B, 'avalon');
+  assert.equal((await as(A, 'select * from public.checkins')).rows.length, 1);
+  await assert.rejects(insert(A, 'avalon'), /duplicate|unique/);
+  await assert.rejects(insert(A, 'camelot', "51, -2, 0.1, 'teleport'"), /check/);
+  await assert.rejects(insert(A, 'camelot', "91, -2, 0.1, 'gps'"), /check/);
+  await assert.rejects(
+    as(
+      B,
+      `insert into public.checkins (user_id, catalog_id, latitude, longitude, distance_km, method)
+       values ('${A}', 'petra', 30.3, 35.4, 0, 'gps')`,
+    ),
+  );
+  assert.equal(
+    (await as(B, `delete from public.checkins where user_id = '${A}' returning id`)).rows.length,
+    0,
+  );
+});

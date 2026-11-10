@@ -8,6 +8,7 @@ import type {
   PlaceInput,
   RecordSaveInput,
   Session,
+  CheckIn,
   Trip,
   TripRecord,
 } from './types';
@@ -23,7 +24,8 @@ type OpBody =
   | { type: 'checklist.upsert'; items: ChecklistItem[] }
   | { type: 'checklist.remove'; ids: string[] }
   | { type: 'trip.save'; trip: Trip }
-  | { type: 'trip.remove'; tripId: string };
+  | { type: 'trip.remove'; tripId: string }
+  | { type: 'checkin.create'; checkIn: CheckIn };
 
 export type OutboxOp = OpBody & {
   id: string;
@@ -37,15 +39,23 @@ type Snapshot = {
   records: TripRecord[] | null;
   checklist: ChecklistItem[] | null;
   trips: Trip[] | null;
+  checkins: CheckIn[] | null;
 };
 type View = {
   places: Place[];
   records: TripRecord[];
   checklist: ChecklistItem[];
   trips: Trip[];
+  checkins: CheckIn[];
 };
 
-const EMPTY_SNAPSHOT: Snapshot = { places: null, records: null, checklist: null, trips: null };
+const EMPTY_SNAPSHOT: Snapshot = {
+  places: null,
+  records: null,
+  checklist: null,
+  trips: null,
+  checkins: null,
+};
 
 const QUEUED_PREFIX = 'queued:';
 const OFFLINE_ERROR = 'Network request failed';
@@ -82,6 +92,7 @@ export const applyOps = (
   let records = snapshot.records ?? [];
   let checklist = snapshot.checklist ?? [];
   let trips = snapshot.trips ?? [];
+  let checkins = snapshot.checkins ?? [];
 
   const toRecord = (id: string, input: QueuedRecord): TripRecord => {
     const place = places.find((item) => item.id === input.record.placeId);
@@ -145,6 +156,11 @@ export const applyOps = (
       case 'trip.remove':
         trips = trips.filter((item) => item.id !== op.tripId);
         break;
+      case 'checkin.create':
+        if (!checkins.some((item) => item.catalogId === op.checkIn.catalogId)) {
+          checkins = [...checkins, op.checkIn];
+        }
+        break;
     }
   }
 
@@ -161,6 +177,7 @@ export const applyOps = (
     records: sortedRecords,
     checklist: [...checklist].sort((a, b) => a.position - b.position),
     trips,
+    checkins,
   };
 };
 
@@ -272,6 +289,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         return base.trips.save(op.trip);
       case 'trip.remove':
         return base.trips.remove(op.tripId);
+      case 'checkin.create':
+        return base.checkins.create(op.checkIn);
     }
   };
 
@@ -293,6 +312,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
           records: snapshot.records && applied.records,
           checklist: applied.checklist,
           trips: snapshot.trips && applied.trips,
+          checkins: snapshot.checkins && applied.checkins,
         };
       }
     }
@@ -576,6 +596,17 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
       async remove(id) {
         const title = view().trips.find((trip) => trip.id === id)?.title ?? '';
         await write({ type: 'trip.remove', tripId: id }, `여정 삭제: ${title}`, () => undefined);
+      },
+    },
+    checkins: {
+      async list() {
+        await refresh('checkins', () => base.checkins.list());
+        return view().checkins;
+      },
+      create(checkIn) {
+        const existing = view().checkins.find((item) => item.catalogId === checkIn.catalogId);
+        if (existing) return Promise.resolve(existing);
+        return write({ type: 'checkin.create', checkIn }, '현장 인증', () => checkIn);
       },
     },
     search: base.search,
