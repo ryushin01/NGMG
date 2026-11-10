@@ -7,8 +7,10 @@ import { ScrollView, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
+import { useCheckins } from '@/entities/checkin';
 import { DESTINATIONS, Stamp } from '@/entities/destination';
 import { usePlaces } from '@/entities/place';
+import { BadgeMedal, evaluateBadges } from '@/features/badges';
 import { savedByCatalogId } from '@/features/destination-save';
 import { AppText, Button, Header } from '@/shared/ui';
 
@@ -20,6 +22,7 @@ const RECENT_LIMIT = 5;
 export const PassportPage = () => {
   const router = useRouter();
   const places = usePlaces();
+  const checkins = useCheckins();
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
@@ -32,7 +35,13 @@ export const PassportPage = () => {
       ? dayjs(place.lastVisitedAt).year()
       : null;
   };
-  const stamped = DESTINATIONS.filter((item) => yearOf(item.id) !== null);
+  const verified = useMemo(
+    () => new Map((checkins.data ?? []).map((item) => [item.catalogId, item.checkedAt])),
+    [checkins.data],
+  );
+  const badges = useMemo(() => evaluateBadges(checkins.data ?? []), [checkins.data]);
+  const earned = badges.filter((item) => item.earned);
+  const stamped = DESTINATIONS.filter((item) => verified.has(item.id) || yearOf(item.id) !== null);
   const count = (realm: 'real' | 'fantasy') =>
     `${stamped.filter((item) => item.realm === realm).length}/${
       DESTINATIONS.filter((item) => item.realm === realm).length
@@ -62,6 +71,7 @@ export const PassportPage = () => {
             key={item.id}
             destination={item}
             year={yearOf(item.id)}
+            verifiedAt={verified.get(item.id) ?? null}
             size={size}
             onPress={() => router.push(`/destination/${item.id}`)}
           />
@@ -89,6 +99,9 @@ export const PassportPage = () => {
               <AppText tone="inverse" testID="passport-summary">
                 실존 유적 {count('real')} · 환상 세계 {count('fantasy')}
               </AppText>
+              <AppText tone="inverse" testID="passport-badges-summary">
+                현장 인증 {verified.size} · 기념 뱃지 {earned.length}/{badges.length}
+              </AppText>
               <XStack gap={8}>
                 {stamped.slice(0, RECENT_LIMIT).map((item) => (
                   <Image
@@ -109,6 +122,19 @@ export const PassportPage = () => {
             loading={sharing}
             onPress={share}
           />
+        </YStack>
+        <YStack gap={12}>
+          <AppText size="title" accessibilityRole="header">
+            기념 뱃지 {earned.length}/{badges.length}
+          </AppText>
+          <AppText size="caption" tone="muted">
+            여행지 상세에서 현장 인증을 하면 스탬프와 함께 뱃지를 모을 수 있어요.
+          </AppText>
+          <XStack flexWrap="wrap" gap={8} testID="passport-badges">
+            {[...earned, ...badges.filter((item) => !item.earned)].map((status) => (
+              <BadgeMedal key={status.badge.id} status={status} size={64} />
+            ))}
+          </XStack>
         </YStack>
         {section('real', '실존 유적')}
         {section('fantasy', '환상 세계')}

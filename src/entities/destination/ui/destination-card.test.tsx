@@ -10,6 +10,7 @@ const destination = {
   location: '서쪽 바다 너머',
   era: '12세기',
   tagline: '사과의 섬',
+  lore: 'legend',
   image: 1,
 } as Destination;
 
@@ -50,4 +51,10 @@ it('가고 싶어요 상태를 스크린리더에 알립니다', async () => {
   expect(screen.getByTestId('wish-avalon').props.accessibilityState).toMatchObject({
     selected: true,
   });
+});
+
+it('분류를 위치·시기와 함께 보여 주고 읽어 줍니다', async () => {
+  await setup();
+  expect(screen.getByText('전설 · 서쪽 바다 너머 · 12세기')).toBeTruthy();
+  expect(screen.getByLabelText(/^아발론, 전설, /)).toBeTruthy();
 });

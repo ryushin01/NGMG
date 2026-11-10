@@ -1,6 +1,6 @@
 {
   "name": "newworld",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/gowun-batang": "^0.4.1",

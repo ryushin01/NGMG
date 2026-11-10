@@ -362,4 +362,84 @@ export const DESTINATION_IMAGES: Record<string, Pick<Destination, 'image' | 'ima
       url: 'https://commons.wikimedia.org/wiki/File:Isola_di_Utopia_Moro.jpg',
     },
   },
+  eden: {
+    image: require('~/assets/destinations/eden.jpg'),
+    imageCredit: {
+      author: 'Thomas Cole',
+      license: 'Public domain',
+      url: 'https://commons.wikimedia.org/wiki/File:Thomas_Cole_-_The_Garden_of_Eden_(1828).jpg',
+    },
+  },
+  dilmun: {
+    image: require('~/assets/destinations/dilmun.jpg'),
+    imageCredit: {
+      author: 'Beireke1',
+      license: 'CC0',
+      url: "https://commons.wikimedia.org/wiki/File:Qal'at_al-Bahrain_2.jpg",
+    },
+  },
+  aaru: {
+    image: require('~/assets/destinations/aaru.jpg'),
+    imageCredit: {
+      author: 'Charles K. Wilkinson (Metropolitan Museum of Art)',
+      license: 'CC0',
+      url: 'https://commons.wikimedia.org/wiki/File:Sennedjem_and_Iineferti_in_the_Fields_of_Iaru_MET_DT11771.jpg',
+    },
+  },
+  hades: {
+    image: require('~/assets/destinations/hades.jpg'),
+    imageCredit: {
+      author: 'Joachim Patinir',
+      license: 'Public domain',
+      url: 'https://commons.wikimedia.org/wiki/File:Joachim_Patinir_007.jpg',
+    },
+  },
+  valhalla: {
+    image: require('~/assets/destinations/valhalla.jpg'),
+    imageCredit: {
+      author: 'Avda',
+      license: 'CC BY-SA 3.0',
+      url: 'https://commons.wikimedia.org/wiki/File:Walhalla_-_Donaustauf_-_2015.jpg',
+    },
+  },
+  yomi: {
+    image: require('~/assets/destinations/yomi.jpg'),
+    imageCredit: {
+      author: 'ChiefHira',
+      license: 'CC BY-SA 3.0',
+      url: 'https://commons.wikimedia.org/wiki/File:Yomotsu_Hirasaka.JPG',
+    },
+  },
+  xibalba: {
+    image: require('~/assets/destinations/xibalba.jpg'),
+    imageCredit: {
+      author: 'Antti T. Nissinen',
+      license: 'CC BY 2.0',
+      url: 'https://commons.wikimedia.org/wiki/File:Actun_Tunichil_Muknal_2010_1.jpg',
+    },
+  },
+  aztlan: {
+    image: require('~/assets/destinations/aztlan.jpg'),
+    imageCredit: {
+      author: 'Luis Méndez Covarrubias',
+      license: 'CC BY-SA 4.0',
+      url: 'https://commons.wikimedia.org/wiki/File:Isla_Mexcaltitan.jpg',
+    },
+  },
+  ys: {
+    image: require('~/assets/destinations/ys.jpg'),
+    imageCredit: {
+      author: 'Évariste-Vital Luminais',
+      license: 'Public domain',
+      url: 'https://commons.wikimedia.org/wiki/File:Evariste-Vital_Luminais_-_Fuite_de_Gradlon_(ca._1884).jpg',
+    },
+  },
+  'nirai-kanai': {
+    image: require('~/assets/destinations/nirai-kanai.jpg'),
+    imageCredit: {
+      author: 'そらみみ',
+      license: 'CC BY-SA 4.0',
+      url: 'https://commons.wikimedia.org/wiki/File:Kudakajima_Island_from_Cape_Chinen_Park.JPG',
+    },
+  },
 };

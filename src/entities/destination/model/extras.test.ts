@@ -2,6 +2,7 @@ import { FANTASY_DESTINATIONS } from './catalog-fantasy';
 import { REAL_DESTINATIONS } from './catalog-real';
 import { COURSES } from './courses';
 import { DESTINATION_LINKS, linksOf } from './links';
+import { MYTH_SPACES } from './myth';
 import { READING_LINKS } from './reading';
 import { TIMELINE_YEARS } from './timeline';
 
@@ -15,6 +16,7 @@ it('연결, 코스, 연대표, 원전이 실제 여행지만 가리킵니다', (
   for (const course of COURSES) for (const stop of course.stops) expect(ids).toContain(stop);
   for (const id of Object.keys(TIMELINE_YEARS)) expect(ids).toContain(id);
   for (const id of Object.keys(READING_LINKS)) expect(ids).toContain(id);
+  for (const id of Object.values(MYTH_SPACES).flat()) expect(ids).toContain(id);
 });
 
 it('연결은 양쪽 여행지에서 모두 보입니다', () => {
@@ -24,4 +26,21 @@ it('연결은 양쪽 여행지에서 모두 보입니다', () => {
 
 it('코스의 경유지가 겹치지 않습니다', () => {
   for (const course of COURSES) expect(new Set(course.stops).size).toBe(course.stops.length);
+});
+
+it('신화 공간은 신화로 분류된 곳이고 한 갈래에만 속합니다', () => {
+  const all = Object.values(MYTH_SPACES).flat();
+  expect(new Set(all).size).toBe(all.length);
+  const myth = new Set(
+    FANTASY_DESTINATIONS.filter((item) => item.lore === 'myth').map((item) => item.id),
+  );
+  for (const id of all) expect(myth).toContain(id);
+});
+
+it('실존은 역사·사실, 환상은 신화·전설로 나누고 역사에는 얽힌 이야기를 답니다', () => {
+  for (const item of REAL_DESTINATIONS) {
+    expect(['history', 'fact']).toContain(item.lore);
+    if (item.lore === 'history') expect(item.loreNote).toBeTruthy();
+  }
+  for (const item of FANTASY_DESTINATIONS) expect(['myth', 'legend']).toContain(item.lore);
 });

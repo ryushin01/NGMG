@@ -1,0 +1,74 @@
+# 아발론의 현실 연고지(글래스턴베리)에서 현장 인증을 하고 스탬프와 기념 뱃지를 확인합니다.
+# iOS 시뮬레이터는 실행 전에 위치 권한을 줍니다: xcrun simctl privacy booted grant location com.ryushin01.newworld
+appId: com.ryushin01.newworld
+---
+- launchApp:
+    clearState: true
+- setLocation:
+    latitude: 51.1446
+    longitude: -2.7005
+- extendedWaitUntil:
+    visible:
+      id: demo-browse
+    timeout: 60000
+- tapOn:
+    id: demo-browse
+- tapOn:
+    id: tab-fantasy
+- extendedWaitUntil:
+    visible:
+      id: world-search-fantasy
+    timeout: 8000
+# 아발론은 전설로 분류됩니다.
+- tapOn:
+    id: world-lore-legend
+- tapOn:
+    id: world-search-fantasy
+- inputText: 아발론
+# 키보드가 결과 카드를 가리므로 고정 글자를 눌러 내립니다.
+- tapOn: 여행지 검색
+- extendedWaitUntil:
+    visible:
+      id: destination-avalon
+    timeout: 8000
+- tapOn:
+    id: destination-avalon
+- extendedWaitUntil:
+    visible:
+      id: destination-title
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: checkin-gps
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: checkin-gps
+- runFlow:
+    when:
+      visible: .*(허용|Allow).*
+    commands:
+      - tapOn: .*(앱을 사용하는 동안 허용|Allow While Using App).*
+- extendedWaitUntil:
+    visible:
+      id: checkin-celebration
+    timeout: 20000
+- assertVisible: 스탬프를 찍었어요
+- assertVisible:
+    id: badge-first-step
+- assertVisible:
+    id: badge-legend-walker
+- takeScreenshot: checkin-celebration
+- tapOn:
+    id: checkin-passport
+- extendedWaitUntil:
+    visible:
+      id: passport-badges-summary
+    timeout: 8000
+- assertVisible: 현장 인증 1 · 기념 뱃지 2/.*
+- scrollUntilVisible:
+    element:
+      id: stamp-avalon-verified
+    direction: DOWN
+    centerElement: true
+- takeScreenshot: checkin-passport

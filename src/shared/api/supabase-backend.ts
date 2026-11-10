@@ -16,6 +16,7 @@ import type {
   PlaceInput,
   RecordSaveInput,
   Session,
+  CheckIn,
   Trip,
   TripRecord,
 } from './types';
@@ -112,6 +113,28 @@ const toTrip = (row: TripRow): Trip => ({
   endDate: row.end_date,
   stops: row.stops,
   memo: row.memo,
+});
+
+type CheckInRow = {
+  id: string;
+  catalog_id: string;
+  checked_at: string;
+  latitude: number;
+  longitude: number;
+  distance_km: number | string;
+  method: CheckIn['method'];
+};
+
+const CHECKIN_SELECT = 'id, catalog_id, checked_at, latitude, longitude, distance_km, method';
+
+const toCheckIn = (row: CheckInRow): CheckIn => ({
+  id: row.id,
+  catalogId: row.catalog_id,
+  checkedAt: row.checked_at,
+  latitude: row.latitude,
+  longitude: row.longitude,
+  distanceKm: Number(row.distance_km),
+  method: row.method,
 });
 
 type PhotoRow = {
@@ -548,6 +571,39 @@ export const supabaseBackend: Backend = {
     async remove(id) {
       const { error } = await client.from('trips').delete().eq('id', id);
       if (error) throw error;
+    },
+  },
+  checkins: {
+    async list() {
+      const { data, error } = await client
+        .from('checkins')
+        .select(CHECKIN_SELECT)
+        .order('checked_at', { ascending: true });
+      if (error) throw error;
+      return (data as CheckInRow[]).map(toCheckIn);
+    },
+    async create(checkIn) {
+      // 여행지마다 하나만 남기므로 이미 있으면 새로 쓰지 않고 기존 행을 돌려줍니다.
+      const { error } = await client.from('checkins').upsert(
+        {
+          id: checkIn.id,
+          catalog_id: checkIn.catalogId,
+          checked_at: checkIn.checkedAt,
+          latitude: checkIn.latitude,
+          longitude: checkIn.longitude,
+          distance_km: checkIn.distanceKm,
+          method: checkIn.method,
+        },
+        { onConflict: 'user_id,catalog_id', ignoreDuplicates: true },
+      );
+      if (error) throw error;
+      const { data, error: readError } = await client
+        .from('checkins')
+        .select(CHECKIN_SELECT)
+        .eq('catalog_id', checkIn.catalogId)
+        .single();
+      if (readError) throw readError;
+      return toCheckIn(data as CheckInRow);
     },
   },
   search: {

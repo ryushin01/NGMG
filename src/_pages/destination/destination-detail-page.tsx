@@ -13,6 +13,7 @@ import { View, XStack, YStack } from 'tamagui';
 import {
   findDestination,
   linksOf,
+  LORE_LABELS,
   Postcard,
   READING_LINKS,
   type Destination,
@@ -35,6 +36,7 @@ import {
   Tag,
   Touchable,
 } from '@/shared/ui';
+import { CheckInPanel } from '@/widgets/check-in-panel';
 import { PlaceMarker } from '@/widgets/place-map';
 
 const openLink = (url: string) =>
@@ -197,9 +199,15 @@ export const DestinationDetailPage = () => {
           </AppText>
           <AppText tone="ink">{destination.tagline}</AppText>
           <XStack gap={6} flexWrap="wrap">
+            <Tag label={LORE_LABELS[destination.lore]} />
             <Tag label={destination.group} />
             <Tag label={destination.era} />
           </XStack>
+          {destination.realm === 'real' && destination.loreNote ? (
+            <AppText testID="destination-lore-note" size="caption" tone="muted">
+              얽힌 이야기: {destination.loreNote}
+            </AppText>
+          ) : null}
         </YStack>
         <XStack paddingHorizontal={20} paddingBottom={12}>
           <IconAction
@@ -218,6 +226,7 @@ export const DestinationDetailPage = () => {
             }
           />
         </XStack>
+        <CheckInPanel destination={destination} />
         {onSite ? (
           <View paddingHorizontal={20} paddingBottom={12}>
             <Touchable

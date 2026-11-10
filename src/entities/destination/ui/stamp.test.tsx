@@ -27,3 +27,21 @@ it('아직 안 간 곳은 글자로도 알려 줍니다', async () => {
   expect(screen.getByLabelText('페트라, 미방문')).toBeTruthy();
   expect(screen.getByText('미방문')).toBeTruthy();
 });
+
+it('현장 인증한 곳은 인증 날짜를 읽어 주고 표시를 붙입니다', async () => {
+  await render(
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
+      <Stamp
+        destination={destination}
+        year={null}
+        verifiedAt="2026-11-10T09:00:00.000Z"
+        size={96}
+        onPress={() => undefined}
+      />
+    </TamaguiProvider>,
+  );
+  expect(screen.getByLabelText('페트라, 현장 인증 2026. 11. 10.')).toBeTruthy();
+  expect(screen.getByText('현장 인증')).toBeTruthy();
+  expect(screen.getByText('2026. 11. 10.')).toBeTruthy();
+  expect(screen.getByTestId('stamp-petra-verified')).toBeTruthy();
+});

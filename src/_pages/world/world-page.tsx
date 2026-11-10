@@ -9,6 +9,9 @@ import {
   DESTINATIONS,
   DestinationCard,
   FANTASY_GROUPS,
+  LORE_LABELS,
+  LORES_BY_REALM,
+  type Lore,
   pickDaily,
   REAL_GROUPS,
   searchDestinations,
@@ -25,13 +28,13 @@ import { SyncBanner } from '@/widgets/sync-banner';
 const COPY: Record<PlaceKind, { title: string; subtitle: string; placeholder: string }> = {
   real: {
     title: '실존 유적',
-    subtitle: '지금 비행기를 타면 갈 수 있는 곳',
+    subtitle: '역사가 남아 지금도 찾아갈 수 있는 곳',
     placeholder: '예: 피라미드, 페루, 마야',
   },
   fantasy: {
     title: '환상 세계',
-    subtitle: '책과 전설로만 닿을 수 있는 곳',
-    placeholder: '예: 아발론, 아서왕, 낙원',
+    subtitle: '신화와 전설로만 닿을 수 있는 곳',
+    placeholder: '예: 아발론, 저승, 낙원',
   },
 };
 
@@ -42,6 +45,7 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
   const toggleWish = useToggleWish();
   const [keyword, setKeyword] = useState('');
   const [group, setGroup] = useState<string | null>(null);
+  const [lore, setLore] = useState<Lore | null>(null);
   const [nearby, setNearby] = useState(false);
   const { position, request } = usePosition();
   const copy = COPY[realm];
@@ -54,11 +58,11 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
   const visitedCount = all.filter((item) => (saved.get(item.id)?.recordCount ?? 0) > 0).length;
   const data = useMemo(() => {
     const found = searchDestinations(keyword, realm).filter(
-      (item) => !group || item.group === group,
+      (item) => (!group || item.group === group) && (!lore || item.lore === lore),
     );
     if (!nearby || !position) return found;
     return [...found].sort((a, b) => distanceKm(position, a) - distanceKm(position, b));
-  }, [group, keyword, nearby, position, realm]);
+  }, [group, keyword, lore, nearby, position, realm]);
 
   const toggleNearby = async () => {
     if (nearby) {
@@ -134,6 +138,28 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
                 returnKeyType="search"
               />
             </View>
+            <XStack
+              paddingHorizontal={20}
+              gap={8}
+              accessibilityRole="radiogroup"
+              accessibilityLabel="분류"
+            >
+              <Chip
+                testID={`world-lore-all-${realm}`}
+                label="모든 이야기"
+                selected={lore === null}
+                onPress={() => setLore(null)}
+              />
+              {LORES_BY_REALM[realm].map((item) => (
+                <Chip
+                  key={item}
+                  testID={`world-lore-${item}`}
+                  label={LORE_LABELS[item]}
+                  selected={lore === item}
+                  onPress={() => setLore(item)}
+                />
+              ))}
+            </XStack>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}

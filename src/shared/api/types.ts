@@ -110,6 +110,19 @@ export type Trip = {
   memo: string;
 };
 
+/** 여행지 현장 인증. 회원마다 여행지 한 곳에 하나입니다. */
+export type CheckIn = {
+  id: string;
+  catalogId: string;
+  checkedAt: string;
+  latitude: number;
+  longitude: number;
+  /** 인증할 때 여행지(환상 세계는 현실의 연고지)까지의 거리 */
+  distanceKm: number;
+  /** gps: 실제 위치, demo: 데모 모드에서 현장에 있는 것으로 처리 */
+  method: 'gps' | 'demo';
+};
+
 export type Session = { userId: string; email: string };
 
 export type Backend = {
@@ -157,6 +170,11 @@ export type Backend = {
     /** 같은 id가 있으면 덮어씁니다. */
     save(trip: Trip): Promise<Trip>;
     remove(id: string): Promise<void>;
+  };
+  checkins: {
+    list(): Promise<CheckIn[]>;
+    /** 같은 여행지에 이미 인증했으면 기존 인증을 돌려줍니다. */
+    create(checkIn: CheckIn): Promise<CheckIn>;
   };
   search: {
     places(query: string): Promise<SearchResult[]>;

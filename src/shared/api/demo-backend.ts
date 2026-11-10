@@ -8,6 +8,7 @@ import type {
   Place,
   RecordSaveInput,
   Session,
+  CheckIn,
   Trip,
   TripRecord,
 } from './types';
@@ -25,6 +26,7 @@ type DemoState = {
   records: TripRecord[];
   checklists: [string, ChecklistItem[]][];
   trips: [string, Trip[]][];
+  checkins?: [string, CheckIn[]][];
   sequence: number;
 };
 
@@ -51,12 +53,18 @@ const isRecord = (value: unknown) =>
     (photo) => isObject(photo) && typeof photo.path === 'string',
   );
 
-const isOwnerEntry = (value: unknown) =>
+const isOwnerEntry = (value: unknown, isItem: (item: unknown) => boolean = hasId) =>
   Array.isArray(value) &&
   value.length === 2 &&
   typeof value[0] === 'string' &&
   Array.isArray(value[1]) &&
-  value[1].every(hasId);
+  value[1].every(isItem);
+
+/** 뱃지 계산이 날짜로 정렬하므로 여행지와 인증 날짜가 있는 항목만 받습니다. */
+const isCheckIn = (value: unknown) =>
+  hasId(value) &&
+  typeof (value as { catalogId?: unknown }).catalogId === 'string' &&
+  typeof (value as { checkedAt?: unknown }).checkedAt === 'string';
 
 /** 배열이 아니면 없는 값으로 보고, 형식이 틀린 항목은 버립니다. */
 const validItems = <T>(value: unknown, isValid: (item: unknown) => boolean) =>
@@ -73,8 +81,13 @@ const loadState = (): Partial<DemoState> => {
       session: typeof session?.userId === 'string' ? session : null,
       places: validItems<Place>(state.places, hasId),
       records: validItems<TripRecord>(state.records, isRecord),
-      checklists: validItems<[string, ChecklistItem[]]>(state.checklists, isOwnerEntry),
-      trips: validItems<[string, Trip[]]>(state.trips, isOwnerEntry),
+      checklists: validItems<[string, ChecklistItem[]]>(state.checklists, (entry) =>
+        isOwnerEntry(entry),
+      ),
+      trips: validItems<[string, Trip[]]>(state.trips, (entry) => isOwnerEntry(entry)),
+      checkins: validItems<[string, CheckIn[]]>(state.checkins, (entry) =>
+        isOwnerEntry(entry, isCheckIn),
+      ),
       sequence: typeof state.sequence === 'number' ? state.sequence : undefined,
     };
   } catch {
@@ -93,6 +106,7 @@ const persist = () => {
     records,
     checklists: [...checklists],
     trips: [...trips],
+    checkins: [...checkins],
     sequence,
   };
   storageAdapter.setItem(STATE_KEY, JSON.stringify(state));
@@ -125,6 +139,8 @@ const wait = async () => {
 const checklists = new Map<string, ChecklistItem[]>(saved.checklists);
 const myChecklist = () => checklists.get(session?.userId ?? '') ?? [];
 const trips = new Map<string, Trip[]>(saved.trips);
+const checkins = new Map<string, CheckIn[]>(saved.checkins);
+const myCheckins = () => checkins.get(session?.userId ?? '') ?? [];
 const myTrips = () => trips.get(session?.userId ?? '') ?? [];
 const setMyTrips = (items: Trip[]) => {
   trips.set(session?.userId ?? '', items);
@@ -233,6 +249,7 @@ export const demoBackend: Backend = {
       records = [...DEMO_RECORDS];
       checklists.delete(session?.userId ?? '');
       trips.delete(session?.userId ?? '');
+      checkins.delete(session?.userId ?? '');
       setSession(null);
       removePhotos(photos);
     },
@@ -345,6 +362,20 @@ export const demoBackend: Backend = {
     async remove(id) {
       await wait();
       setMyTrips(myTrips().filter((item) => item.id !== id));
+    },
+  },
+  checkins: {
+    async list() {
+      await wait();
+      return myCheckins();
+    },
+    async create(checkIn) {
+      await wait();
+      const existing = myCheckins().find((item) => item.catalogId === checkIn.catalogId);
+      if (existing) return existing;
+      checkins.set(session?.userId ?? '', [...myCheckins(), checkIn]);
+      persist();
+      return checkIn;
     },
   },
   search: {
