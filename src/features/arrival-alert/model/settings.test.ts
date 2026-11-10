@@ -1,7 +1,12 @@
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { DESTINATIONS } from '@/entities/destination';
-import { enableArrivalAlert, isArrivalAlertEnabled, syncArrivalRegions } from './settings';
+import {
+  disableArrivalAlert,
+  enableArrivalAlert,
+  isArrivalAlertEnabled,
+  syncArrivalRegions,
+} from './settings';
 
 jest.mock('expo-notifications', () => ({
   requestPermissionsAsync: jest.fn(),
@@ -101,4 +106,19 @@ it('지역 감시를 지원하지 않는 기기면 끈 채로 그 이유를 돌�
   );
   await expect(enableArrivalAlert(new Set())).resolves.toBe('unavailable');
   expect(isArrivalAlertEnabled()).toBe(false);
+});
+
+it('위치를 기다리는 사이 꺼지면 지역을 다시 등록하지 않습니다', async () => {
+  grant(true, true, true);
+  await enableArrivalAlert(new Set());
+  jest.mocked(Location.startGeofencingAsync).mockClear();
+  let resolvePosition: (value: unknown) => void = () => undefined;
+  jest
+    .mocked(Location.getLastKnownPositionAsync)
+    .mockReturnValueOnce(new Promise((resolve) => (resolvePosition = resolve)) as never);
+  const pending = syncArrivalRegions(new Set());
+  await disableArrivalAlert();
+  resolvePosition({ coords: { latitude: 51.1442, longitude: -2.6986 } });
+  await pending;
+  expect(Location.startGeofencingAsync).not.toHaveBeenCalled();
 });

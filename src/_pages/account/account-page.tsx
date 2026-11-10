@@ -225,6 +225,7 @@ export const AccountPage = () => {
                 variant="outline"
                 label="기록 CSV"
                 loading={exportData.isPending && exportData.variables === 'csv'}
+                disabled={exportData.isPending && exportData.variables !== 'csv'}
                 onPress={() => runExport('csv')}
               />
             </View>
@@ -234,6 +235,7 @@ export const AccountPage = () => {
                 variant="outline"
                 label="전체 JSON"
                 loading={exportData.isPending && exportData.variables === 'json'}
+                disabled={exportData.isPending && exportData.variables !== 'json'}
                 onPress={() => runExport('json')}
               />
             </View>

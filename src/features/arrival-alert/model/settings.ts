@@ -62,7 +62,7 @@ export const enableArrivalAlert = async (
   return 'enabled';
 };
 
-const stopRegions = async () => {
+export const stopRegions = async () => {
   if (await Location.hasStartedGeofencingAsync(ARRIVAL_TASK).catch(() => false)) {
     await Location.stopGeofencingAsync(ARRIVAL_TASK);
   }
@@ -88,6 +88,8 @@ export const syncArrivalRegions = async (checkedIds?: ReadonlySet<string>) => {
     (await Location.getLastKnownPositionAsync({ maxAge: 30 * 60 * 1000 })) ??
     (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }).catch(() => null));
   if (!position) return;
+  // 위치를 기다리는 사이 로그아웃 등으로 꺼졌으면 다시 켜지 않습니다.
+  if (!isArrivalAlertEnabled()) return;
   const regions = pickRegions(DESTINATIONS, checked, position.coords);
   // 모두 인증했으면 지켜볼 곳이 없으므로 등록만 멈추고 설정은 그대로 둡니다.
   if (regions.length === 0) {

@@ -165,13 +165,29 @@ export const applyOps = (
   }
 
   const sortedRecords = [...records].sort((a, b) => b.visitedAt.localeCompare(a.visitedAt));
+  const recountFromRecords = (place: Place) => {
+    const own = sortedRecords.filter((record) => record.placeId === place.id);
+    return { ...place, recordCount: own.length, lastVisitedAt: own[0]?.visitedAt ?? null };
+  };
+  // 기록 목록을 받은 적이 없으면 다시 세면 모두 0이 되므로, 서버 값에 새로 만든 기록만 더합니다.
+  const addCreatedRecords = (place: Place) => {
+    const created = ops.filter(
+      (op) => op.type === 'record.create' && op.input.record.placeId === place.id,
+    );
+    if (created.length === 0) return place;
+    const latest = created
+      .map((op) => (op.type === 'record.create' ? op.input.record.visitedAt : ''))
+      .reduce((a, b) => (a > b ? a : b), place.lastVisitedAt ?? '');
+    return {
+      ...place,
+      recordCount: place.recordCount + created.length,
+      lastVisitedAt: latest || null,
+    };
+  };
   const withStats =
     ops.length === 0
       ? places
-      : places.map((place) => {
-          const own = sortedRecords.filter((record) => record.placeId === place.id);
-          return { ...place, recordCount: own.length, lastVisitedAt: own[0]?.visitedAt ?? null };
-        });
+      : places.map(snapshot.records === null ? addCreatedRecords : recountFromRecords);
   return {
     places: withStats,
     records: sortedRecords,
@@ -299,19 +315,23 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     switch (op.type) {
       case 'place.create':
       case 'place.update':
-        snapshot.places = upsertById(snapshot.places ?? [], value as Place);
+        if (snapshot.places) snapshot.places = upsertById(snapshot.places, value as Place);
         break;
       case 'record.create':
       case 'record.update':
-        snapshot.records = upsertById(snapshot.records ?? [], value as TripRecord);
+        if (snapshot.records) snapshot.records = upsertById(snapshot.records, value as TripRecord);
         break;
       default: {
         const applied = applyOps(snapshot, [op], deps.photos.uriOf);
-        // applyOps는 장소별 기록 수를 기록 사본으로 다시 셉니다. 기록 사본이 없으면 모두 0이 되므로,
-        // 남은 장소는 서버가 준 값을 그대로 둡니다.
+        // 기록 목록이 있으면 applyOps가 다시 센 값(기록 삭제 반영)을 쓰고,
+        // 없으면 다시 센 값이 틀리므로 남은 장소는 서버가 준 값을 그대로 둡니다.
         const kept = new Set(applied.places.map((place) => place.id));
         snapshot = {
-          places: snapshot.places && snapshot.places.filter((place) => kept.has(place.id)),
+          places:
+            snapshot.places &&
+            (snapshot.records
+              ? applied.places
+              : snapshot.places.filter((place) => kept.has(place.id))),
           records: snapshot.records && applied.records,
           checklist: applied.checklist,
           trips: snapshot.trips && applied.trips,
@@ -490,7 +510,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         if (await canReachServer()) {
           try {
             const fresh = await base.places.get(id);
-            snapshot.places = upsertById(snapshot.places ?? [], fresh);
+            // 목록을 받은 적이 없으면 한 건만 든 목록을 만들지 않습니다(전체 목록으로 오인).
+            if (snapshot.places) snapshot.places = upsertById(snapshot.places, fresh);
             saveSnapshot();
             return fresh;
           } catch (error) {
@@ -533,7 +554,7 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         if (await canReachServer()) {
           try {
             const fresh = await base.records.get(id);
-            snapshot.records = upsertById(snapshot.records ?? [], fresh);
+            if (snapshot.records) snapshot.records = upsertById(snapshot.records, fresh);
             saveSnapshot();
             return fresh;
           } catch (error) {
@@ -619,6 +640,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
 
   const sync = {
     getState: () => state,
+    /** 서버에서 전체 목록을 한 번이라도 받아 두었는지. 내보내기가 빠진 자료 없이 만들 수 있는지 확인합니다. */
+    hasSnapshot: (keys: (keyof Snapshot)[]) => keys.every((key) => snapshot[key] !== null),
     subscribe(listener: () => void) {
       stateListeners.add(listener);
       return () => {

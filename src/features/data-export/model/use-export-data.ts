@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { backend } from '@/shared/api';
+import { backend, sync } from '@/shared/api';
 import { recordsToCsv, toBackupJson } from './serialize';
 
 export type ExportFormat = 'json' | 'csv';
@@ -17,6 +17,11 @@ const shareFile = async (format: ExportFormat) => {
     backend.trips.list(),
     format === 'json' ? backend.checkins.list() : [],
   ]);
+  // 끊긴 채로 한 번도 받지 못한 목록이 있으면 대기 중인 변경만 담긴 불완전한 파일이 되므로 멈춥니다.
+  const needed = ['places', 'records', 'checklist', 'trips'] as const;
+  if (!sync.hasSnapshot(format === 'json' ? [...needed, 'checkins'] : ['records'])) {
+    throw new Error('Incomplete export');
+  }
   const content =
     format === 'csv'
       ? recordsToCsv(records)

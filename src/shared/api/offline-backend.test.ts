@@ -529,6 +529,61 @@ describe('보낸 변경을 서버 사본에 합칠 때', () => {
   });
 });
 
+describe('기록 목록을 받기 전의 장소 통계', () => {
+  const cachedPlace = {
+    ...placeInput,
+    id: 'p1',
+    recordCount: 3,
+    lastVisitedAt: '2026-10-01T00:00:00.000Z',
+    createdAt: 'now',
+  } as Place;
+
+  it('끊긴 동안 기록과 무관한 변경이 있어도 서버 값을 그대로 보여 줍니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    server.places = [cachedPlace];
+    signInAs('a');
+    await backend.places.list();
+    sync.setOnline(false);
+    await backend.checklist.upsert([
+      { id: 'c1', title: '여권', category: '서류', checked: true, position: 0 },
+    ] as import('./types').ChecklistItem[]);
+    const [place] = await backend.places.list();
+    expect(place).toMatchObject({ recordCount: 3, lastVisitedAt: '2026-10-01T00:00:00.000Z' });
+  });
+
+  it('끊긴 동안 만든 기록은 서버 값에 더합니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    server.places = [cachedPlace];
+    signInAs('a');
+    await backend.places.list();
+    sync.setOnline(false);
+    await backend.records.create({
+      record: recordInput('p1', '다시 간 날'),
+      keptPhotos: [],
+      newPhotos: [],
+    });
+    const [place] = await backend.places.list();
+    expect(place).toMatchObject({ recordCount: 4, lastVisitedAt: '2026-11-01T00:00:00.000Z' });
+  });
+
+  it('한 건만 받은 기록으로 전체 목록을 만들지 않습니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    signInAs('a');
+    expect(sync.hasSnapshot(['records'])).toBe(false);
+    await backend.places.list();
+    const place = await backend.places.create(placeInput);
+    await backend.records.create({
+      record: recordInput(place.id, '첫 기록'),
+      keptPhotos: [],
+      newPhotos: [],
+    });
+    expect(server.records).toHaveLength(1);
+    expect(sync.hasSnapshot(['places', 'records'])).toBe(false);
+    await backend.records.list();
+    expect(sync.hasSnapshot(['places', 'records'])).toBe(true);
+  });
+});
+
 describe('통화가 생기기 전의 기기 데이터', () => {
   it('보관된 기록과 대기 중인 변경을 원화로 복원합니다', async () => {
     const { backend, sync, store, signInAs } = setup();

@@ -59,7 +59,10 @@ it('내보내기를 빠르게 두 번 눌러도 한 번만 실행하고, 끝나�
 it('내보내는 동안 누른 버튼에 진행 중을 표시합니다', async () => {
   await show(jest.fn(), { isPending: true, variables: 'csv' });
   expect(screen.getByTestId('export-csv').props.accessibilityState).toMatchObject({ busy: true });
-  expect(screen.getByTestId('export-json').props.accessibilityState).toMatchObject({ busy: false });
+  expect(screen.getByTestId('export-json').props.accessibilityState).toMatchObject({
+    busy: false,
+    disabled: true,
+  });
 });
 
 it('계정 정보를 보여 줍니다', async () => {

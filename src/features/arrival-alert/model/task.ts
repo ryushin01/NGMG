@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { notifyArrival } from './arrival';
 import { ARRIVAL_TASK, REFRESH_REGION_ID } from './regions';
-import { syncArrivalRegions } from './settings';
+import { isArrivalAlertEnabled, stopRegions, syncArrivalRegions } from './settings';
 
 export { ARRIVAL_TASK };
 
@@ -16,6 +16,11 @@ type GeofenceData = {
 if (!TaskManager.isTaskDefined(ARRIVAL_TASK)) {
   TaskManager.defineTask<GeofenceData>(ARRIVAL_TASK, async ({ data, error }) => {
     if (error || !data?.region.identifier) return;
+    // 꺼진 뒤에 남은 지역(멈추기 실패, 꺼지는 중에 등록된 경우)은 알리지 않고 멈춥니다.
+    if (!isArrivalAlertEnabled()) {
+      await stopRegions().catch(() => undefined);
+      return;
+    }
     const { eventType, region } = data;
     if (region.identifier === REFRESH_REGION_ID) {
       // 멀리 이동했으므로 새 위치에서 가까운 여행지로 다시 고릅니다.

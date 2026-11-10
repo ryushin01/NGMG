@@ -26,7 +26,8 @@ export const PlaceEditPage = () => {
             catalogId: place.data.catalogId,
             wishlisted: place.data.wishlisted,
           }}
-          onSaved={() => router.back()}
+          // 링크로 바로 열어 돌아갈 화면이 없으면 장소 화면으로 바꿉니다. 그대로 두면 저장 잠금이 걸린 폼에 남습니다.
+          onSaved={() => (router.canGoBack() ? router.back() : router.replace(`/place/${id}`))}
         />
       ) : place.isError ? (
         <MessageView
