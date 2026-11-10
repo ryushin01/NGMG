@@ -1,4 +1,5 @@
 import { styled, Text } from 'tamagui';
+import { FONT } from './fonts';
 
 // v3의 숫자 lineHeight는 글자 크기에 곱하는 배수이므로 픽셀은 문자열로 적습니다.
 export const AppText = styled(Text, {
@@ -19,9 +20,12 @@ export const AppText = styled(Text, {
       caption: { fontSize: 13, lineHeight: '18px' },
       body: { fontSize: 15, lineHeight: '22px' },
       row: { fontSize: 17, lineHeight: '24px' },
-      title: { fontSize: 19, lineHeight: '26px', fontWeight: '700', color: 'ink' },
-      headline: { fontSize: 24, lineHeight: '32px', fontWeight: '700', color: 'ink' },
+      // 제목은 고운바탕 굵은 체입니다. 글꼴 파일 자체가 굵어 fontWeight를 더하지 않습니다(Android 이중 굵기 방지).
+      title: { fontSize: 19, lineHeight: '28px', fontFamily: FONT.heading, color: 'ink' },
+      headline: { fontSize: 24, lineHeight: '34px', fontFamily: FONT.heading, color: 'ink' },
     },
     bold: { true: { fontWeight: '700' } },
+    /** 여행지 영문 원어명처럼 라틴 문자로만 된 짧은 이름 */
+    latin: { true: { fontFamily: FONT.latin, letterSpacing: 0.5 } },
   } as const,
 });

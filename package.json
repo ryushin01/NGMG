@@ -1,8 +1,11 @@
 {
   "name": "newworld",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/gowun-batang": "^0.4.1",
+    "@expo-google-fonts/gowun-dodum": "^0.4.1",
+    "@expo-google-fonts/marcellus": "^0.4.1",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@hookform/resolvers": "^7.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -104,7 +107,7 @@
       "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|tamagui|@tamagui/.*|sonner-native|supercluster|kdbush|standard-navigation))"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|tamagui|@tamagui/.*|sonner-native|supercluster|kdbush|standard-navigation|@expo-google-fonts/.*))"
     ],
     "setupFiles": [
       "<rootDir>/jest.setup.js"

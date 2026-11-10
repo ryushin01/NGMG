@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useSessionBootstrap, useSessionStore } from '@/entities/session';
 import { backend } from '@/shared/api';
-import { useColors } from '@/shared/ui';
+import { useAppFonts, useColors } from '@/shared/ui';
 import { Providers } from './providers';
 
 SplashScreen.preventAutoHideAsync();
@@ -52,7 +52,9 @@ const Navigator = () => {
   useClearCacheOnSignOut();
   useRecoveryLink();
   const session = useSessionStore((state) => state.session);
-  const ready = useSessionStore((state) => state.ready);
+  const sessionReady = useSessionStore((state) => state.ready);
+  const fontsReady = useAppFonts();
+  const ready = sessionReady && fontsReady;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();

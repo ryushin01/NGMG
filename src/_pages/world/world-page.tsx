@@ -6,10 +6,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
 import {
+  DESTINATIONS,
   DestinationCard,
   FANTASY_GROUPS,
+  pickDaily,
   REAL_GROUPS,
   searchDestinations,
+  TodayCard,
 } from '@/entities/destination';
 import { usePlaces } from '@/entities/place';
 import { savedByCatalogId, useToggleWish } from '@/features/destination-save';
@@ -46,6 +49,7 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
 
   const saved = useMemo(() => savedByCatalogId(places.data ?? []), [places.data]);
   const all = useMemo(() => searchDestinations('', realm), [realm]);
+  const today = useMemo(() => pickDaily(DESTINATIONS, realm), [realm]);
   const visitedCount = all.filter((item) => (saved.get(item.id)?.recordCount ?? 0) > 0).length;
   const data = useMemo(() => {
     const found = searchDestinations(keyword, realm).filter(
@@ -85,6 +89,14 @@ const WorldPage = ({ realm }: { realm: PlaceKind }) => {
               </YStack>
               <SyncBanner />
             </XStack>
+            {today ? (
+              <View paddingHorizontal={20}>
+                <TodayCard
+                  destination={today}
+                  onPress={() => router.push(`/destination/${today.id}`)}
+                />
+              </View>
+            ) : null}
             <XStack paddingHorizontal={20} gap={8}>
               <View flex={1}>
                 <Button
