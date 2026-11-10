@@ -67,13 +67,23 @@ npx supabase functions deploy recover-account
 
 ## 테스트
 
-| 명령                                            | 내용                                                                               |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `pnpm test`                                     | 단위·컴포넌트 테스트 (Jest, React Native Testing Library)                          |
-| `pnpm run test:db`                              | 마이그레이션을 PGlite에 적용해 RLS와 제약 조건 검사                                |
-| `pnpm run test:e2e`                             | Maestro E2E. 데모 모드 앱을 시뮬레이터에 설치한 뒤 실행합니다.                     |
-| `pnpm run test:e2e:server`                      | 로컬 Supabase에 연결한 Release 앱으로 가입부터 계정 삭제까지 검사합니다. 아래 참고 |
-| `EXPO_PUBLIC_STORYBOOK_ENABLED=true pnpm start` | 앱에서 `/storybook` 경로로 컴포넌트 카탈로그 확인                                  |
+| 명령                                            | 내용                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `pnpm test`                                     | 단위·컴포넌트 테스트 (Jest, React Native Testing Library)                                         |
+| `pnpm run test:db`                              | 마이그레이션을 PGlite에 적용해 RLS와 제약 조건 검사                                               |
+| `pnpm run test:e2e`                             | Maestro E2E. 전용 시뮬레이터 `NewWorld E2E`에 데모 모드 Release 앱을 설치해 실행합니다. 아래 참고 |
+| `pnpm run test:e2e:server`                      | 로컬 Supabase에 연결한 Release 앱으로 가입부터 계정 삭제까지 검사합니다. 아래 참고                |
+| `EXPO_PUBLIC_STORYBOOK_ENABLED=true pnpm start` | 앱에서 `/storybook` 경로로 컴포넌트 카탈로그 확인                                                 |
+
+### E2E 전용 시뮬레이터
+
+E2E 흐름은 시작할 때 앱 데이터를 지우므로, 평소 쓰는 시뮬레이터의 계정과 기록을 지우지 않도록 `scripts/e2e-ios.sh`가 전용 시뮬레이터에서만 돌립니다.
+
+- `NewWorld E2E`(iPhone 17 Pro) 시뮬레이터가 없으면 만들고 켭니다. iOS 27 시뮬레이터는 지역 감시를 지원하지 않아(도착 알림이 `ERR_GEOFENCING_UNAVAILABLE`로 실패) iOS 26 중 가장 최신을 먼저 고릅니다. 다른 버전은 `E2E_RUNTIME`으로 지정합니다.
+- Maestro에 필요한 Java가 시스템에 없으면 Homebrew `openjdk`나 Android Studio의 JBR을 씁니다.
+- Release 앱을 빌드해 설치하고 위치 권한(항상 허용)을 준 뒤 Maestro를 그 기기에서만 실행합니다.
+- 흐름 하나만: `pnpm run test:e2e e2e/checkin-flow.yaml` · 빌드 없이: `SKIP_BUILD=1 pnpm run test:e2e`
+- 서버 E2E도 같은 기기 ID(스크립트가 출력)를 `DEVICE`로 넘겨 돌립니다.
 
 ### 실제 서버 경로 검사
 

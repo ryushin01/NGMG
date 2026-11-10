@@ -6,10 +6,12 @@ appId: com.ryushin01.newworld
 - runFlow: _sign-in.yaml
 - tapOn:
     id: tab-my
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: export-csv
-    timeout: 8000
+    direction: DOWN
+    centerElement: true
+    timeout: 15000
 - tapOn:
     id: export-csv
 - waitForAnimationToEnd

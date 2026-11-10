@@ -11,10 +11,19 @@ appId: com.ryushin01.newworld
     visible:
       id: my-checklist
     timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: demo-offline
+    direction: DOWN
+    centerElement: true
 - tapOn:
     id: demo-offline
 - tapOn:
     id: tab-my
+- scrollUntilVisible:
+    element:
+      id: my-places
+    direction: UP
 - tapOn:
     id: my-places
 - extendedWaitUntil:
@@ -66,11 +75,19 @@ appId: com.ryushin01.newworld
 # 연결을 되살리면 올라가고 기록은 그대로입니다.
 - tapOn:
     id: tab-my
+- scrollUntilVisible:
+    element:
+      id: demo-offline
+    direction: DOWN
+    centerElement: true
 - tapOn:
     id: demo-offline
-- extendedWaitUntil:
-    visible: .*완료.*
-    timeout: 8000
+- scrollUntilVisible:
+    element:
+      id: my-sync
+      text: .*완료.*
+    direction: UP
+    timeout: 10000
 - assertNotVisible:
     id: sync-banner
 - tapOn:

@@ -19,18 +19,21 @@ appId: com.ryushin01.newworld
     element:
       id: arrival-alert
     direction: DOWN
+    centerElement: true
 - tapOn:
     id: arrival-alert
 - tapOn: 계속
-# 위치·알림 권한 창이 뜨면 허용합니다.
+- waitForAnimationToEnd
+# 위치·알림 권한 창이 뜨면 허용합니다. 확인 창 본문의 '항상 허용' 문구에 걸리지 않도록 버튼 글자 전체와 맞춥니다.
 - repeat:
     times: 3
     commands:
       - runFlow:
           when:
-            visible: .*(항상 허용|Always Allow|허용|Allow).*
+            visible: (항상 허용|Change to Always Allow|Always Allow|허용|Allow)
           commands:
-            - tapOn: .*(항상 허용|Change to Always Allow|Always Allow|^허용$|^Allow$).*
+            - tapOn: (항상 허용|Change to Always Allow|Always Allow|허용|Allow)
+            - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       id: arrival-alert
