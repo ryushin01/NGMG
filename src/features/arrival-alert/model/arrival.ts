@@ -34,7 +34,8 @@ export const notifyArrival = async (id: string, now = Date.now()) => {
   if (!message) return false;
   const notified = readNotified();
   if (now - (notified[id] ?? 0) < QUIET_MS) return false;
-  await Notifications.scheduleNotificationAsync({ content: message, trigger: null });
+  // 거의 동시에 들어온 이벤트가 둘 다 알리지 않도록 보내기 전에 먼저 기록합니다.
   storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify({ ...notified, [id]: now }));
+  await Notifications.scheduleNotificationAsync({ content: message, trigger: null });
   return true;
 };

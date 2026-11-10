@@ -22,3 +22,11 @@ it('같은 곳은 12시간 안에 다시 알리지 않습니다', async () => {
     expect.objectContaining({ trigger: null }),
   );
 });
+
+it('동시에 들어온 도착 이벤트에도 한 번만 알립니다', async () => {
+  jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+  const now = 1_900_000_000_000;
+  const results = await Promise.all([notifyArrival('giza', now), notifyArrival('giza', now)]);
+  expect(results.filter(Boolean)).toHaveLength(1);
+  expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+});

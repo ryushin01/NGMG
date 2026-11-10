@@ -1,4 +1,4 @@
-# 근처 여행지 도착 알림: 먼 곳에서 알림을 켜고 글래스턴베리(아발론 연고지)로 옮기면 알림이 오고, 누르면 상세가 열립니다.
+# 근처 여행지 도착 알림: 서울에서 알림을 켜고 글래스턴베리(아발론 연고지)로 옮기면, 갱신 지역을 벗어나 지역을 다시 고르고 아발론 도착 알림이 옵니다.
 # iOS 시뮬레이터는 실행 전에 위치 권한을 '항상'으로 줍니다: xcrun simctl privacy booted grant location-always com.ryushin01.newworld
 appId: com.ryushin01.newworld
 ---
@@ -32,18 +32,23 @@ appId: com.ryushin01.newworld
           commands:
             - tapOn: .*(항상 허용|Change to Always Allow|Always Allow|^허용$|^Allow$).*
 - extendedWaitUntil:
-    visible: 근처 여행지에 도착하면 알려 드릴게요.
+    visible:
+      id: arrival-alert
+      checked: true
     timeout: 15000
 - setLocation:
     latitude: 51.1446
     longitude: -2.7005
+# Maestro는 시스템 화면(배너, 알림 센터)의 글자를 읽거나 눌러 앱을 열지 못합니다.
+# 알림이 온 것은 알림 센터 화면으로 남기고, 알림을 눌러 상세를 여는 동작은 use-notification-link 단위 테스트로 확인합니다.
+# 알림이 앱 위 배너로 먼저 뜨므로 배너가 사라질 때까지 기다린 뒤 알림 센터를 엽니다.
 - extendedWaitUntil:
-    visible: 아발론 근처에 왔어요
-    timeout: 60000
-- takeScreenshot: arrival-banner
-- tapOn: 아발론 근처에 왔어요
-- extendedWaitUntil:
-    visible:
-      id: destination-title
-    timeout: 10000
-- assertVisible: 아발론
+    visible: 배너가 사라질 때까지 기다림
+    timeout: 12000
+    optional: true
+- swipe:
+    start: 20%, 0%
+    end: 20%, 60%
+    duration: 600
+- waitForAnimationToEnd
+- takeScreenshot: arrival-notification
