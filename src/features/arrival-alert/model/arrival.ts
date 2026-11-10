@@ -38,10 +38,16 @@ export const notifyArrival = async (id: string, now = Date.now()) => {
   if (now - (notified[id] ?? 0) < QUIET_MS) return false;
   // 거의 동시에 들어온 이벤트가 둘 다 알리지 않도록 보내기 전에 먼저 기록합니다.
   storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify({ ...notified, [id]: now }));
-  await Notifications.scheduleNotificationAsync({
-    content: message,
-    // Android는 사용자가 설정에서 도착 알림만 따로 끌 수 있도록 전용 채널로 보냅니다.
-    trigger: Platform.OS === 'android' ? { channelId: ARRIVAL_CHANNEL } : null,
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: message,
+      // Android는 사용자가 설정에서 도착 알림만 따로 끌 수 있도록 전용 채널로 보냅니다.
+      trigger: Platform.OS === 'android' ? { channelId: ARRIVAL_CHANNEL } : null,
+    });
+  } catch (error) {
+    // 알림이 뜨지 않았으면 다음 도착 때 다시 알릴 수 있도록 기록을 되돌립니다.
+    storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+    throw error;
+  }
   return true;
 };

@@ -84,3 +84,10 @@ it('백그라운드에서 다시 고를 때는 마지막으로 저장한 인증 
   const regions = jest.mocked(Location.startGeofencingAsync).mock.calls[0][1] ?? [];
   expect(regions.map((item) => item.identifier)).not.toContain('camelot');
 });
+
+it('지역 등록에 실패하면 켠 설정을 되돌립니다', async () => {
+  grant(true, true, true);
+  jest.mocked(Location.startGeofencingAsync).mockRejectedValueOnce(new Error('fail'));
+  await expect(enableArrivalAlert(new Set())).rejects.toThrow('fail');
+  expect(isArrivalAlertEnabled()).toBe(false);
+});

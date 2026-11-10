@@ -45,3 +45,10 @@ it('Android에서는 도착 알림 전용 채널로 보냅니다', async () => {
     Object.defineProperty(Platform, 'OS', { value: original, configurable: true });
   }
 });
+
+it('알림을 띄우지 못하면 다음 도착 때 다시 알릴 수 있도록 기록을 되돌립니다', async () => {
+  const now = 2_100_000_000_000;
+  jest.mocked(Notifications.scheduleNotificationAsync).mockRejectedValueOnce(new Error('fail'));
+  await expect(notifyArrival('petra', now)).rejects.toThrow('fail');
+  expect(await notifyArrival('petra', now + 1000)).toBe(true);
+});

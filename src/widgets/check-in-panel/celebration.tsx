@@ -37,8 +37,9 @@ export const Celebration = ({
       );
     }
   };
+  // 창이 닫힐 때는 안내 없이 처음 화면으로 되돌립니다.
   const close = () => {
-    setSharing(false);
+    setSharingState(false);
     onClose();
   };
   const accent = destination.realm === 'real' ? 'brandText' : 'fantasyText';
@@ -125,7 +126,7 @@ export const Celebration = ({
                   testID="checkin-passport"
                   label="여권 보기"
                   onPress={() => {
-                    setSharing(false);
+                    setSharingState(false);
                     onOpenPassport();
                   }}
                 />

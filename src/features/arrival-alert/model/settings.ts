@@ -43,7 +43,13 @@ export const enableArrivalAlert = async (
   const notification = await Notifications.requestPermissionsAsync();
   if (!notification.granted) return 'notification-denied';
   storageAdapter.setItem(ENABLED_KEY, '1');
-  await syncArrivalRegions(checkedIds);
+  try {
+    await syncArrivalRegions(checkedIds);
+  } catch (error) {
+    // 지역을 등록하지 못했으면 다음 실행 때 켜진 것처럼 보이지 않도록 되돌립니다.
+    await disableArrivalAlert().catch(() => undefined);
+    throw error;
+  }
   return 'enabled';
 };
 
