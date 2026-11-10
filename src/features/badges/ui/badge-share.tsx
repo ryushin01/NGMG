@@ -26,8 +26,11 @@ export const BadgeShareContent = ({
   const card = useRef<NativeView>(null);
   const { share, sharing } = useCaptureShare();
   // 프로필 사진이 뜨기 전에 찍으면 사진이 빠지므로 준비될 때까지 공유를 막습니다.
-  const [avatarReady, setAvatarReady] = useState(!owner?.avatarUrl);
-  const markReady = useCallback(() => setAvatarReady(true), []);
+  // 사진 주소가 바뀌면 새 사진을 기다리도록, 준비된 주소를 기억해 지금 주소와 비교합니다.
+  const avatarUrl = owner?.avatarUrl ?? null;
+  const [readyUrl, setReadyUrl] = useState<string | null>(null);
+  const markReady = useCallback(() => setReadyUrl(avatarUrl), [avatarUrl]);
+  const avatarReady = !avatarUrl || readyUrl === avatarUrl;
   const onShare = async () => {
     if (!(await share(card, { dialogTitle: '기념 뱃지 공유' }))) {
       toast.error('뱃지 이미지를 만들지 못했습니다.');
