@@ -1,9 +1,8 @@
 const NETWORK_MESSAGE = '네트워크 연결을 확인해 주세요.';
 
 const MESSAGES: [RegExp, string][] = [
-  [/invalid login credentials/i, '이메일 또는 비밀번호가 맞지 않습니다.'],
-  [/already registered/i, '이미 가입된 이메일입니다.'],
-  [/email not confirmed/i, '이메일 인증을 먼저 완료해 주세요.'],
+  [/invalid login credentials/i, '아이디 또는 비밀번호가 맞지 않습니다.'],
+  [/already registered/i, '이미 사용 중인 아이디입니다.'],
 ];
 
 const TRANSIENT_NAMES = new Set(['AuthRetryableFetchError', 'FunctionsFetchError']);

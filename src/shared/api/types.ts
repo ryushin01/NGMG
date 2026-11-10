@@ -123,7 +123,21 @@ export type CheckIn = {
   method: 'gps' | 'demo';
 };
 
-export type Session = { userId: string; email: string };
+/** 로그인은 이메일 없이 아이디로 합니다. */
+export type Session = { userId: string; username: string };
+
+export type SignUpInput = { username: string; password: string; nickname: string; name: string };
+
+export type Profile = {
+  /** 다른 화면에 보이는 이름 */
+  nickname: string;
+  /** 본명. MY에서 본인만 봅니다. 비어 있을 수 있습니다. */
+  name: string;
+  avatarUrl: string | null;
+};
+
+/** avatar가 undefined면 사진을 그대로 두고, null이면 지웁니다. */
+export type ProfileInput = { nickname: string; name: string; avatar?: LocalPhoto | null };
 
 export type Backend = {
   mode: 'supabase' | 'demo';
@@ -134,15 +148,19 @@ export type Backend = {
     /** 유효한 토큰으로 서버를 호출할 수 있는지 확인합니다. 만료 토큰 갱신도 시도합니다. */
     isReady(): Promise<boolean>;
     subscribe(listener: (session: Session | null) => void): () => void;
-    signIn(email: string, password: string): Promise<void>;
-    /** 이메일 확인이 필요하면 needsConfirmation이 true입니다. */
-    signUp(email: string, password: string): Promise<{ needsConfirmation: boolean }>;
+    signIn(username: string, password: string): Promise<void>;
+    /** 가입하면 바로 로그인합니다. 메일 인증이 없습니다. */
+    signUp(input: SignUpInput): Promise<void>;
+    /** 가입 없이 둘러보는 데모 계정으로 들어갑니다(데모 모드 전용). */
+    browse(): Promise<void>;
     signOut(): Promise<void>;
-    sendPasswordReset(email: string): Promise<void>;
-    /** 재설정 메일 링크에 담긴 토큰으로 로그인합니다. 재설정 링크가 아니면 false입니다. */
-    applyRecoveryLink(url: string): Promise<boolean>;
-    updatePassword(password: string): Promise<void>;
+    /** 메일이 없으므로 로그인한 상태에서 지금 비밀번호를 확인한 뒤 바꿉니다. */
+    updatePassword(current: string, next: string): Promise<void>;
     deleteAccount(): Promise<void>;
+  };
+  profile: {
+    get(): Promise<Profile>;
+    update(input: ProfileInput): Promise<Profile>;
   };
   places: {
     list(): Promise<Place[]>;

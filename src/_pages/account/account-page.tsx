@@ -7,6 +7,7 @@ import { Alert, ScrollView, Switch } from 'react-native';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
+import { ProfileAvatar, useProfile } from '@/entities/profile';
 import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { useSessionStore } from '@/entities/session';
 import { ArrivalAlertSwitch } from '@/features/arrival-alert';
@@ -57,7 +58,11 @@ const LinkRow = ({
 
 export const AccountPage = () => {
   const router = useRouter();
-  const email = useSessionStore((state) => state.session?.email ?? '');
+  const username = useSessionStore((state) => state.session?.username ?? '');
+  const profile = useProfile();
+  const nickname = profile.data?.nickname ?? username;
+  // 둘러보기 계정은 비밀번호가 없습니다.
+  const isGuest = backend.mode === 'demo' && username === 'guest';
   const { ops } = useSyncState();
   const checklist = useChecklist();
   const checkins = useCheckins();
@@ -112,9 +117,41 @@ export const AccountPage = () => {
     <View flex={1} backgroundColor="surface">
       <Header title="MY" hideBack />
       <ScrollView contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: 40 }}>
+        <XStack
+          testID="my-profile"
+          alignItems="center"
+          gap={16}
+          accessible
+          accessibilityLabel={`${nickname}, 아이디 ${username}${profile.data?.name ? `, 이름 ${profile.data.name}` : ''}`}
+        >
+          <ProfileAvatar nickname={nickname} uri={profile.data?.avatarUrl ?? null} size={72} />
+          <YStack flex={1} gap={2}>
+            <AppText size="title">{nickname}</AppText>
+            <AppText tone="muted">@{username}</AppText>
+            {profile.data?.name ? (
+              <AppText size="caption" tone="muted">
+                {profile.data.name} · 본인만 보임
+              </AppText>
+            ) : null}
+          </YStack>
+        </XStack>
         <YStack>
-          <Row label="이메일" value={email} />
+          <LinkRow
+            testID="my-profile-edit"
+            label="프로필 편집"
+            onPress={() => router.push('/profile-edit')}
+          />
           <Divider />
+          {isGuest ? null : (
+            <>
+              <LinkRow
+                testID="my-password"
+                label="비밀번호 변경"
+                onPress={() => router.push('/password')}
+              />
+              <Divider />
+            </>
+          )}
           <LinkRow testID="my-places" label="내 여행지" onPress={() => router.push('/places')} />
           <Divider />
           <LinkRow testID="my-trips" label="내 여정" onPress={() => router.push('/trips')} />

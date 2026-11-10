@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { AccessibilityInfo, Modal, ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
 import type { Destination } from '@/entities/destination';
+import { useProfile } from '@/entities/profile';
 import { BadgeMedal, BadgeShareContent, type BadgeStatus } from '@/features/badges';
 import { formatDay } from '@/shared/lib';
 import { AppIcon, AppText, Button } from '@/shared/ui';
@@ -26,6 +27,7 @@ export const Celebration = ({
   onClose,
   onOpenPassport,
 }: CelebrationProps) => {
+  const owner = useProfile().data?.nickname;
   // 새 모달을 겹치지 않고 같은 창을 뱃지 카드 화면으로 바꿉니다.
   const [sharing, setSharingState] = useState(false);
   const setSharing = (next: boolean) => {
@@ -56,6 +58,7 @@ export const Celebration = ({
         {sharing ? (
           <BadgeShareContent
             statuses={allBadges}
+            owner={owner}
             closeLabel="뒤로"
             onClose={() => setSharing(false)}
           />

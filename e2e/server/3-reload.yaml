@@ -1,4 +1,4 @@
-# 앱을 다시 켜면 세션이 유지되고 서버 값이 보입니다.
+# 앱을 다시 켜면 세션이 유지되고 서버 값이 보입니다. 이어서 MY에서 비밀번호를 바꿉니다.
 appId: com.ryushin01.newworld
 ---
 - stopApp
@@ -21,27 +21,30 @@ appId: com.ryushin01.newworld
     visible: 21개 중 2개 챙김
     timeout: 20000
 - runFlow: _back-to-home.yaml
+# 메일이 없으므로 로그인한 상태에서 지금 비밀번호를 확인하고 바꿉니다.
 - tapOn:
     id: tab-my
-- scrollUntilVisible:
-    element:
-      id: sign-out
-    direction: DOWN
-    centerElement: true
-- waitForAnimationToEnd
 - tapOn:
-    id: sign-out
-- extendedWaitUntil:
-    visible:
-      id: go-forgot
-    timeout: 15000
+    id: my-password
 - tapOn:
-    id: go-forgot
+    id: field-current
+- inputText: first-password
 - tapOn:
-    id: field-email
-- inputText: ${EMAIL}
+    id: field-password
+- runFlow: _close-password-sheet.yaml
+- tapOn:
+    id: field-password
+- inputText: second-password
+- tapOn:
+    id: field-passwordConfirm
+- runFlow: _close-password-sheet.yaml
+- tapOn:
+    id: field-passwordConfirm
+- inputText: second-password
 - runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
-    id: reset-submit
-# 재설정 메일 수신은 run.sh가 확인합니다.
-- waitForAnimationToEnd
+    id: password-submit
+- extendedWaitUntil:
+    visible:
+      id: my-password
+    timeout: 20000

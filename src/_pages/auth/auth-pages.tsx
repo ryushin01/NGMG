@@ -5,7 +5,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 import { View, YStack } from 'tamagui';
-import { ForgotPasswordForm, NewPasswordForm, SignInForm, SignUpForm } from '@/features/auth';
+import { ChangePasswordForm, SignInForm, SignUpForm } from '@/features/auth';
 import { backend } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
 import { AppText, Button, Header, useColors } from '@/shared/ui';
@@ -24,14 +24,12 @@ const FormScroll = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const GUEST_EMAIL = 'guest@newworld.demo';
-
 export const SignInPage = () => {
   const { top } = useSafeAreaInsets();
   // isPending은 다음 렌더에야 바뀌므로 빠른 연속 탭은 ref로 막습니다.
   const browsing = useRef(false);
   const browse = useMutation({
-    mutationFn: () => backend.auth.signIn(GUEST_EMAIL, 'demo'),
+    mutationFn: () => backend.auth.browse(),
     onError: (error) => {
       browsing.current = false;
       toast.error(toErrorMessage(error, '데모를 시작하지 못했습니다.'));
@@ -84,20 +82,11 @@ export const SignUpPage = () => (
   </View>
 );
 
-export const ForgotPasswordPage = () => (
+export const ChangePasswordPage = () => (
   <View flex={1} backgroundColor="surface">
-    <Header title="비밀번호 찾기" />
+    <Header title="비밀번호 변경" />
     <FormScroll>
-      <ForgotPasswordForm />
-    </FormScroll>
-  </View>
-);
-
-export const ResetPasswordPage = () => (
-  <View flex={1} backgroundColor="surface">
-    <Header title="새 비밀번호 설정" />
-    <FormScroll>
-      <NewPasswordForm />
+      <ChangePasswordForm />
     </FormScroll>
   </View>
 );

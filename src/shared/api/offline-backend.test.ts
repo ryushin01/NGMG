@@ -146,7 +146,7 @@ const setup = () => {
   };
   const api = createOfflineBackend(base, deps);
   api.backend.auth.subscribe(() => undefined);
-  const signInAs = (userId: string) => authListener({ userId, email: `${userId}@x` });
+  const signInAs = (userId: string) => authListener({ userId, username: userId });
   return {
     ...api,
     server,

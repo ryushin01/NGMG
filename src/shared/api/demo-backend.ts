@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { compressPhoto, photoStore } from '../lib/photo';
 import { storageAdapter } from '../lib/storage';
 import { DEMO_PLACES, DEMO_RECORDS, DEMO_SEARCH } from './demo-data';
@@ -6,6 +7,7 @@ import type {
   ChecklistItem,
   Photo,
   Place,
+  Profile,
   RecordSaveInput,
   Session,
   CheckIn,
@@ -27,8 +29,23 @@ type DemoState = {
   checklists: [string, ChecklistItem[]][];
   trips: [string, Trip[]][];
   checkins?: [string, CheckIn[]][];
+  /** 아이디별 비밀번호 해시. 원문은 저장하지 않습니다. */
+  accounts?: [string, DemoAccount][];
+  /** 회원 id별 프로필. avatar는 사진 보관소의 파일 이름입니다. */
+  profiles?: [string, StoredProfile][];
   sequence: number;
 };
+
+type DemoAccount = { salt: string; hash: string };
+type StoredProfile = { nickname: string; name: string; avatar: string | null };
+
+/** 둘러보기 계정. 이전 버전에서 쌓인 데이터를 이어 쓰도록 회원 id를 그대로 둡니다. */
+export const GUEST_USERNAME = 'guest';
+const GUEST_SESSION: Session = { userId: 'demo-guest@newworld.demo', username: GUEST_USERNAME };
+const AVATAR_EDGE = 512;
+
+const hashPassword = (salt: string, password: string) =>
+  Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, `${salt}:${password}`);
 
 /** iOS는 앱 업데이트 때 컨테이너 경로가 바뀌므로 저장한 파일 이름으로 주소를 다시 만듭니다. */
 const withPhotoUrls = (record: TripRecord): TripRecord => ({
@@ -76,9 +93,23 @@ const loadState = (): Partial<DemoState> => {
     const value: unknown = JSON.parse(storageAdapter.getItem(STATE_KEY) ?? '{}');
     if (!isObject(value)) return {};
     const state = value;
-    const session = state.session as Session | null | undefined;
+    const stored = state.session as {
+      userId?: unknown;
+      username?: unknown;
+      email?: unknown;
+    } | null;
+    // 이메일로 로그인하던 이전 버전의 세션은 아이디로 바꿉니다.
+    const username =
+      typeof stored?.username === 'string'
+        ? stored.username
+        : typeof stored?.email === 'string'
+          ? stored.email.split('@')[0]
+          : null;
     return {
-      session: typeof session?.userId === 'string' ? session : null,
+      session:
+        typeof stored?.userId === 'string' && username !== null
+          ? { userId: stored.userId, username }
+          : null,
       places: validItems<Place>(state.places, hasId),
       records: validItems<TripRecord>(state.records, isRecord),
       checklists: validItems<[string, ChecklistItem[]]>(state.checklists, (entry) =>
@@ -87,6 +118,25 @@ const loadState = (): Partial<DemoState> => {
       trips: validItems<[string, Trip[]]>(state.trips, (entry) => isOwnerEntry(entry)),
       checkins: validItems<[string, CheckIn[]]>(state.checkins, (entry) =>
         isOwnerEntry(entry, isCheckIn),
+      ),
+      accounts: validItems<[string, DemoAccount]>(
+        state.accounts,
+        (entry) =>
+          Array.isArray(entry) &&
+          typeof entry[0] === 'string' &&
+          isObject(entry[1]) &&
+          typeof entry[1].salt === 'string' &&
+          typeof entry[1].hash === 'string',
+      ),
+      profiles: validItems<[string, StoredProfile]>(
+        state.profiles,
+        (entry) =>
+          Array.isArray(entry) &&
+          typeof entry[0] === 'string' &&
+          isObject(entry[1]) &&
+          typeof entry[1].nickname === 'string' &&
+          typeof entry[1].name === 'string' &&
+          (entry[1].avatar === null || typeof entry[1].avatar === 'string'),
       ),
       sequence: typeof state.sequence === 'number' ? state.sequence : undefined,
     };
@@ -107,6 +157,8 @@ const persist = () => {
     checklists: [...checklists],
     trips: [...trips],
     checkins: [...checkins],
+    accounts: [...accounts],
+    profiles: [...profiles],
     sequence,
   };
   storageAdapter.setItem(STATE_KEY, JSON.stringify(state));
@@ -142,6 +194,17 @@ const trips = new Map<string, Trip[]>(saved.trips);
 const checkins = new Map<string, CheckIn[]>(saved.checkins);
 const myCheckins = () => checkins.get(session?.userId ?? '') ?? [];
 const myTrips = () => trips.get(session?.userId ?? '') ?? [];
+const accounts = new Map<string, DemoAccount>(saved.accounts);
+const profiles = new Map<string, StoredProfile>(saved.profiles);
+const userIdOf = (username: string) => `demo-${username}`;
+
+const toProfile = (stored: StoredProfile | undefined): Profile => ({
+  nickname:
+    stored?.nickname ??
+    (session?.username === GUEST_USERNAME ? '둘러보는 여행자' : (session?.username ?? '')),
+  name: stored?.name ?? '',
+  avatarUrl: stored?.avatar ? photoStore.uriOf(stored.avatar) : null,
+});
 const setMyTrips = (items: Trip[]) => {
   trips.set(session?.userId ?? '', items);
   persist();
@@ -223,24 +286,41 @@ export const demoBackend: Backend = {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    async signIn(email) {
+    async signIn(username, password) {
       await wait();
-      setSession({ userId: `demo-${email}`, email });
+      const account = accounts.get(username);
+      if (!account || (await hashPassword(account.salt, password)) !== account.hash) {
+        throw new Error('Invalid login credentials');
+      }
+      setSession({ userId: userIdOf(username), username });
     },
-    async signUp(email) {
+    async signUp({ username, password, nickname, name }) {
       await wait();
-      setSession({ userId: `demo-${email}`, email });
-      return { needsConfirmation: false };
+      if (username === GUEST_USERNAME || accounts.has(username)) {
+        throw new Error('User already registered');
+      }
+      const salt = Crypto.randomUUID();
+      accounts.set(username, { salt, hash: await hashPassword(salt, password) });
+      profiles.set(userIdOf(username), { nickname, name, avatar: null });
+      setSession({ userId: userIdOf(username), username });
+    },
+    async browse() {
+      await wait();
+      setSession(GUEST_SESSION);
     },
     async signOut() {
       setSession(null);
     },
-    async sendPasswordReset() {
+    async updatePassword(current, next) {
       await wait();
-    },
-    applyRecoveryLink: async () => false,
-    async updatePassword() {
-      await wait();
+      const username = session?.username ?? '';
+      const account = accounts.get(username);
+      if (!account || (await hashPassword(account.salt, current)) !== account.hash) {
+        throw new Error('Invalid login credentials');
+      }
+      const salt = Crypto.randomUUID();
+      accounts.set(username, { salt, hash: await hashPassword(salt, next) });
+      persist();
     },
     async deleteAccount() {
       // 데모는 계정이 없으므로 처음 예시 데이터로 되돌립니다.
@@ -250,8 +330,34 @@ export const demoBackend: Backend = {
       checklists.delete(session?.userId ?? '');
       trips.delete(session?.userId ?? '');
       checkins.delete(session?.userId ?? '');
+      const avatar = profiles.get(session?.userId ?? '')?.avatar;
+      if (avatar) photoStore.remove(avatar);
+      profiles.delete(session?.userId ?? '');
+      if (session && session.username !== GUEST_USERNAME) accounts.delete(session.username);
       setSession(null);
       removePhotos(photos);
+    },
+  },
+  profile: {
+    async get() {
+      await wait();
+      return toProfile(profiles.get(session?.userId ?? ''));
+    },
+    async update({ nickname, name, avatar }) {
+      await wait();
+      const userId = session?.userId ?? '';
+      const previous = profiles.get(userId);
+      let file = previous?.avatar ?? null;
+      if (avatar !== undefined) {
+        // 상태를 저장한 뒤에 이전 사진을 지워, 저장 전에 앱이 꺼져도 사진이 사라지지 않게 합니다.
+        file = avatar
+          ? await photoStore.save((await compressPhoto(avatar, AVATAR_EDGE)).uri)
+          : null;
+      }
+      profiles.set(userId, { nickname, name, avatar: file });
+      persist();
+      if (previous?.avatar && previous.avatar !== file) photoStore.remove(previous.avatar);
+      return toProfile(profiles.get(userId));
     },
   },
   places: {

@@ -65,7 +65,7 @@ beforeEach(() => {
 
 it('앱을 다시 켜도 로그인, 장소, 여정, 체크리스트, 현장 인증이 남습니다', async () => {
   const api = relaunch();
-  await api.auth.signIn('guest@newworld.demo', 'demo');
+  await api.auth.browse();
   const place = await api.places.create(input);
   const trip = { id: 't', title: '코스', startDate: null, endDate: null, stops: [], memo: '' };
   await api.trips.save(trip);
@@ -90,7 +90,7 @@ it('앱을 다시 켜도 로그인, 장소, 여정, 체크리스트, 현장 인�
   await api.checkins.create(checkIn);
 
   const next = relaunch();
-  expect(next.auth.getCachedSession()?.email).toBe('guest@newworld.demo');
+  expect(next.auth.getCachedSession()?.username).toBe('guest');
   expect((await next.places.get(place.id)).name).toBe('내 유적');
   expect(await next.trips.list()).toEqual([trip]);
   expect(await next.checklist.list()).toEqual([item]);
@@ -175,10 +175,37 @@ it('상태를 저장한 뒤에 사진 파일을 지웁니다', async () => {
 
 it('계정 삭제는 예시 데이터로 되돌립니다', async () => {
   const api = relaunch();
-  await api.auth.signIn('guest@newworld.demo', 'demo');
+  await api.auth.browse();
   await api.places.create(input);
   await api.auth.deleteAccount();
   const names = (await relaunch().places.list()).map((place) => place.name);
   expect(names).not.toContain('내 유적');
   expect(names).toContain('마추픽추');
+});
+
+it('이메일로 로그인하던 이전 버전의 세션을 아이디로 바꿔 이어 씁니다', async () => {
+  mockValues.set(
+    'newworld.demo.state',
+    JSON.stringify({
+      session: { userId: 'demo-guest@newworld.demo', email: 'guest@newworld.demo' },
+    }),
+  );
+  expect(relaunch().auth.getCachedSession()).toEqual({
+    userId: 'demo-guest@newworld.demo',
+    username: 'guest',
+  });
+});
+
+it('가입한 계정과 프로필이 앱을 다시 켜도 남습니다', async () => {
+  const api = relaunch();
+  await api.auth.signUp({
+    username: 'ryushin0',
+    password: 'password1',
+    nickname: '유신',
+    name: '',
+  });
+  await api.auth.signOut();
+  const next = relaunch();
+  await next.auth.signIn('ryushin0', 'password1');
+  expect((await next.profile.get()).nickname).toBe('유신');
 });

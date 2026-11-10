@@ -9,6 +9,7 @@ import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
 import { DESTINATIONS, Stamp } from '@/entities/destination';
+import { useProfile } from '@/entities/profile';
 import { usePlaces } from '@/entities/place';
 import { BadgeMedal, BadgeShare, evaluateBadges } from '@/features/badges';
 import { savedByCatalogId } from '@/features/destination-save';
@@ -23,6 +24,7 @@ export const PassportPage = () => {
   const router = useRouter();
   const places = usePlaces();
   const checkins = useCheckins();
+  const nickname = useProfile().data?.nickname;
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
@@ -95,7 +97,7 @@ export const PassportPage = () => {
           >
             <YStack gap={14}>
               <AppText size="headline" tone="inverse">
-                신세계 여행 여권
+                {nickname ? `${nickname}의 신세계 여행 여권` : '신세계 여행 여권'}
               </AppText>
               <AppText tone="inverse" testID="passport-summary">
                 실존 유적 {count('real')} · 환상 세계 {count('fantasy')}
@@ -155,6 +157,7 @@ export const PassportPage = () => {
       </ScrollView>
       <BadgeShare
         statuses={badges}
+        owner={nickname}
         visible={badgeShareOpen}
         onClose={() => setBadgeShareOpen(false)}
       />

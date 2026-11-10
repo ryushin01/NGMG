@@ -6,4 +6,5 @@ additional_redirect_urls = ["newworld://", "exp+newworld://**"]
 enable_signup = true
 
 [auth.email]
-enable_confirmations = true
+# 아이디로 가입하며 앱 전용 주소로는 메일을 받을 수 없으므로 메일 인증을 끕니다.
+enable_confirmations = false

@@ -13,6 +13,7 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('sonner-native', () => ({ toast: Object.assign(jest.fn(), { error: jest.fn() }) }));
 jest.mock('@/shared/config', () => ({ isSupabaseConfigured: false }));
 jest.mock('@/entities/checkin', () => ({ useCheckins: jest.fn() }));
+jest.mock('@/entities/profile', () => ({ useProfile: () => ({ data: { nickname: '유신' } }) }));
 jest.mock('@/features/check-in', () => ({ CHECK_IN_RADIUS_KM: 3, useCheckIn: jest.fn() }));
 
 const avalon = findDestination('avalon')!;
@@ -48,6 +49,7 @@ it('데모 인증으로 스탬프를 찍으면 축하 화면과 새 뱃지를 �
   await fireEvent.press(screen.getByTestId('checkin-share-badges'));
   expect(screen.getByTestId('badge-card')).toBeTruthy();
   expect(screen.getByText(/개 가운데 \d+개를 모았어요/)).toBeTruthy();
+  expect(screen.getByText('유신의 기념 뱃지')).toBeTruthy();
   await fireEvent.press(screen.getByTestId('badge-share-close'));
   expect(screen.getByText('스탬프를 찍었어요')).toBeTruthy();
   await fireEvent.press(screen.getByTestId('checkin-passport'));

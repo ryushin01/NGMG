@@ -7,11 +7,12 @@ import { BadgeMedal } from './badge-medal';
 
 const SHOWN = 9;
 
-type BadgeCardProps = { statuses: BadgeStatus[]; dateLabel: string };
+/** owner가 있으면 '유신의 기념 뱃지'처럼 닉네임을 붙입니다. */
+type BadgeCardProps = { statuses: BadgeStatus[]; dateLabel: string; owner?: string };
 
 /** 공유용 뱃지 카드. 받은 뱃지를 최근 순으로 9개까지 보여 줍니다. */
 export const BadgeCard = forwardRef<NativeView, BadgeCardProps>(function BadgeCard(
-  { statuses, dateLabel },
+  { statuses, dateLabel, owner },
   ref,
 ) {
   const earned = statuses
@@ -33,7 +34,7 @@ export const BadgeCard = forwardRef<NativeView, BadgeCardProps>(function BadgeCa
     >
       <YStack gap={4}>
         <AppText size="headline" accessibilityRole="header">
-          신세계 기념 뱃지
+          {owner ? `${owner}의 기념 뱃지` : '신세계 기념 뱃지'}
         </AppText>
         <AppText tone="muted">
           {statuses.length}개 가운데 {earned.length}개를 모았어요

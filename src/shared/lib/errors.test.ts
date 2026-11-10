@@ -2,7 +2,7 @@ import { isTransientError, toErrorMessage } from './errors';
 
 it('알려진 오류를 한국어 안내로 바꾸고 모르는 오류는 내부 내용을 노출하지 않습니다', () => {
   expect(toErrorMessage(new Error('Invalid login credentials'))).toBe(
-    '이메일 또는 비밀번호가 맞지 않습니다.',
+    '아이디 또는 비밀번호가 맞지 않습니다.',
   );
   expect(toErrorMessage(new Error('Network request failed'))).toBe(
     '네트워크 연결을 확인해 주세요.',

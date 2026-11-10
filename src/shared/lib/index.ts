@@ -6,3 +6,4 @@ export { distanceKm, formatDistance } from './geo';
 export { CURRENCIES, CURRENCY_LABELS, formatMoney } from './currency';
 export { useToday } from './use-today';
 export { useCaptureShare } from './use-capture-share';
+export { useSubmitLock } from './use-submit-lock';

@@ -4,11 +4,11 @@ appId: com.ryushin01.newworld
 - launchApp
 - extendedWaitUntil:
     visible:
-      id: field-email
+      id: field-username
     timeout: 30000
 - tapOn:
-    id: field-email
-- inputText: ${EMAIL}
+    id: field-username
+- inputText: ${USERNAME}
 - waitForAnimationToEnd
 - tapOn:
     id: field-password

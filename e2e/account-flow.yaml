@@ -1,4 +1,4 @@
-# 입력 오류 안내, 탭 이동, 로그아웃 후 로그인 화면 복귀
+# 입력 오류 안내, 탭 이동, 둘러보기 계정 표시, 로그아웃 후 로그인 화면 복귀
 appId: com.ryushin01.newworld
 ---
 - launchApp:
@@ -9,7 +9,7 @@ appId: com.ryushin01.newworld
     timeout: 30000
 - tapOn:
     id: sign-in-submit
-- assertVisible: 이메일을 입력해 주세요.
+- assertVisible: 아이디를 입력해 주세요.
 - assertVisible: 비밀번호를 입력해 주세요.
 - runFlow: _sign-in.yaml
 - tapOn:
@@ -18,7 +18,7 @@ appId: com.ryushin01.newworld
 - assertVisible: '.*구름이 걷히던 아침.*'
 - tapOn:
     id: tab-my
-- assertVisible: '.*demo@newworld.app.*'
+- assertVisible: '@guest'
 - scrollUntilVisible:
     element:
       id: sign-out
