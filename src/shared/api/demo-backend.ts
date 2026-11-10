@@ -22,10 +22,15 @@ import type {
 const STATE_KEY = 'newworld.demo.state';
 const PHOTO_PREFIX = 'demo-photo:';
 
+type UserData = { places: Place[]; records: TripRecord[] };
+
 type DemoState = {
   session: Session | null;
-  places: Place[];
-  records: TripRecord[];
+  /** 이전 버전은 장소와 기록을 계정 구분 없이 저장했습니다. 불러올 때 둘러보기 계정으로 옮깁니다. */
+  places?: Place[];
+  records?: TripRecord[];
+  /** 회원 id별 장소와 기록 */
+  userData?: [string, UserData][];
   checklists: [string, ChecklistItem[]][];
   trips: [string, Trip[]][];
   checkins?: [string, CheckIn[]][];
@@ -112,6 +117,21 @@ const loadState = (): Partial<DemoState> => {
           : null,
       places: validItems<Place>(state.places, hasId),
       records: validItems<TripRecord>(state.records, isRecord),
+      userData: validItems<[string, UserData]>(
+        state.userData,
+        (entry) =>
+          Array.isArray(entry) &&
+          typeof entry[0] === 'string' &&
+          isObject(entry[1]) &&
+          Array.isArray(entry[1].places) &&
+          Array.isArray(entry[1].records),
+      )?.map(([userId, data]): [string, UserData] => [
+        userId,
+        {
+          places: data.places.filter(hasId),
+          records: data.records.filter(isRecord),
+        },
+      ]),
       checklists: validItems<[string, ChecklistItem[]]>(state.checklists, (entry) =>
         isOwnerEntry(entry),
       ),
@@ -150,10 +170,10 @@ const saved = loadState();
 let session: Session | null = saved.session ?? null;
 const listeners = new Set<(session: Session | null) => void>();
 const persist = () => {
+  if (activeUserId) userData.set(activeUserId, { places, records });
   const state: DemoState = {
     session,
-    places,
-    records,
+    userData: [...userData],
     checklists: [...checklists],
     trips: [...trips],
     checkins: [...checkins],
@@ -165,13 +185,41 @@ const persist = () => {
 };
 
 const setSession = (next: Session | null) => {
+  switchUser(next?.userId ?? '');
   session = next;
   persist();
   listeners.forEach((listener) => listener(next));
 };
 
-let places: Place[] = saved.places ?? [...DEMO_PLACES];
-let records: TripRecord[] = (saved.records ?? [...DEMO_RECORDS]).map(withPhotoUrls);
+/** 예시 장소와 기록은 둘러보기 계정에만 두고, 가입한 계정은 빈 상태로 시작합니다. */
+const freshData = (userId: string): UserData =>
+  userId === GUEST_SESSION.userId
+    ? { places: [...DEMO_PLACES], records: [...DEMO_RECORDS] }
+    : { places: [], records: [] };
+
+const userData = new Map<string, UserData>(saved.userData);
+// 이전 버전에는 아이디 가입이 없어 저장된 장소와 기록은 모두 둘러보기 데이터였습니다.
+if (!saved.userData && (saved.places || saved.records)) {
+  userData.set(GUEST_SESSION.userId, {
+    places: saved.places ?? [],
+    records: saved.records ?? [],
+  });
+}
+
+let activeUserId = session?.userId ?? '';
+const dataOf = (userId: string) => {
+  const data = userData.get(userId) ?? freshData(userId);
+  return { places: data.places, records: data.records.map(withPhotoUrls) };
+};
+let { places, records } = dataOf(activeUserId);
+
+/** 로그인한 계정이 바뀌면 그 계정의 장소와 기록으로 바꿉니다. */
+const switchUser = (userId: string) => {
+  if (userId === activeUserId) return;
+  if (activeUserId) userData.set(activeUserId, { places, records });
+  activeUserId = userId;
+  ({ places, records } = dataOf(userId));
+};
 let sequence = saved.sequence ?? 1000;
 const nextId = () => `demo-${(sequence += 1)}`;
 
@@ -226,6 +274,15 @@ const withStats = (place: Place): Place => {
         .sort()
         .at(-1) ?? null,
   };
+};
+
+/** 사진 파일을 지우지 못해도 계정 삭제나 프로필 저장은 끝까지 진행합니다. */
+const removeAvatar = (name: string) => {
+  try {
+    photoStore.remove(name);
+  } catch {
+    // 남은 파일은 다음 정리 때 지웁니다.
+  }
 };
 
 const removePhotos = (photos: Photo[]) => {
@@ -323,15 +380,19 @@ export const demoBackend: Backend = {
       persist();
     },
     async deleteAccount() {
-      // 데모는 계정이 없으므로 처음 예시 데이터로 되돌립니다.
+      // 이 계정의 장소와 기록만 지웁니다. 둘러보기 계정은 처음 예시 데이터로 되돌립니다.
       const photos = records.flatMap((record) => record.photos);
-      places = [...DEMO_PLACES];
-      records = [...DEMO_RECORDS];
+      if (activeUserId === GUEST_SESSION.userId)
+        userData.set(activeUserId, freshData(activeUserId));
+      else userData.delete(activeUserId);
+      activeUserId = '';
+      places = [];
+      records = [];
       checklists.delete(session?.userId ?? '');
       trips.delete(session?.userId ?? '');
       checkins.delete(session?.userId ?? '');
       const avatar = profiles.get(session?.userId ?? '')?.avatar;
-      if (avatar) photoStore.remove(avatar);
+      if (avatar) removeAvatar(avatar);
       profiles.delete(session?.userId ?? '');
       if (session && session.username !== GUEST_USERNAME) accounts.delete(session.username);
       setSession(null);
@@ -356,7 +417,7 @@ export const demoBackend: Backend = {
       }
       profiles.set(userId, { nickname, name, avatar: file });
       persist();
-      if (previous?.avatar && previous.avatar !== file) photoStore.remove(previous.avatar);
+      if (previous?.avatar && previous.avatar !== file) removeAvatar(previous.avatar);
       return toProfile(profiles.get(userId));
     },
   },

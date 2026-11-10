@@ -11,7 +11,7 @@ import { ProfileAvatar, useProfile, useUpdateProfile } from '@/entities/profile'
 import { FormField, profileSchema } from '@/features/auth';
 import type { LocalPhoto } from '@/shared/api';
 import { toErrorMessage, useSubmitLock } from '@/shared/lib';
-import { Button, Header, LoadingView, useColors } from '@/shared/ui';
+import { Button, Header, LoadingView, MessageView, useColors } from '@/shared/ui';
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
@@ -115,7 +115,17 @@ export const ProfileEditPage = () => {
   return (
     <View flex={1} backgroundColor="surface">
       <Header title="프로필 편집" />
-      {profile.data ? <ProfileEditForm initial={profile.data} /> : <LoadingView />}
+      {profile.data ? (
+        <ProfileEditForm initial={profile.data} />
+      ) : profile.isError ? (
+        <MessageView
+          message={toErrorMessage(profile.error, '프로필을 불러오지 못했습니다.')}
+          actionLabel="다시 시도"
+          onAction={() => profile.refetch()}
+        />
+      ) : (
+        <LoadingView />
+      )}
     </View>
   );
 };

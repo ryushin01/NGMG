@@ -254,11 +254,11 @@ type ProfileRow = { nickname: string; name: string; avatar_path: string | null }
 
 const toProfile = async (row: ProfileRow): Promise<Profile> => {
   if (!row.avatar_path) return { nickname: row.nickname, name: row.name, avatarUrl: null };
+  // 사진 주소를 받지 못해도(일시 오류, 지워진 파일) 닉네임과 이름은 보여 줍니다.
   const { data, error } = await client.storage
     .from(AVATAR_BUCKET)
     .createSignedUrl(row.avatar_path, AVATAR_URL_TTL);
-  if (error) throw error;
-  return { nickname: row.nickname, name: row.name, avatarUrl: data.signedUrl };
+  return { nickname: row.nickname, name: row.name, avatarUrl: error ? null : data.signedUrl };
 };
 
 const currentUserId = async () => {
