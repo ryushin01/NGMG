@@ -1,6 +1,6 @@
 import { BadgeCheck } from 'lucide-react-native';
 import { useState } from 'react';
-import { Modal, ScrollView } from 'react-native';
+import { AccessibilityInfo, Modal, ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
 import type { Destination } from '@/entities/destination';
 import { BadgeMedal, BadgeShareContent, type BadgeStatus } from '@/features/badges';
@@ -27,7 +27,16 @@ export const Celebration = ({
   onOpenPassport,
 }: CelebrationProps) => {
   // 새 모달을 겹치지 않고 같은 창을 뱃지 카드 화면으로 바꿉니다.
-  const [sharing, setSharing] = useState(false);
+  const [sharing, setSharingState] = useState(false);
+  const setSharing = (next: boolean) => {
+    setSharingState(next);
+    // 같은 창의 내용이 바뀌므로 화면 낭독기에 알려 줍니다.
+    if (next !== sharing) {
+      AccessibilityInfo.announceForAccessibility(
+        next ? '뱃지 카드 미리 보기로 바뀌었습니다' : '축하 화면으로 돌아왔습니다',
+      );
+    }
+  };
   const close = () => {
     setSharing(false);
     onClose();

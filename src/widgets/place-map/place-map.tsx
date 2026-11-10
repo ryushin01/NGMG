@@ -11,6 +11,8 @@ import { PlaceMarker } from './place-marker';
 
 export type PlaceMapHandle = {
   focus: (coordinate: LatLng, delta?: number) => void;
+  /** 여러 곳이 모두 보이도록 지도를 맞춥니다. */
+  fit: (coordinates: LatLng[]) => void;
 };
 
 type PlaceMapProps = {
@@ -49,7 +51,18 @@ export const PlaceMap = forwardRef<PlaceMapHandle, PlaceMapProps>(function Place
       350,
     );
   };
-  useImperativeHandle(ref, () => ({ focus }));
+  const fit: PlaceMapHandle['fit'] = (coordinates) => {
+    if (coordinates.length === 0) return;
+    if (coordinates.length === 1) {
+      focus(coordinates[0], 0.6);
+      return;
+    }
+    mapRef.current?.fitToCoordinates(coordinates, {
+      edgePadding: { top: 80, right: 60, bottom: bottomInset + 60, left: 60 },
+      animated: true,
+    });
+  };
+  useImperativeHandle(ref, () => ({ focus, fit }));
 
   return (
     <AppMapView

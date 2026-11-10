@@ -32,7 +32,9 @@ export const BadgeCard = forwardRef<NativeView, BadgeCardProps>(function BadgeCa
       borderColor="line"
     >
       <YStack gap={4}>
-        <AppText size="headline">신세계 기념 뱃지</AppText>
+        <AppText size="headline" accessibilityRole="header">
+          신세계 기념 뱃지
+        </AppText>
         <AppText tone="muted">
           {statuses.length}개 가운데 {earned.length}개를 모았어요
         </AppText>

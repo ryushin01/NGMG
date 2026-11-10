@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { BadgeCheck, LocateFixed } from 'lucide-react-native';
 import { useState } from 'react';
+import { AccessibilityInfo } from 'react-native';
 import { toast } from 'sonner-native';
 import { XStack, YStack } from 'tamagui';
 import { useCheckins } from '@/entities/checkin';
@@ -11,6 +12,13 @@ import { isSupabaseConfigured } from '@/shared/config';
 import { formatDay, formatDistance } from '@/shared/lib';
 import { AppIcon, AppText, Button } from '@/shared/ui';
 import { Celebration } from './celebration';
+
+/** 토스트는 화면 낭독기가 놓칠 수 있어 같은 문구를 함께 읽어 줍니다. */
+const notify = (message: string, error = true) => {
+  if (error) toast.error(message);
+  else toast(message);
+  AccessibilityInfo.announceForAccessibility(message);
+};
 
 /** 여행지 상세의 현장 인증 영역. 인증하면 여권에 스탬프가 찍히고 조건을 채운 뱃지를 받습니다. */
 export const CheckInPanel = ({ destination }: { destination: Destination }) => {
@@ -40,18 +48,18 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
         });
         return;
       case 'already':
-        toast(`${formatDay(result.checkIn.checkedAt)}에 이미 인증한 곳입니다.`);
+        notify(`${formatDay(result.checkIn.checkedAt)}에 이미 인증한 곳입니다.`, false);
         return;
       case 'far':
-        toast.error(
+        notify(
           `${fantasy ? '연고지' : '현장'}에서 ${formatDistance(result.distance)} 떨어져 있어요. ${CHECK_IN_RADIUS_KM}km 안에서 다시 시도해 주세요.`,
         );
         return;
       case 'denied':
-        toast.error('현장 인증에는 위치 권한이 필요합니다. 설정에서 위치 접근을 허용해 주세요.');
+        notify('현장 인증에는 위치 권한이 필요합니다. 설정에서 위치 접근을 허용해 주세요.');
         return;
       case 'error':
-        toast.error('현장 인증을 하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        notify('현장 인증을 하지 못했습니다. 잠시 후 다시 시도해 주세요.');
         return;
       default:
     }

@@ -89,3 +89,19 @@ appId: com.ryushin01.newworld
     id: badge-share-close
 - assertNotVisible:
     id: badge-card
+# 지도에서 현장 인증 필터를 고르면 인증한 곳이 체크 핀으로 보입니다.
+- tapOn: 뒤로 가기
+- tapOn: 뒤로 가기
+- tapOn:
+    id: tab-map
+- extendedWaitUntil:
+    visible:
+      id: filter-verified
+    timeout: 8000
+- tapOn:
+    id: filter-verified
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: 환상 세계, 아발론, 현장 인증
+    timeout: 10000
+- takeScreenshot: map-verified

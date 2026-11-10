@@ -91,6 +91,18 @@ export const MapPage = () => {
   );
   const selected = allPlaces.find((place) => place.id === selectedId) ?? null;
 
+  const changeFilter = (next: KindFilter) => {
+    setFilter(next);
+    // 인증한 곳은 세계 곳곳에 흩어져 있으므로 모두 보이도록 지도를 맞춥니다.
+    if (next === 'verified') {
+      mapRef.current?.fit(
+        allPlaces
+          .filter((place) => !!place.catalogId && verifiedIds.has(place.catalogId))
+          .map(({ latitude, longitude }) => ({ latitude, longitude })),
+      );
+    }
+  };
+
   const selectPlace = (place: Place) => {
     Haptics.selectionAsync();
     setSelectedId(place.id);
@@ -189,7 +201,7 @@ export const MapPage = () => {
         ) : (
           <HomeContent
             filter={filter}
-            onChangeFilter={setFilter}
+            onChangeFilter={changeFilter}
             tags={tags}
             tag={tag}
             onChangeTag={setTag}
