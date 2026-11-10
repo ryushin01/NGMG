@@ -307,8 +307,11 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         break;
       default: {
         const applied = applyOps(snapshot, [op], deps.photos.uriOf);
+        // applyOps는 장소별 기록 수를 기록 사본으로 다시 셉니다. 기록 사본이 없으면 모두 0이 되므로,
+        // 남은 장소는 서버가 준 값을 그대로 둡니다.
+        const kept = new Set(applied.places.map((place) => place.id));
         snapshot = {
-          places: snapshot.places && applied.places,
+          places: snapshot.places && snapshot.places.filter((place) => kept.has(place.id)),
           records: snapshot.records && applied.records,
           checklist: applied.checklist,
           trips: snapshot.trips && applied.trips,

@@ -512,6 +512,23 @@ describe('현장 인증', () => {
   });
 });
 
+describe('보낸 변경을 서버 사본에 합칠 때', () => {
+  it('기록 목록을 받기 전이어도 장소의 기록 수는 서버 값을 그대로 둡니다', async () => {
+    const { backend, sync, server, signInAs } = setup();
+    server.places = [
+      { ...placeInput, id: 'p1', recordCount: 3, lastVisitedAt: '2026-10-01', createdAt: 'now' },
+    ] as Place[];
+    signInAs('a');
+    await backend.places.list();
+    await backend.checklist.upsert([
+      { id: 'c1', title: '여권', category: '서류', checked: true, position: 0 },
+    ] as import('./types').ChecklistItem[]);
+    sync.setOnline(false);
+    const [place] = await backend.places.list();
+    expect(place).toMatchObject({ recordCount: 3, lastVisitedAt: '2026-10-01' });
+  });
+});
+
 describe('통화가 생기기 전의 기기 데이터', () => {
   it('보관된 기록과 대기 중인 변경을 원화로 복원합니다', async () => {
     const { backend, sync, store, signInAs } = setup();

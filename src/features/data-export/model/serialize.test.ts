@@ -37,3 +37,17 @@ it('JSON 백업에는 서명 URL을 넣지 않습니다', () => {
   expect(json).not.toContain('https://signed');
   expect(JSON.parse(json).records[0].photos[0].path).toBe('u/r/a.jpg');
 });
+
+it('백업에 현장 인증 스탬프를 함께 넣습니다', () => {
+  const checkIn = {
+    id: 'c1',
+    catalogId: 'avalon',
+    checkedAt: '2026-11-10T09:00:00.000Z',
+    latitude: 51.14,
+    longitude: -2.69,
+    distanceKm: 0.4,
+    method: 'gps' as const,
+  };
+  const json = JSON.parse(toBackupJson([], [], [], '2026-11-10', [], [checkIn]));
+  expect(json.checkins).toEqual([checkIn]);
+});
