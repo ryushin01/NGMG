@@ -1,4 +1,4 @@
-import type { ChecklistItem, Place, Trip, TripRecord } from '@/shared/api';
+import type { CheckIn, ChecklistItem, Place, Trip, TripRecord } from '@/shared/api';
 
 const csvCell = (value: string | number | null) => {
   const text = value === null ? '' : String(value);
@@ -43,6 +43,7 @@ export const toBackupJson = (
   checklist: ChecklistItem[],
   exportedAt: string,
   trips: Trip[] = [],
+  checkins: CheckIn[] = [],
 ) =>
   JSON.stringify(
     {
@@ -56,6 +57,8 @@ export const toBackupJson = (
       })),
       checklist,
       trips,
+      // 계정을 지우면 현장 인증 스탬프도 사라지므로 백업에 함께 넣습니다.
+      checkins,
     },
     null,
     2,

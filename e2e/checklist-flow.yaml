@@ -117,11 +117,9 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: field-nickname
 - inputText: 다른여행자
-# 키보드가 가입 버튼을 가리므로 키보드의 다음 키로 닫은 뒤 누릅니다.
+# 키보드가 가입 버튼을 가리므로 키보드로 이름 칸에 간 뒤, 이름 칸의 완료 키로 가입합니다.
 - pressKey: Enter
-- runFlow: _hide-keyboard-android.yaml
-- tapOn:
-    id: sign-up-submit
+- pressKey: Enter
 # 가입하면 복구 코드를 한 번 보여 줍니다.
 - extendedWaitUntil:
     visible:
@@ -129,7 +127,7 @@ appId: com.ryushin01.newworld
     timeout: 15000
 - assertVisible:
     id: recovery-code
-    text: "[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}"
+    text: '[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}'
 - tapOn:
     id: recovery-code-done
 - runFlow:

@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { backend } from '@/shared/api';
+import { backend, sync } from '@/shared/api';
 import { recordsToCsv, toBackupJson } from './serialize';
 
 export type ExportFormat = 'json' | 'csv';
@@ -10,16 +10,22 @@ export type ExportFormat = 'json' | 'csv';
 const MIME: Record<ExportFormat, string> = { json: 'application/json', csv: 'text/csv' };
 
 const shareFile = async (format: ExportFormat) => {
-  const [places, records, checklist, trips] = await Promise.all([
+  const [places, records, checklist, trips, checkins] = await Promise.all([
     backend.places.list(),
     backend.records.list(),
     backend.checklist.list(),
     backend.trips.list(),
+    format === 'json' ? backend.checkins.list() : [],
   ]);
+  // 끊긴 채로 한 번도 받지 못한 목록이 있으면 대기 중인 변경만 담긴 불완전한 파일이 되므로 멈춥니다.
+  const needed = ['places', 'records', 'checklist', 'trips'] as const;
+  if (!sync.hasSnapshot(format === 'json' ? [...needed, 'checkins'] : ['records'])) {
+    throw new Error('Incomplete export');
+  }
   const content =
     format === 'csv'
       ? recordsToCsv(records)
-      : toBackupJson(places, records, checklist, new Date().toISOString(), trips);
+      : toBackupJson(places, records, checklist, new Date().toISOString(), trips, checkins);
   const file = new File(Paths.cache, `newworld-${dayjs().format('YYYYMMDD-HHmmss')}.${format}`);
   file.create({ overwrite: true });
   file.write(content);

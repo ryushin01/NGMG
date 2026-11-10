@@ -1,6 +1,6 @@
 import * as TaskManager from 'expo-task-manager';
 import { notifyArrival } from './arrival';
-import { syncArrivalRegions } from './settings';
+import { isArrivalAlertEnabled, stopRegions, syncArrivalRegions } from './settings';
 import { ARRIVAL_TASK } from './task';
 
 jest.mock('expo-location', () => ({ GeofencingEventType: { Enter: 1, Exit: 2 } }));
@@ -10,7 +10,11 @@ jest.mock('expo-task-manager', () => ({
   defineTask: jest.fn(),
 }));
 jest.mock('./arrival', () => ({ notifyArrival: jest.fn() }));
-jest.mock('./settings', () => ({ syncArrivalRegions: jest.fn() }));
+jest.mock('./settings', () => ({
+  syncArrivalRegions: jest.fn(),
+  isArrivalAlertEnabled: jest.fn(() => true),
+  stopRegions: jest.fn(async () => undefined),
+}));
 
 const run = (body: object) => {
   const executor = jest.mocked(TaskManager.defineTask).mock.calls[0][1];
@@ -30,4 +34,12 @@ it('위치 갱신 지역을 벗어나면 새 위치에서 여행지를 다시 �
   await run({ data: { eventType: 2, region: { identifier: 'newworld-refresh' } }, error: null });
   expect(syncArrivalRegions).toHaveBeenCalledTimes(1);
   expect(notifyArrival).toHaveBeenCalledTimes(1);
+});
+
+it('알림이 꺼진 뒤에 남은 지역은 알리지 않고 멈춥니다', async () => {
+  jest.mocked(isArrivalAlertEnabled).mockReturnValueOnce(false);
+  const before = jest.mocked(notifyArrival).mock.calls.length;
+  await run({ data: { eventType: 1, region: { identifier: 'avalon' } }, error: null });
+  expect(notifyArrival).toHaveBeenCalledTimes(before);
+  expect(stopRegions).toHaveBeenCalledTimes(1);
 });

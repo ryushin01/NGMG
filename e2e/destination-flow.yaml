@@ -34,7 +34,7 @@ appId: com.ryushin01.newworld
     visible:
       id: world-progress-fantasy
     timeout: 8000
-- assertVisible: 20곳 중 1곳 다녀옴
+- assertVisible: 30곳 중 1곳 다녀옴
 - assertNotVisible:
     id: destination-petra
 - tapOn:
@@ -80,5 +80,5 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: tab-fantasy
 - extendedWaitUntil:
-    visible: 20곳 중 2곳 다녀옴
+    visible: 30곳 중 2곳 다녀옴
     timeout: 8000

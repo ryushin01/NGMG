@@ -6,7 +6,7 @@ const destination = {
   id: 'petra',
   realm: 'real',
   name: '페트라',
-  image: require('~/assets/destinations/petra.jpg'),
+  image: require('~/assets/destinations/petra.webp'),
 } as Destination;
 
 const meta = {

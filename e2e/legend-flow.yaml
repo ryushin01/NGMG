@@ -99,7 +99,7 @@ appId: com.ryushin01.newworld
     visible:
       id: passport-summary
     timeout: 8000
-- assertVisible: 실존 유적 1/25 · 환상 세계 1/20
+- assertVisible: 실존 유적 1/25 · 환상 세계 1/30
 - tapOn: 뒤로 가기
 - waitForAnimationToEnd
 # 하트를 끄면 내 여행지에서 사라집니다.

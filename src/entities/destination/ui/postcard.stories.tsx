@@ -11,7 +11,7 @@ const meta = {
       name: '아발론',
       tagline: '상처 입은 아서왕이 쉬러 간 사과의 섬',
       location: '서쪽 바다 너머',
-      image: require('~/assets/destinations/avalon.jpg'),
+      image: require('~/assets/destinations/avalon.webp'),
     } as Destination,
     dateLabel: '2026. 11. 10.',
   },

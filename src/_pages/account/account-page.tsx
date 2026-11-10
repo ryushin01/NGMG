@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, ScrollView, Switch } from 'react-native';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
@@ -100,10 +100,16 @@ export const AccountPage = () => {
     );
   };
 
+  // isPending은 다음 렌더에야 바뀌어, 빠르게 두 번 누르면 공유 창이 두 번 뜹니다.
+  const exporting = useRef(false);
   const runExport = (format: 'json' | 'csv') => {
-    if (exportData.isPending) return;
+    if (exporting.current) return;
+    exporting.current = true;
     exportData.mutate(format, {
       onError: (error) => toast.error(toErrorMessage(error, '내보내지 못했습니다.')),
+      onSettled: () => {
+        exporting.current = false;
+      },
     });
   };
 
@@ -218,6 +224,8 @@ export const AccountPage = () => {
                 testID="export-csv"
                 variant="outline"
                 label="기록 CSV"
+                loading={exportData.isPending && exportData.variables === 'csv'}
+                disabled={exportData.isPending && exportData.variables !== 'csv'}
                 onPress={() => runExport('csv')}
               />
             </View>
@@ -226,6 +234,8 @@ export const AccountPage = () => {
                 testID="export-json"
                 variant="outline"
                 label="전체 JSON"
+                loading={exportData.isPending && exportData.variables === 'json'}
+                disabled={exportData.isPending && exportData.variables !== 'json'}
                 onPress={() => runExport('json')}
               />
             </View>

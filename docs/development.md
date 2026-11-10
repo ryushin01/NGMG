@@ -67,13 +67,23 @@ npx supabase functions deploy recover-account
 
 ## 테스트
 
-| 명령                                            | 내용                                                                               |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `pnpm test`                                     | 단위·컴포넌트 테스트 (Jest, React Native Testing Library)                          |
-| `pnpm run test:db`                              | 마이그레이션을 PGlite에 적용해 RLS와 제약 조건 검사                                |
-| `pnpm run test:e2e`                             | Maestro E2E. 데모 모드 앱을 시뮬레이터에 설치한 뒤 실행합니다.                     |
-| `pnpm run test:e2e:server`                      | 로컬 Supabase에 연결한 Release 앱으로 가입부터 계정 삭제까지 검사합니다. 아래 참고 |
-| `EXPO_PUBLIC_STORYBOOK_ENABLED=true pnpm start` | 앱에서 `/storybook` 경로로 컴포넌트 카탈로그 확인                                  |
+| 명령                                            | 내용                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `pnpm test`                                     | 단위·컴포넌트 테스트 (Jest, React Native Testing Library)                                         |
+| `pnpm run test:db`                              | 마이그레이션을 PGlite에 적용해 RLS와 제약 조건 검사                                               |
+| `pnpm run test:e2e`                             | Maestro E2E. 전용 시뮬레이터 `NewWorld E2E`에 데모 모드 Release 앱을 설치해 실행합니다. 아래 참고 |
+| `pnpm run test:e2e:server`                      | 로컬 Supabase에 연결한 Release 앱으로 가입부터 계정 삭제까지 검사합니다. 아래 참고                |
+| `EXPO_PUBLIC_STORYBOOK_ENABLED=true pnpm start` | 앱에서 `/storybook` 경로로 컴포넌트 카탈로그 확인                                                 |
+
+### E2E 전용 시뮬레이터
+
+E2E 흐름은 시작할 때 앱 데이터를 지우므로, 평소 쓰는 시뮬레이터의 계정과 기록을 지우지 않도록 `scripts/e2e-ios.sh`가 전용 시뮬레이터에서만 돌립니다.
+
+- `NewWorld E2E`(iPhone 17 Pro) 시뮬레이터가 없으면 만들고 켭니다. iOS 27 시뮬레이터는 지역 감시를 지원하지 않아(도착 알림이 `ERR_GEOFENCING_UNAVAILABLE`로 실패) iOS 26 중 가장 최신을 고르고, iOS 26이 없으면 설치 안내와 함께 멈춥니다. 다른 버전은 `E2E_RUNTIME`으로 지정하며, 버전마다 따로 만들어 씁니다.
+- Maestro에 필요한 Java가 시스템에 없으면 Homebrew `openjdk`나 Android Studio의 JBR을 씁니다.
+- Release 앱을 빌드해 설치하고 위치 권한(항상 허용)을 준 뒤 Maestro를 그 기기에서만 실행합니다.
+- 흐름 하나만: `pnpm run test:e2e e2e/checkin-flow.yaml` · 빌드 없이: `SKIP_BUILD=1 pnpm run test:e2e`
+- 서버 E2E도 같은 기기 ID(스크립트가 출력)를 `DEVICE`로 넘겨 돌립니다.
 
 ### 실제 서버 경로 검사
 
@@ -142,7 +152,7 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 여행지는 `src/entities/destination/model/`에 앱과 함께 묶여 있어 오프라인에서도 보입니다.
 
 - 소개글은 나무위키와 위키백과에서 사실을 확인해 새로 쓴 요약입니다. 나무위키 본문은 CC BY-NC-SA 2.0 KR이므로 그대로 옮기지 않습니다. 각 여행지 화면 아래에 출처 링크가 있습니다.
-- 사진은 위키미디어 공용의 Public domain, CC0, CC BY, CC BY-SA 파일만 800px로 줄여 `assets/destinations/`에 넣고, 저작자·라이선스·원본 링크를 `images.ts`에 함께 둡니다.
+- 사진은 위키미디어 공용의 Public domain, CC0, CC BY, CC BY-SA 파일만 800px로 줄인 뒤 WebP(품질 80, `cwebp -q 80 -metadata none`)로 바꿔 `assets/destinations/`에 넣고, 저작자·라이선스·원본 링크를 `images.ts`에 함께 둡니다.
 - 환상 세계의 좌표는 실제 위치가 아니라 전승과 이어진 현실의 장소이며, 화면의 `locationNote`로 알립니다.
 - 입장 조건과 여행경보는 자주 바뀌므로 단정하지 않고 공식 안내를 확인하도록 안내합니다.
 - 분류(`lore`)는 환상 세계가 `myth`(신과 창세·낙원·저승)·`legend`(영웅, 사라진 도시, 민간 전승, 문학), 실존 유적이 `history`(신화·전설이 얽힌 곳, `loreNote`에 근거 한 줄)·`fact`입니다.

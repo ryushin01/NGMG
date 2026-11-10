@@ -18,6 +18,7 @@ const DENIED: Record<Exclude<EnableResult, 'enabled'>, string> = {
   'location-denied': '위치 권한이 없어 알림을 켜지 못했습니다.',
   'background-denied': "위치 접근을 '항상 허용'으로 바꿔야 앱을 닫아도 알려 드릴 수 있습니다.",
   'notification-denied': '알림 권한이 없어 알림을 켜지 못했습니다.',
+  unavailable: '이 기기에서는 위치 기반 지역 알림을 쓸 수 없습니다.',
 };
 
 const confirm = () =>
@@ -57,10 +58,17 @@ export const ArrivalAlertSwitch = ({ checkedIds }: { checkedIds: ReadonlySet<str
         toast.success('근처 여행지에 도착하면 알려 드릴게요.');
         return;
       }
-      Alert.alert('알림을 켜지 못했습니다', DENIED[result], [
-        { text: '닫기', style: 'cancel' },
-        { text: '설정 열기', onPress: () => Linking.openSettings() },
-      ]);
+      Alert.alert(
+        '알림을 켜지 못했습니다',
+        DENIED[result],
+        // 기기가 지원하지 않으면 설정에서 바꿀 것이 없으므로 닫기만 둡니다.
+        result === 'unavailable'
+          ? [{ text: '닫기', style: 'cancel' }]
+          : [
+              { text: '닫기', style: 'cancel' },
+              { text: '설정 열기', onPress: () => Linking.openSettings() },
+            ],
+      );
     } catch {
       toast.error('알림 설정을 바꾸지 못했습니다.');
     } finally {
