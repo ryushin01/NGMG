@@ -120,6 +120,19 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - E2E는 Release 빌드로 실행합니다. R8 코드 축소나 키체인 권한 같은 문제는 Debug 빌드에서 드러나지 않습니다.
 - Android는 `GOOGLE_MAPS_ANDROID_API_KEY` 없이 빌드하면 지도 자리에 안내 문구가 나옵니다. 키를 추가한 뒤에는 다시 빌드합니다.
 
+## 글꼴
+
+| 역할        | 글꼴                                                | 적용                                |
+| ----------- | --------------------------------------------------- | ----------------------------------- |
+| 제목        | 고운바탕 굵은 체(`@expo-google-fonts/gowun-batang`) | `AppText`의 `title`·`headline` 크기 |
+| 영문 원어명 | Marcellus(`@expo-google-fonts/marcellus`)           | `AppText`의 `latin`                 |
+| 본문        | 운영체제 글꼴                                       | 나머지                              |
+
+- 고운돋움처럼 굵기가 하나뿐인 한글 글꼴은 본문의 굵은 글씨가 사라져 본문에는 쓰지 않습니다.
+- 제목 글꼴은 파일 자체가 굵어 `fontWeight`를 더하지 않습니다(Android에서 이중으로 굵어지는 것을 막음).
+- `useAppFonts`(`src/shared/ui/fonts.ts`)로 불러오고, 끝날 때까지 스플래시를 유지합니다. 실패하면 시스템 글꼴로 계속합니다.
+- 웹 빌드(Expo Web)는 시도했으나 Tamagui 3의 가로 배치·고정 위치 스타일이 적용되지 않아 보류했습니다.
+
 ## 여행지 도감 자료
 
 여행지는 `src/entities/destination/model/`에 앱과 함께 묶여 있어 오프라인에서도 보입니다.

@@ -1,13 +1,22 @@
+import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, ExternalLink, Heart, MapPin, Share2 } from 'lucide-react-native';
-import { useState } from 'react';
-import { Platform, ScrollView, Share } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import { ArrowLeft, ExternalLink, Heart, Mail, MapPin, Share2 } from 'lucide-react-native';
+import { useRef, useState } from 'react';
+import { Modal, Platform, ScrollView, Share, type View as NativeView } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
-import { findDestination, linksOf, READING_LINKS, type Destination } from '@/entities/destination';
+import {
+  findDestination,
+  linksOf,
+  Postcard,
+  READING_LINKS,
+  type Destination,
+} from '@/entities/destination';
 import { KindBadge, KindIcon, usePlaces } from '@/entities/place';
 import { RecordRow, useRecords } from '@/entities/record';
 import { savedByCatalogId, useToggleWish } from '@/features/destination-save';
@@ -18,6 +27,7 @@ import {
   AppMapView,
   AppText,
   BottomCta,
+  Button,
   Divider,
   Header,
   ListRow,
@@ -38,6 +48,9 @@ const openInMaps = ({ latitude, longitude, name }: Destination) => {
       : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`,
   );
 };
+
+/** 한자·그리스 문자 원어명에는 라틴 전용 글꼴을 쓰지 않습니다. */
+const isLatin = (text: string) => /^[\p{Script=Latin}\p{N}\s.,'’-]+$/u.test(text);
 
 const SOLID_AFTER = 230;
 const ON_SITE_KM = 5;
@@ -111,6 +124,27 @@ export const DestinationDetailPage = () => {
   const records = useRecords(saved?.id);
   const myRecords = saved ? (records.data ?? []) : [];
   const [solid, setSolid] = useState(false);
+  const postcard = useRef<NativeView>(null);
+  const sharingPostcard = useRef(false);
+  const [postcardOpen, setPostcardOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
+
+  const sharePostcard = async () => {
+    // 이미지로 찍는 동안 다시 누르면 공유 창이 겹치므로 막습니다.
+    if (sharingPostcard.current) return;
+    sharingPostcard.current = true;
+    setSharing(true);
+    try {
+      const target = postcard as unknown as Parameters<typeof captureRef>[0];
+      const uri = await captureRef(target, { format: 'jpg', quality: 0.9 });
+      await Sharing.shareAsync(uri, { mimeType: 'image/jpeg', dialogTitle: '엽서 공유' });
+    } catch {
+      toast.error('엽서를 만들지 못했습니다.');
+    } finally {
+      sharingPostcard.current = false;
+      setSharing(false);
+    }
+  };
   const position = useAutoPosition();
 
   if (!destination) {
@@ -158,7 +192,9 @@ export const DestinationDetailPage = () => {
           <AppText size="headline" accessibilityRole="header" testID="destination-title">
             {destination.name}
           </AppText>
-          <AppText tone="muted">{destination.originalName}</AppText>
+          <AppText tone="muted" latin={isLatin(destination.originalName)}>
+            {destination.originalName}
+          </AppText>
           <AppText tone="ink">{destination.tagline}</AppText>
           <XStack gap={6} flexWrap="wrap">
             <Tag label={destination.group} />
@@ -171,6 +207,7 @@ export const DestinationDetailPage = () => {
             icon={ExternalLink}
             onPress={() => openInMaps(destination)}
           />
+          <IconAction label="엽서" icon={Mail} onPress={() => setPostcardOpen(true)} />
           <IconAction
             label="공유"
             icon={Share2}
@@ -375,6 +412,48 @@ export const DestinationDetailPage = () => {
           />
         </Touchable>
       </View>
+      {/* 엽서는 미리 보여 준 뒤 보이는 그대로 이미지로 찍어 공유합니다. iOS는 화면 밖 뷰를 찍지 못합니다. */}
+      <Modal
+        visible={postcardOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPostcardOpen(false)}
+      >
+        <View
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.6)"
+          alignItems="center"
+          justifyContent="center"
+          padding={16}
+          accessibilityViewIsModal
+        >
+          <YStack gap={16} alignItems="center">
+            <Postcard
+              ref={postcard}
+              destination={destination}
+              dateLabel={dayjs().format('YYYY. M. D.')}
+            />
+            <XStack gap={8} width={360} maxWidth="100%">
+              <View flex={1}>
+                <Button
+                  testID="postcard-close"
+                  variant="outline"
+                  label="닫기"
+                  onPress={() => setPostcardOpen(false)}
+                />
+              </View>
+              <View flex={1}>
+                <Button
+                  testID="postcard-share"
+                  label="엽서 공유"
+                  loading={sharing}
+                  onPress={sharePostcard}
+                />
+              </View>
+            </XStack>
+          </YStack>
+        </View>
+      </Modal>
       <BottomCta
         testID="destination-add-record"
         label={fantasy ? '상상 여행기 쓰기' : '여행 기록 쓰기'}
