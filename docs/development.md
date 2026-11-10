@@ -163,6 +163,7 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 알림은 원격 푸시 없이 기기에서 만드는 로컬 알림이며(`enableRemoteNotifications: false`), 누르면 `/destination/{id}`로 갑니다(`useNotificationLink`).
 - Expo Go에서는 동작하지 않으므로 개발 빌드나 Release 빌드로 확인합니다.
 - E2E(`e2e/arrival-flow.yaml`)는 서울에서 알림을 켜고 글래스턴베리로 옮겨 알림 센터 화면을 남깁니다. 실행 전 `xcrun simctl privacy booted grant location-always com.ryushin01.newworld`로 권한을 줍니다. Maestro는 시스템 화면의 글자를 읽거나 알림을 눌러 앱을 열지 못하므로, 알림을 눌러 이동하는 동작은 단위 테스트로 확인합니다. 지도 마커도 Maestro가 읽지 못해 화면으로 확인합니다.
+- Android 11 이상은 '항상 허용'을 시스템 설정에서 바꿔야 해서, 에뮬레이터에서는 `adb shell pm grant com.ryushin01.newworld android.permission.ACCESS_BACKGROUND_LOCATION`(과 `ACCESS_FINE_LOCATION`, `POST_NOTIFICATIONS`)으로 권한을 준 뒤 `clearState` 없이 실행합니다. 도착 알림은 전용 채널 `arrival`(여행지 도착)로 보내 사용자가 따로 끌 수 있습니다.
 
 ## 서버 적용 현황
 
