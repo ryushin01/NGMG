@@ -282,6 +282,7 @@ export const ChangePasswordForm = () => {
         name="passwordConfirm"
         label="새 비밀번호 확인"
         kind="new-password"
+        onSubmit={submit}
       />
       <Button
         testID="password-submit"

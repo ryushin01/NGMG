@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ScrollView, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { toast } from 'sonner-native';
@@ -26,6 +26,10 @@ export const PassportPage = () => {
   const checkins = useCheckins();
   const profile = useProfile().data;
   const nickname = profile?.nickname;
+  // 프로필 사진이 뜨기 전에 찍으면 사진이 빠지므로 준비될 때까지 여권 공유를 막습니다.
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const markAvatarLoaded = useCallback(() => setAvatarLoaded(true), []);
+  const avatarReady = !profile?.avatarUrl || avatarLoaded;
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
@@ -99,7 +103,12 @@ export const PassportPage = () => {
             <YStack gap={14}>
               <XStack gap={12} alignItems="center">
                 {profile ? (
-                  <ProfileAvatar nickname={profile.nickname} uri={profile.avatarUrl} size={52} />
+                  <ProfileAvatar
+                    nickname={profile.nickname}
+                    uri={profile.avatarUrl}
+                    size={52}
+                    onReady={markAvatarLoaded}
+                  />
                 ) : null}
                 <AppText size="headline" tone="inverse" flex={1}>
                   {nickname ? `${nickname}의 신세계 여행 여권` : '신세계 여행 여권'}
@@ -131,6 +140,7 @@ export const PassportPage = () => {
                 variant="outline"
                 label="여권 공유"
                 loading={sharing}
+                disabled={!avatarReady}
                 onPress={share}
               />
             </View>

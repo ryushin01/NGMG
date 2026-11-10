@@ -24,10 +24,15 @@ begin
     raise exception 'not signed in';
   end if;
   select split_part(email, '@', 1) into v_username from auth.users where id = v_user;
+  if coalesce(v_username, '') = '' then
+    raise exception 'username not found';
+  end if;
   insert into private.recovery_codes (user_id, username, code_hash)
   values (v_user, v_username, p_code_hash)
   on conflict (user_id) do update
-    set code_hash = excluded.code_hash, failed_attempts = 0, locked_until = null, updated_at = now();
+    -- 아이디(가입 주소)가 바뀌었으면 함께 맞춥니다.
+    set code_hash = excluded.code_hash, username = excluded.username,
+        failed_attempts = 0, locked_until = null, updated_at = now();
 end;
 $$;
 

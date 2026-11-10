@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Modal, type View as NativeView } from 'react-native';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
@@ -25,6 +25,9 @@ export const BadgeShareContent = ({
 }: BadgeShareContentProps) => {
   const card = useRef<NativeView>(null);
   const { share, sharing } = useCaptureShare();
+  // 프로필 사진이 뜨기 전에 찍으면 사진이 빠지므로 준비될 때까지 공유를 막습니다.
+  const [avatarReady, setAvatarReady] = useState(!owner?.avatarUrl);
+  const markReady = useCallback(() => setAvatarReady(true), []);
   const onShare = async () => {
     if (!(await share(card, { dialogTitle: '기념 뱃지 공유' }))) {
       toast.error('뱃지 이미지를 만들지 못했습니다.');
@@ -36,6 +39,7 @@ export const BadgeShareContent = ({
         ref={card}
         statuses={statuses}
         owner={owner}
+        onAvatarReady={markReady}
         dateLabel={dayjs().format('YYYY. M. D.')}
       />
       <XStack gap={8} width={360} maxWidth="100%">
@@ -52,6 +56,7 @@ export const BadgeShareContent = ({
             testID="badge-share-confirm"
             label="이미지 공유"
             loading={sharing}
+            disabled={!avatarReady}
             onPress={onShare}
           />
         </View>
