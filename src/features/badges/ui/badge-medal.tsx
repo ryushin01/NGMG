@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { View, YStack } from 'tamagui';
+import { formatDay } from '@/shared/lib';
 import { AppIcon, AppText } from '@/shared/ui';
 import type { BadgeIcon, BadgeStatus } from '../model/badges';
 
@@ -41,7 +42,7 @@ export const BadgeMedal = ({ status, size = 72 }: { status: BadgeStatus; size?: 
       gap={6}
       accessible
       accessibilityLabel={`${badge.name}, ${
-        earned ? `획득, ${earnedAt?.slice(0, 10)}` : `미획득, ${current}/${target}`
+        earned ? `획득, ${earnedAt ? formatDay(earnedAt) : ''}` : `미획득, ${current}/${target}`
       }, ${badge.description}`}
     >
       <View
@@ -66,7 +67,7 @@ export const BadgeMedal = ({ status, size = 72 }: { status: BadgeStatus; size?: 
         {badge.name}
       </AppText>
       <AppText size="caption" tone="muted" textAlign="center">
-        {earned ? `${earnedAt?.slice(0, 10).replaceAll('-', '. ')}.` : `${current}/${target}`}
+        {earned && earnedAt ? formatDay(earnedAt) : `${current}/${target}`}
       </AppText>
     </YStack>
   );

@@ -9,6 +9,7 @@ jest.mock('expo-location', () => ({
   Accuracy: { Balanced: 3 },
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  getLastKnownPositionAsync: jest.fn(),
 }));
 jest.mock('@/entities/checkin', () => ({ useCheckins: jest.fn(), useCreateCheckin: jest.fn() }));
 
@@ -67,4 +68,35 @@ it('빠르게 두 번 눌러도 한 번만 저장합니다', async () => {
   expect(mutateAsync).toHaveBeenCalledTimes(1);
   expect(results).toContainEqual({ status: 'busy' });
   expect(results).toContainEqual(expect.objectContaining({ status: 'stamped' }));
+});
+
+it('위치를 오래 받지 못하면 마지막 위치를 쓰고, 그것도 없으면 오류로 끝내 다시 누를 수 있습니다', async () => {
+  jest
+    .mocked(Location.requestForegroundPermissionsAsync)
+    .mockResolvedValue({ granted: true } as never);
+  jest.mocked(Location.getCurrentPositionAsync).mockReturnValue(new Promise(() => undefined));
+  jest.mocked(Location.getLastKnownPositionAsync).mockResolvedValue(null);
+  const { checkIn, mutateAsync } = await setup();
+  jest.useFakeTimers();
+  try {
+    const pending = checkIn(avalon);
+    await jest.advanceTimersByTimeAsync(15000);
+    expect(await pending).toEqual({ status: 'error' });
+    expect(mutateAsync).not.toHaveBeenCalled();
+    jest.mocked(Location.getLastKnownPositionAsync).mockResolvedValue({
+      coords: { latitude: 51.15, longitude: -2.7 },
+    } as never);
+    const next = checkIn(avalon);
+    await jest.advanceTimersByTimeAsync(15000);
+    expect((await next).status).toBe('stamped');
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it('이미 있던 인증이 돌아오면 새 스탬프로 보지 않습니다', async () => {
+  const { checkIn, mutateAsync } = await setup();
+  const existing = { id: 'old', catalogId: 'avalon', checkedAt: '2026-11-01T00:00:00.000Z' };
+  mutateAsync.mockResolvedValueOnce(existing as never);
+  expect(await checkIn(avalon, { demo: true })).toEqual({ status: 'already', checkIn: existing });
 });

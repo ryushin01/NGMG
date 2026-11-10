@@ -9,7 +9,7 @@ import { CheckInPanel } from './check-in-panel';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
-jest.mock('sonner-native', () => ({ toast: { error: jest.fn() } }));
+jest.mock('sonner-native', () => ({ toast: Object.assign(jest.fn(), { error: jest.fn() }) }));
 jest.mock('@/shared/config', () => ({ isSupabaseConfigured: false }));
 jest.mock('@/entities/checkin', () => ({ useCheckins: jest.fn() }));
 jest.mock('@/features/check-in', () => ({ CHECK_IN_RADIUS_KM: 3, useCheckIn: jest.fn() }));
@@ -60,4 +60,11 @@ it('이미 인증했으면 날짜와 인증 방식을 보여 주고 버튼을 �
     /2026\. 11\. 10\. 인증했어요 \(데모 인증\)/,
   );
   expect(screen.queryByTestId('checkin-gps')).toBeNull();
+});
+
+it('이미 인증했던 곳이면 축하 대신 날짜를 알려 줍니다', async () => {
+  await show([], { status: 'already', checkIn });
+  await fireEvent.press(screen.getByTestId('checkin-gps'));
+  expect(toast).toHaveBeenCalledWith('2026. 11. 10.에 이미 인증한 곳입니다.');
+  expect(screen.queryByText('스탬프를 찍었어요')).toBeNull();
 });

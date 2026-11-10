@@ -8,11 +8,9 @@ import type { Destination } from '@/entities/destination';
 import { newlyEarned, type BadgeStatus } from '@/features/badges';
 import { CHECK_IN_RADIUS_KM, useCheckIn } from '@/features/check-in';
 import { isSupabaseConfigured } from '@/shared/config';
-import { formatDistance } from '@/shared/lib';
+import { formatDay, formatDistance } from '@/shared/lib';
 import { AppIcon, AppText, Button } from '@/shared/ui';
 import { Celebration } from './celebration';
-
-const dateLabel = (iso: string) => iso.slice(0, 10).replaceAll('-', '. ') + '.';
 
 /** 여행지 상세의 현장 인증 영역. 인증하면 여권에 스탬프가 찍히고 조건을 채운 뱃지를 받습니다. */
 export const CheckInPanel = ({ destination }: { destination: Destination }) => {
@@ -38,6 +36,9 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
           checkedAt: result.checkIn.checkedAt,
           badges: newlyEarned(result.before, result.after),
         });
+        return;
+      case 'already':
+        toast(`${formatDay(result.checkIn.checkedAt)}에 이미 인증한 곳입니다.`);
         return;
       case 'far':
         toast.error(
@@ -79,7 +80,7 @@ export const CheckInPanel = ({ destination }: { destination: Destination }) => {
       </XStack>
       {mine ? (
         <AppText testID="checkin-done" tone="ink">
-          {dateLabel(mine.checkedAt)} 인증했어요
+          {formatDay(mine.checkedAt)} 인증했어요
           {mine.method === 'demo' ? ' (데모 인증)' : ''}. 여행 여권에 스탬프가 찍혔습니다.
         </AppText>
       ) : (

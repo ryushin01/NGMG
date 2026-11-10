@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { BadgeCheck } from 'lucide-react-native';
 import { View, YStack } from 'tamagui';
+import { formatDay } from '@/shared/lib';
 import { AppIcon, AppText, Touchable } from '@/shared/ui';
 import type { Destination } from '../model/types';
 
@@ -14,11 +15,6 @@ type StampProps = {
   onPress: () => void;
 };
 
-const dateLabel = (iso: string) => {
-  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
-  return `${y}. ${m}. ${d}.`;
-};
-
 /**
  * 색이 없어도 구분되도록 상태를 글자로 함께 보여 줍니다.
  * 현장 인증: 사진, 인증 표시, '인증' 날짜 / 기록만: 사진과 연도 / 없음: 빈 도장과 '미방문'.
@@ -28,7 +24,7 @@ export const Stamp = ({ destination, year, verifiedAt = null, size, onPress }: S
   const stamped = verified || year !== null;
   const accent = destination.realm === 'real' ? 'brandText' : 'fantasyText';
   const state = verified
-    ? `현장 인증 ${dateLabel(verifiedAt)}`
+    ? `현장 인증 ${formatDay(verifiedAt)}`
     : year !== null
       ? `${year}년 방문`
       : '미방문';
@@ -92,7 +88,7 @@ export const Stamp = ({ destination, year, verifiedAt = null, size, onPress }: S
               현장 인증
             </AppText>
             <AppText size="caption" tone="muted">
-              {dateLabel(verifiedAt)}
+              {formatDay(verifiedAt)}
             </AppText>
           </YStack>
         ) : year !== null ? (

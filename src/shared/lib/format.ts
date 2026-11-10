@@ -4,6 +4,8 @@ import 'dayjs/locale/ko';
 dayjs.locale('ko');
 
 export const formatDate = (iso: string) => dayjs(iso).format('YYYY. M. D. (dd)');
+/** 요일 없이 기기 시간대의 날짜만. 인증·뱃지 날짜에 씁니다. */
+export const formatDay = (iso: string) => dayjs(iso).format('YYYY. M. D.');
 export const formatDateTime = (iso: string) => dayjs(iso).format('YYYY. M. D. (dd) A h:mm');
 export const formatPrice = (price: number) => `${price.toLocaleString('ko-KR')}원`;
 export const formatCoordinate = (latitude: number, longitude: number) =>

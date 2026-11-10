@@ -31,7 +31,7 @@ it('획득한 뱃지는 날짜를 함께 읽어 줍니다', async () => {
     ),
   );
   expect(
-    screen.getByLabelText('스탬프 수집가, 획득, 2026-11-10, 현장 인증 스탬프 5개'),
+    screen.getByLabelText('스탬프 수집가, 획득, 2026. 11. 10., 현장 인증 스탬프 5개'),
   ).toBeTruthy();
   expect(screen.getByText('2026. 11. 10.')).toBeTruthy();
 });

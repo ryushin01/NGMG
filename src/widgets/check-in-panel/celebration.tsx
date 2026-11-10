@@ -3,6 +3,7 @@ import { Modal, ScrollView } from 'react-native';
 import { View, XStack, YStack } from 'tamagui';
 import type { Destination } from '@/entities/destination';
 import { BadgeMedal, type BadgeStatus } from '@/features/badges';
+import { formatDay } from '@/shared/lib';
 import { AppIcon, AppText, Button } from '@/shared/ui';
 
 type CelebrationProps = {
@@ -64,7 +65,7 @@ export const Celebration = ({
               </AppText>
               {checkedAt ? (
                 <AppText size="caption" tone="muted">
-                  {checkedAt.slice(0, 10).replaceAll('-', '. ')}. 여행 여권에 기록됨
+                  {formatDay(checkedAt)} 여행 여권에 기록됨
                 </AppText>
               ) : null}
             </YStack>
