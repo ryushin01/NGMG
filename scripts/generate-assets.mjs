@@ -40,6 +40,8 @@ await png(svg(`${background}${pyramid()}`), 'assets/icon.png', 1024);
 await png(svg(scaled(0.68, pyramid())), 'assets/android-icon-foreground.png', 1024);
 await png(svg(background), 'assets/android-icon-background.png', 1024);
 await png(svg(scaled(0.68, pyramid({ mono: true }))), 'assets/android-icon-monochrome.png', 1024);
+// Android 알림 작은 아이콘은 투명 바탕의 흰색 단색이어야 합니다.
+await png(svg(scaled(0.9, pyramid({ mono: true }))), 'assets/notification-icon.png', 96);
 await png(
   svg(`<rect width="1024" height="1024" rx="220" fill="${INK}"/>${scaled(0.9, pyramid())}`),
   'assets/splash-icon.png',

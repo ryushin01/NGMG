@@ -4,7 +4,7 @@ const config: ExpoConfig = {
   name: '신세계',
   slug: 'newworld',
   scheme: 'newworld',
-  version: '2.4.0',
+  version: '2.5.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
@@ -60,7 +60,14 @@ const config: ExpoConfig = {
       },
     ],
     // 도착 알림은 기기 안에서 만드는 로컬 알림이라 원격 푸시(APNs) 권한을 넣지 않습니다.
-    ['expo-notifications', { enableRemoteNotifications: false, color: '#c2792b' }],
+    [
+      'expo-notifications',
+      {
+        enableRemoteNotifications: false,
+        color: '#c2792b',
+        icon: './assets/notification-icon.png',
+      },
+    ],
     [
       'expo-image-picker',
       {

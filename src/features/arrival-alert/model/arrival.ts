@@ -1,8 +1,10 @@
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { findDestination } from '@/entities/destination';
 import { storageAdapter } from '@/shared/lib';
 
 const NOTIFIED_KEY = 'newworld.arrival.notified';
+export const ARRIVAL_CHANNEL = 'arrival';
 /** 경계를 오가며 같은 곳 알림이 반복되지 않도록 12시간 동안은 다시 알리지 않습니다. */
 export const QUIET_MS = 12 * 60 * 60 * 1000;
 
@@ -36,6 +38,10 @@ export const notifyArrival = async (id: string, now = Date.now()) => {
   if (now - (notified[id] ?? 0) < QUIET_MS) return false;
   // 거의 동시에 들어온 이벤트가 둘 다 알리지 않도록 보내기 전에 먼저 기록합니다.
   storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify({ ...notified, [id]: now }));
-  await Notifications.scheduleNotificationAsync({ content: message, trigger: null });
+  await Notifications.scheduleNotificationAsync({
+    content: message,
+    // Android는 사용자가 설정에서 도착 알림만 따로 끌 수 있도록 전용 채널로 보냅니다.
+    trigger: Platform.OS === 'android' ? { channelId: ARRIVAL_CHANNEL } : null,
+  });
   return true;
 };

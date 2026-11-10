@@ -104,12 +104,15 @@ export const Celebration = ({
                       <BadgeMedal key={status.badge.id} status={status} />
                     ))}
                   </XStack>
-                  <Button
-                    testID="checkin-share-badges"
-                    variant="outline"
-                    label="뱃지 공유"
-                    onPress={() => setSharing(true)}
-                  />
+                  {/* 가운데 정렬 안에서도 Android에서 버튼이 줄어들지 않도록 가로를 채웁니다. */}
+                  <View alignSelf="stretch">
+                    <Button
+                      testID="checkin-share-badges"
+                      variant="outline"
+                      label="뱃지 공유"
+                      onPress={() => setSharing(true)}
+                    />
+                  </View>
                 </YStack>
               ) : null}
             </ScrollView>

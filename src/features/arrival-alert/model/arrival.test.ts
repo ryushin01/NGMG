@@ -30,3 +30,18 @@ it('동시에 들어온 도착 이벤트에도 한 번만 알립니다', async (
   expect(results.filter(Boolean)).toHaveLength(1);
   expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
 });
+
+it('Android에서는 도착 알림 전용 채널로 보냅니다', async () => {
+  const { Platform } = jest.requireActual<typeof import('react-native')>('react-native');
+  const original = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+  try {
+    jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+    await notifyArrival('karnak', 2_000_000_000_000);
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ trigger: { channelId: 'arrival' } }),
+    );
+  } finally {
+    Object.defineProperty(Platform, 'OS', { value: original, configurable: true });
+  }
+});

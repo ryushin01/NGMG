@@ -4,6 +4,7 @@ import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 import { DESTINATIONS } from '@/entities/destination';
 import { storageAdapter } from '@/shared/lib';
+import { ARRIVAL_CHANNEL } from './arrival';
 import { ARRIVAL_TASK, pickRegions } from './regions';
 
 const ENABLED_KEY = 'newworld.arrival.enabled';
@@ -34,7 +35,7 @@ export const enableArrivalAlert = async (
   if (!background.granted) return 'background-denied';
   if (Platform.OS === 'android') {
     // Android 13 이상은 채널이 있어야 알림 권한 창이 뜹니다.
-    await Notifications.setNotificationChannelAsync('arrival', {
+    await Notifications.setNotificationChannelAsync(ARRIVAL_CHANNEL, {
       name: '여행지 도착',
       importance: AndroidImportance.DEFAULT,
     });

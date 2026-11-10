@@ -154,6 +154,16 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 - 인증 후 축하 화면은 인증 전후 목록을 비교해 새로 받은 뱃지만 보여 줍니다(`widgets/check-in-panel`).
 - E2E(`e2e/checkin-flow.yaml`)는 Maestro `setLocation`으로 시뮬레이터 위치를 글래스턴베리에 두고 아발론을 인증합니다.
 
+## 근처 도착 알림
+
+- MY의 `근처 여행지 도착 알림`으로 켭니다. 이유를 먼저 설명한 뒤 위치(사용 중 → 항상)와 알림 권한을 차례로 받습니다.
+- `expo-location`의 지역 감시(geofencing)와 `expo-task-manager`의 백그라운드 작업(`features/arrival-alert/model/task.ts`, 루트 레이아웃에서 불러와 정의)을 씁니다. 위치는 기기 밖으로 보내지 않습니다.
+- iOS는 앱 하나에 20곳까지 감시하므로 아직 인증하지 않은 가까운 여행지 19곳(반경 3km)과 현재 위치를 둘러싼 갱신 지역(반경 50km) 1곳을 등록합니다. 갱신 지역을 벗어나면 마지막으로 저장한 인증 목록으로 지역을 다시 고릅니다.
+- 앱으로 돌아오거나 인증 목록이 바뀌어도 다시 고릅니다(`useArrivalSync`, 탭 레이아웃). 같은 곳은 12시간 안에 다시 알리지 않습니다.
+- 알림은 원격 푸시 없이 기기에서 만드는 로컬 알림이며(`enableRemoteNotifications: false`), 누르면 `/destination/{id}`로 갑니다(`useNotificationLink`).
+- Expo Go에서는 동작하지 않으므로 개발 빌드나 Release 빌드로 확인합니다.
+- E2E(`e2e/arrival-flow.yaml`)는 서울에서 알림을 켜고 글래스턴베리로 옮겨 알림 센터 화면을 남깁니다. 실행 전 `xcrun simctl privacy booted grant location-always com.ryushin01.newworld`로 권한을 줍니다. Maestro는 시스템 화면의 글자를 읽거나 알림을 눌러 앱을 열지 못하므로, 알림을 눌러 이동하는 동작은 단위 테스트로 확인합니다. 지도 마커도 Maestro가 읽지 못해 화면으로 확인합니다.
+
 ## 서버 적용 현황
 
 Supabase 프로젝트 `newworld`에는 `20261108000000`까지 적용되어 있습니다. 무료 플랜의 활성 프로젝트 한도 때문에 일시 중지한 상태이며, 앱은 `.env` 없이 데모 모드로 동작합니다. 다시 켜면 `npx supabase db push`로 `20261109000000_trips_currency.sql`(통화, 여정)과 `20261110000000_checkins.sql`(현장 인증)을 적용합니다.
