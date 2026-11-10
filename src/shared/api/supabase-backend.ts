@@ -1,7 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import { createClient, type Session as SupabaseSession } from '@supabase/supabase-js';
 import * as Crypto from 'expo-crypto';
-import * as Linking from 'expo-linking';
 import { AppState } from 'react-native';
 import { env, PHOTO_BUCKET } from '../config';
 import { isTransientError } from '../lib/errors';
@@ -14,6 +13,7 @@ import type {
   Photo,
   Place,
   PlaceInput,
+  Profile,
   RecordSaveInput,
   Session,
   CheckIn,
@@ -45,8 +45,18 @@ const LAST_SESSION_KEY = 'newworld.last-session';
 
 const localSignOutListeners = new Set<(session: Session | null) => void>();
 
+/**
+ * Supabase Auth는 이메일이 꼭 있어야 하므로 아이디를 앱 전용 주소로 바꿔 씁니다.
+ * 이 주소로는 메일을 보내지 않으며(메일 인증 꺼짐) 화면에도 보이지 않습니다.
+ */
+const ID_DOMAIN = 'users.newworld.app';
+const toAuthEmail = (username: string) => `${username}@${ID_DOMAIN}`;
+const AVATAR_BUCKET = 'avatars';
+const AVATAR_EDGE = 512;
+const AVATAR_URL_TTL = 60 * 60;
+
 const toSession = (session: SupabaseSession | null): Session | null =>
-  session ? { userId: session.user.id, email: session.user.email ?? '' } : null;
+  session ? { userId: session.user.id, username: (session.user.email ?? '').split('@')[0] } : null;
 
 const rememberSession = (session: Session | null) => {
   if (session) storageAdapter.setItem(LAST_SESSION_KEY, JSON.stringify(session));
@@ -55,7 +65,9 @@ const rememberSession = (session: Session | null) => {
 
 const lastSession = (): Session | null => {
   const raw = storageAdapter.getItem(LAST_SESSION_KEY);
-  return raw ? (JSON.parse(raw) as Session) : null;
+  if (!raw) return null;
+  const stored = JSON.parse(raw) as { userId: string; username?: string; email?: string };
+  return { userId: stored.userId, username: stored.username ?? stored.email?.split('@')[0] ?? '' };
 };
 
 type PlaceRow = {
@@ -238,6 +250,17 @@ const recordPayload = ({ record }: RecordSaveInput) => ({
   souvenir: record.souvenir,
 });
 
+type ProfileRow = { nickname: string; name: string; avatar_path: string | null };
+
+const toProfile = async (row: ProfileRow): Promise<Profile> => {
+  if (!row.avatar_path) return { nickname: row.nickname, name: row.name, avatarUrl: null };
+  // 사진 주소를 받지 못해도(일시 오류, 지워진 파일) 닉네임과 이름은 보여 줍니다.
+  const { data, error } = await client.storage
+    .from(AVATAR_BUCKET)
+    .createSignedUrl(row.avatar_path, AVATAR_URL_TTL);
+  return { nickname: row.nickname, name: row.name, avatarUrl: error ? null : data.signedUrl };
+};
+
 const currentUserId = async () => {
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
@@ -391,14 +414,24 @@ export const supabaseBackend: Backend = {
         data.subscription.unsubscribe();
       };
     },
-    async signIn(email, password) {
-      const { error } = await client.auth.signInWithPassword({ email, password });
+    async signIn(username, password) {
+      const { error } = await client.auth.signInWithPassword({
+        email: toAuthEmail(username),
+        password,
+      });
       if (error) throw error;
     },
-    async signUp(email, password) {
-      const { data, error } = await client.auth.signUp({ email, password });
+    async signUp({ username, password, nickname, name }) {
+      // 닉네임과 본명은 가입 메타데이터로 넘기고, DB 트리거가 프로필을 만듭니다.
+      const { error } = await client.auth.signUp({
+        email: toAuthEmail(username),
+        password,
+        options: { data: { nickname, name } },
+      });
       if (error) throw error;
-      return { needsConfirmation: !data.session };
+    },
+    async browse() {
+      throw new Error('둘러보기는 데모 모드에서만 쓸 수 있습니다.');
     },
     async signOut() {
       // 토큰이 만료된 채 끊겨 있으면 갱신 재시도가 길어지므로 오래 기다리지 않습니다.
@@ -418,29 +451,71 @@ export const supabaseBackend: Backend = {
       storageAdapter.removeItem(LAST_SESSION_KEY);
       localSignOutListeners.forEach((listener) => listener(null));
     },
-    async sendPasswordReset(email) {
-      const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo: Linking.createURL('/'),
+    async updatePassword(current, next) {
+      // 메일로 확인할 수 없으므로 지금 비밀번호로 다시 로그인해 본인인지 확인합니다.
+      const { data } = await client.auth.getSession();
+      const email = data.session?.user.email;
+      if (!email) throw new Error('로그인이 필요합니다.');
+      const { error: verifyError } = await client.auth.signInWithPassword({
+        email,
+        password: current,
       });
-      if (error) throw error;
-    },
-    async applyRecoveryLink(url) {
-      const params = new URLSearchParams(url.split('#')[1] ?? '');
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-      if (params.get('type') !== 'recovery' || !access_token || !refresh_token) return false;
-      const { error } = await client.auth.setSession({ access_token, refresh_token });
-      if (error) throw error;
-      return true;
-    },
-    async updatePassword(password) {
-      const { error } = await client.auth.updateUser({ password });
+      if (verifyError) throw verifyError;
+      const { error } = await client.auth.updateUser({ password: next });
       if (error) throw error;
     },
     async deleteAccount() {
       const { error } = await client.functions.invoke('delete-account', { method: 'POST' });
       if (error) throw error;
       await client.auth.signOut({ scope: 'local' });
+    },
+  },
+  profile: {
+    async get() {
+      const { data, error } = await client
+        .from('profiles')
+        .select('nickname, name, avatar_path')
+        .single();
+      if (error) throw error;
+      return toProfile(data as ProfileRow);
+    },
+    async update({ nickname, name, avatar }) {
+      const userId = await currentUserId();
+      const { data: before, error: readError } = await client
+        .from('profiles')
+        .select('avatar_path')
+        .single();
+      if (readError) throw readError;
+      let avatarPath: string | null = (before as { avatar_path: string | null }).avatar_path;
+      if (avatar !== undefined) {
+        avatarPath = null;
+        if (avatar) {
+          const { bytes } = await compressPhoto(avatar, AVATAR_EDGE);
+          avatarPath = `${userId}/${Crypto.randomUUID()}.jpg`;
+          const { error } = await client.storage
+            .from(AVATAR_BUCKET)
+            .upload(avatarPath, bytes, { contentType: 'image/jpeg' });
+          if (error) throw error;
+        }
+      }
+      const { data, error } = await client
+        .from('profiles')
+        .update({ nickname, name, avatar_path: avatarPath, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .select('nickname, name, avatar_path')
+        .single();
+      if (error) {
+        if (avatarPath && avatarPath !== (before as { avatar_path: string | null }).avatar_path) {
+          await client.storage.from(AVATAR_BUCKET).remove([avatarPath]);
+        }
+        throw error;
+      }
+      const previous = (before as { avatar_path: string | null }).avatar_path;
+      // 새 프로필을 저장한 뒤에 이전 사진을 지웁니다. 실패해도 프로필은 이미 바뀌었습니다.
+      if (previous && previous !== avatarPath) {
+        await client.storage.from(AVATAR_BUCKET).remove([previous]);
+      }
+      return toProfile(data as ProfileRow);
     },
   },
   places: {

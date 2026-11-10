@@ -609,6 +609,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
         return write({ type: 'checkin.create', checkIn }, '현장 인증', () => checkIn);
       },
     },
+    // 프로필은 사진을 올려야 해서 큐에 쌓지 않고 바로 보냅니다.
+    profile: base.profile,
     search: base.search,
   };
 

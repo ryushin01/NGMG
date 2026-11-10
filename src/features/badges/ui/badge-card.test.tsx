@@ -36,3 +36,12 @@ it('9개가 넘으면 최근 9개와 나머지 수를 보여 줍니다', async (
   expect(screen.getByTestId('badge-b10')).toBeTruthy();
   expect(screen.queryByTestId('badge-b0')).toBeNull();
 });
+
+it('닉네임이 있으면 제목에 붙입니다', async () => {
+  await render(
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
+      <BadgeCard statuses={[]} dateLabel="2026. 11. 10." owner="유신" />
+    </TamaguiProvider>,
+  );
+  expect(screen.getByRole('header', { name: '유신의 기념 뱃지' })).toBeTruthy();
+});

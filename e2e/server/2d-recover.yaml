@@ -2,8 +2,8 @@
 appId: com.ryushin01.newworld
 ---
 - tapOn:
-    id: field-email
-- inputText: ${EMAIL}
+    id: field-username
+- inputText: ${USERNAME}
 - waitForAnimationToEnd
 - tapOn:
     id: field-password

@@ -9,8 +9,8 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: go-sign-up
 - tapOn:
-    id: field-email
-- inputText: ${EMAIL}
+    id: field-username
+- inputText: ${USERNAME}
 - waitForAnimationToEnd
 - tapOn:
     id: field-password
@@ -25,11 +25,30 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: field-passwordConfirm
 - inputText: first-password
+- tapOn:
+    id: field-nickname
+- inputText: 서버여행자
 - runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
     id: sign-up-submit
-# 가입에 성공하면 로그인 화면으로 돌아갑니다. 메일 수신은 run.sh가 확인합니다.
+# 메일 인증 없이 가입과 동시에 로그인됩니다. 다음 단계는 로그인부터 하므로 로그아웃합니다.
+- runFlow: _after-sign-in.yaml
+- extendedWaitUntil:
+    visible:
+      id: tab-my
+    timeout: 20000
+- tapOn:
+    id: tab-my
+- assertVisible: 서버여행자
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: sign-out
 - extendedWaitUntil:
     visible:
       id: sign-in-submit
-    timeout: 20000
+    timeout: 15000

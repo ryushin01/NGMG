@@ -1,13 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
-import * as Linking from 'expo-linking';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSessionBootstrap, useSessionStore } from '@/entities/session';
 // 백그라운드 도착 작업은 앱이 깨어날 때 가장 먼저 정의되어야 하므로 루트에서 불러옵니다.
 import { useNotificationLink } from '@/features/arrival-alert';
-import { backend } from '@/shared/api';
 import { useAppFonts, useColors } from '@/shared/ui';
 import { Providers } from './providers';
 
@@ -24,31 +22,6 @@ const useClearCacheOnSignOut = () => {
   }, [client, userId]);
 };
 
-/** 비밀번호 재설정 메일의 링크로 앱이 열리면 새 비밀번호 화면으로 보냅니다. */
-const useRecoveryLink = (navigatorReady: boolean) => {
-  const router = useRouter();
-  const url = Linking.useLinkingURL();
-  const signedIn = useSessionStore((state) => !!state.session);
-  const [requested, setRequested] = useState(0);
-  const handled = useRef(0);
-  useEffect(() => {
-    if (!url) return;
-    backend.auth.applyRecoveryLink(url).then(
-      (applied) => {
-        if (applied) setRequested((count) => count + 1);
-      },
-      () => undefined,
-    );
-  }, [url]);
-  // 렌더가 끝난 뒤에 이동해야 로그인 화면이 홈으로 바뀌면서 새 화면을 지우지 않습니다.
-  // 세션과 글꼴을 불러오는 동안에는 Stack이 없으므로 준비될 때까지 이동을 미룹니다.
-  useEffect(() => {
-    if (!navigatorReady || !signedIn || requested === handled.current) return;
-    handled.current = requested;
-    router.push('/reset-password');
-  }, [navigatorReady, requested, router, signedIn]);
-};
-
 const Navigator = () => {
   const colors = useColors();
   useSessionBootstrap();
@@ -57,7 +30,6 @@ const Navigator = () => {
   const sessionReady = useSessionStore((state) => state.ready);
   const fontsReady = useAppFonts();
   const ready = sessionReady && fontsReady;
-  useRecoveryLink(ready);
   useNotificationLink(ready && !!session);
 
   useEffect(() => {
@@ -94,12 +66,12 @@ const Navigator = () => {
           <Stack.Screen name="checklist" />
           <Stack.Screen name="stats" />
           <Stack.Screen name="sync" />
+          <Stack.Screen name="profile-edit" />
+          <Stack.Screen name="password" />
         </Stack.Protected>
-        <Stack.Screen name="reset-password" />
         <Stack.Protected guard={!session}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="sign-up" />
-          <Stack.Screen name="forgot-password" />
         </Stack.Protected>
       </Stack>
     </>

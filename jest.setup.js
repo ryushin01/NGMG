@@ -22,3 +22,13 @@ jest.mock('react-native-keyboard-controller', () => ({
   KeyboardStickyView: ({ children }) => children,
   KeyboardProvider: ({ children }) => children,
 }));
+// 데모 백엔드의 비밀번호 해시와 id는 네이티브 모듈 대신 Node의 crypto로 만듭니다.
+jest.mock('expo-crypto', () => {
+  const crypto = jest.requireActual('node:crypto');
+  return {
+    CryptoDigestAlgorithm: { SHA256: 'SHA-256' },
+    randomUUID: () => crypto.randomUUID(),
+    digestStringAsync: async (_algorithm, data) =>
+      crypto.createHash('sha256').update(data).digest('hex'),
+  };
+});

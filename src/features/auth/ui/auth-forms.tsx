@@ -6,197 +6,244 @@ import { toast } from 'sonner-native';
 import { YStack } from 'tamagui';
 import { z } from 'zod';
 import { backend } from '@/shared/api';
-import { toErrorMessage } from '@/shared/lib';
+import { toErrorMessage, useSubmitLock } from '@/shared/lib';
 import { AppText, Button, Field } from '@/shared/ui';
-import { newPasswordSchema, resetRequestSchema, signInSchema, signUpSchema } from '../model/schema';
+import { changePasswordSchema, signInSchema, signUpSchema } from '../model/schema';
+
+type FieldKind = 'username' | 'password' | 'new-password' | 'nickname' | 'name';
 
 type FormFieldProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
   label: string;
-  secret?: boolean;
-  newPassword?: boolean;
+  kind: FieldKind;
+  hint?: string;
+  required?: boolean;
   /** 키보드의 완료 키를 눌렀을 때 실행합니다. 제출 버튼이 키보드에 가려져도 보낼 수 있습니다. */
   onSubmit?: () => void;
 };
 
-const FormField = <T extends FieldValues>({
+// 비밀번호 칸이 둘이면 iOS가 강력한 암호 시트를 입력 중에 다시 띄워 글자 입력을 끊습니다.
+// 앱에 연결된 도메인이 없어 그 암호를 저장해 쓸 수도 없으므로 새 비밀번호는 시트가 뜨지 않는 유형을 씁니다.
+const KIND_PROPS = {
+  username: {
+    textContentType: 'username',
+    autoComplete: 'username',
+    keyboardType: 'ascii-capable',
+  },
+  password: {
+    textContentType: 'password',
+    autoComplete: 'current-password',
+    keyboardType: 'default',
+    secret: true,
+  },
+  'new-password': {
+    textContentType: 'oneTimeCode',
+    autoComplete: 'new-password',
+    keyboardType: 'default',
+    secret: true,
+  },
+  nickname: { textContentType: 'nickname', autoComplete: 'nickname', keyboardType: 'default' },
+  name: { textContentType: 'name', autoComplete: 'name', keyboardType: 'default' },
+} as const;
+
+export const FormField = <T extends FieldValues>({
   control,
   name,
   label,
-  secret,
-  newPassword,
+  kind,
+  hint,
+  required = true,
   onSubmit,
-}: FormFieldProps<T>) => (
-  <Controller
-    control={control}
-    name={name}
-    render={({ field, fieldState }) => (
-      <Field
-        testID={`field-${name}`}
-        label={label}
-        required
-        value={field.value}
-        onChangeText={field.onChange}
-        onBlur={field.onBlur}
-        error={fieldState.error?.message}
-        onSubmitEditing={onSubmit}
-        returnKeyType={onSubmit ? 'go' : 'next'}
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry={secret}
-        keyboardType={secret ? 'default' : 'email-address'}
-        // 비밀번호 칸이 둘이면 iOS가 강력한 암호 시트를 입력 중에 다시 띄워 글자 입력을 끊습니다.
-        // 앱에 연결된 도메인이 없어 그 암호를 저장해 쓸 수도 없으므로 시트가 뜨지 않는 유형을 씁니다.
-        textContentType={secret ? (newPassword ? 'oneTimeCode' : 'password') : 'username'}
-        autoComplete={secret ? (newPassword ? 'new-password' : 'current-password') : 'email'}
-      />
-    )}
-  />
-);
-
-const SignInLink = ({
-  href,
-  label,
-  testID,
-}: {
-  href: '/sign-up' | '/forgot-password';
-  label: string;
-  testID: string;
-}) => (
-  <Link href={href} testID={testID} accessibilityRole="link" style={{ paddingVertical: 12 }}>
-    <AppText tone="brand">{label}</AppText>
-  </Link>
-);
+}: FormFieldProps<T>) => {
+  const { secret, ...props } = { secret: false, ...KIND_PROPS[kind] };
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState }) => (
+        <Field
+          testID={`field-${name}`}
+          label={label}
+          hint={hint}
+          required={required}
+          value={field.value}
+          onChangeText={field.onChange}
+          onBlur={field.onBlur}
+          error={fieldState.error?.message}
+          onSubmitEditing={onSubmit}
+          returnKeyType={onSubmit ? 'go' : 'next'}
+          autoCorrect={false}
+          secureTextEntry={secret}
+          autoCapitalize="none"
+          {...props}
+        />
+      )}
+    />
+  );
+};
 
 export const SignInForm = () => {
-  const { control, handleSubmit } = useForm<z.infer<typeof signInSchema>>({
+  const lock = useSubmitLock();
+  const { control, handleSubmit } = useForm<
+    z.input<typeof signInSchema>,
+    unknown,
+    z.output<typeof signInSchema>
+  >({
     resolver: zodResolver(signInSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { username: '', password: '' },
   });
   const signIn = useMutation({
-    mutationFn: (data: z.infer<typeof signInSchema>) =>
-      backend.auth.signIn(data.email, data.password),
-    onError: (error) => toast.error(toErrorMessage(error)),
+    mutationFn: (data: z.output<typeof signInSchema>) =>
+      backend.auth.signIn(data.username, data.password),
+    onError: (error) => {
+      lock.release();
+      toast.error(toErrorMessage(error));
+    },
   });
   const submit = handleSubmit((data) => {
-    if (!signIn.isPending) signIn.mutate(data);
+    if (lock.take()) signIn.mutate(data);
   });
   return (
     <YStack gap={20}>
-      <FormField control={control} name="email" label="이메일" />
-      <FormField control={control} name="password" label="비밀번호" secret onSubmit={submit} />
+      <FormField control={control} name="username" label="아이디" kind="username" />
+      <FormField
+        control={control}
+        name="password"
+        label="비밀번호"
+        kind="password"
+        onSubmit={submit}
+      />
       <Button testID="sign-in-submit" label="로그인" loading={signIn.isPending} onPress={submit} />
       <YStack alignItems="center">
-        <SignInLink testID="go-sign-up" href="/sign-up" label="이메일로 회원가입" />
-        <SignInLink testID="go-forgot" href="/forgot-password" label="비밀번호를 잊으셨나요?" />
+        <Link
+          href="/sign-up"
+          testID="go-sign-up"
+          accessibilityRole="link"
+          style={{ paddingVertical: 12 }}
+        >
+          <AppText tone="brand">아이디로 회원가입</AppText>
+        </Link>
       </YStack>
     </YStack>
   );
 };
 
 export const SignUpForm = () => {
-  const router = useRouter();
-  const { control, handleSubmit } = useForm<z.infer<typeof signUpSchema>>({
+  const lock = useSubmitLock();
+  const { control, handleSubmit } = useForm<
+    z.input<typeof signUpSchema>,
+    unknown,
+    z.output<typeof signUpSchema>
+  >({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: '', password: '', passwordConfirm: '' },
+    defaultValues: { username: '', password: '', passwordConfirm: '', nickname: '', name: '' },
   });
+  // 가입하면 바로 로그인되어 보호된 화면으로 넘어갑니다.
   const signUp = useMutation({
-    mutationFn: (data: z.infer<typeof signUpSchema>) =>
-      backend.auth.signUp(data.email, data.password),
-    onSuccess: ({ needsConfirmation }) => {
-      if (needsConfirmation) {
-        toast.success('인증 메일을 보냈습니다. 메일의 링크를 누른 뒤 로그인해 주세요.');
-        router.back();
-      }
+    mutationFn: ({ username, password, nickname, name }: z.output<typeof signUpSchema>) =>
+      backend.auth.signUp({ username, password, nickname, name }),
+    onError: (error) => {
+      lock.release();
+      toast.error(toErrorMessage(error));
     },
-    onError: (error) => toast.error(toErrorMessage(error)),
+  });
+  const submit = handleSubmit((data) => {
+    if (lock.take()) signUp.mutate(data);
   });
   return (
     <YStack gap={20}>
-      <FormField control={control} name="email" label="이메일" />
-      <FormField control={control} name="password" label="비밀번호 (8자 이상)" secret newPassword />
+      <FormField
+        control={control}
+        name="username"
+        label="아이디"
+        kind="username"
+        hint="영문 소문자, 숫자, 밑줄(_)로 4~20자"
+      />
+      <FormField
+        control={control}
+        name="password"
+        label="비밀번호 (8자 이상)"
+        kind="new-password"
+      />
       <FormField
         control={control}
         name="passwordConfirm"
         label="비밀번호 확인"
-        secret
-        newPassword
+        kind="new-password"
       />
+      <FormField
+        control={control}
+        name="nickname"
+        label="닉네임"
+        kind="nickname"
+        hint="여권과 공유 이미지에 보이는 이름입니다. 2~20자"
+      />
+      <FormField
+        control={control}
+        name="name"
+        label="이름"
+        kind="name"
+        required={false}
+        hint="본인만 볼 수 있습니다."
+        onSubmit={submit}
+      />
+      <AppText size="caption" tone="muted">
+        이메일 없이 가입하므로 비밀번호를 잊으면 찾을 수 없습니다. 로그인한 상태에서는 MY에서
+        비밀번호를 바꿀 수 있습니다.
+      </AppText>
       <Button
         testID="sign-up-submit"
         label="가입하기"
         loading={signUp.isPending}
-        onPress={handleSubmit((data) => signUp.mutate(data))}
+        onPress={submit}
       />
     </YStack>
   );
 };
 
-export const ForgotPasswordForm = () => {
+export const ChangePasswordForm = () => {
   const router = useRouter();
-  const { control, handleSubmit } = useForm<z.infer<typeof resetRequestSchema>>({
-    resolver: zodResolver(resetRequestSchema),
-    defaultValues: { email: '' },
-  });
-  const send = useMutation({
-    mutationFn: (data: z.infer<typeof resetRequestSchema>) =>
-      backend.auth.sendPasswordReset(data.email),
-    onSuccess: () => {
-      toast.success('재설정 메일을 보냈습니다.');
-      router.back();
-    },
-    onError: (error) => toast.error(toErrorMessage(error)),
-  });
-  return (
-    <YStack gap={20}>
-      <AppText tone="muted">가입한 이메일로 비밀번호 재설정 링크를 보내 드립니다.</AppText>
-      <FormField control={control} name="email" label="이메일" />
-      <Button
-        testID="reset-submit"
-        label="메일 보내기"
-        loading={send.isPending}
-        onPress={handleSubmit((data) => send.mutate(data))}
-      />
-    </YStack>
-  );
-};
-
-export const NewPasswordForm = () => {
-  const router = useRouter();
-  const { control, handleSubmit } = useForm<z.infer<typeof newPasswordSchema>>({
-    resolver: zodResolver(newPasswordSchema),
-    defaultValues: { password: '', passwordConfirm: '' },
+  const lock = useSubmitLock();
+  const { control, handleSubmit } = useForm<z.infer<typeof changePasswordSchema>>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: { current: '', password: '', passwordConfirm: '' },
   });
   const update = useMutation({
-    mutationFn: (data: z.infer<typeof newPasswordSchema>) =>
-      backend.auth.updatePassword(data.password),
+    mutationFn: (data: z.infer<typeof changePasswordSchema>) =>
+      backend.auth.updatePassword(data.current, data.password),
     onSuccess: () => {
       toast.success('비밀번호를 변경했습니다.');
-      router.replace('/');
+      router.back();
     },
-    onError: (error) => toast.error(toErrorMessage(error)),
+    onError: (error) => {
+      lock.release();
+      toast.error(toErrorMessage(error));
+    },
+  });
+  const submit = handleSubmit((data) => {
+    if (lock.take()) update.mutate(data);
   });
   return (
     <YStack gap={20}>
+      <FormField control={control} name="current" label="지금 비밀번호" kind="password" />
       <FormField
         control={control}
         name="password"
         label="새 비밀번호 (8자 이상)"
-        secret
-        newPassword
+        kind="new-password"
       />
       <FormField
         control={control}
         name="passwordConfirm"
         label="새 비밀번호 확인"
-        secret
-        newPassword
+        kind="new-password"
       />
       <Button
+        testID="password-submit"
         label="변경하기"
         loading={update.isPending}
-        onPress={handleSubmit((data) => update.mutate(data))}
+        onPress={submit}
       />
     </YStack>
   );

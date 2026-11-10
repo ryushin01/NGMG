@@ -12,7 +12,7 @@ const db = new PGlite();
 await db.exec(`
   create role authenticated nologin;
   create schema auth;
-  create table auth.users (id uuid primary key);
+  create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb);
   create function auth.uid() returns uuid language sql stable as
     $$ select nullif(current_setting('test.uid', true), '')::uuid $$;
   grant usage on schema auth to authenticated;
@@ -200,4 +200,37 @@ test('현장 인증은 본인 것만 보이고 여행지마다 하나이며 방�
     (await as(B, `delete from public.checkins where user_id = '${A}' returning id`)).rows.length,
     0,
   );
+});
+
+test('가입하면 닉네임으로 프로필이 생기고 본인 프로필만 보고 고칠 수 있습니다', async () => {
+  const C = '00000000-0000-0000-0000-00000000000c';
+  await db.exec(
+    `insert into auth.users values ('${C}', 'yushin@users.newworld.app', '{"nickname": "유신", "name": "홍길동"}')`,
+  );
+  assert.deepEqual((await as(C, 'select nickname, name from public.profiles')).rows[0], {
+    nickname: '유신',
+    name: '홍길동',
+  });
+  // 마이그레이션 전에 가입한 회원도 프로필이 있습니다.
+  assert.equal((await as(A, 'select nickname from public.profiles')).rows.length, 1);
+  assert.equal((await as(A, `select * from public.profiles where id = '${C}'`)).rows.length, 0);
+  assert.equal(
+    (await as(A, `update public.profiles set nickname = '탈취' where id = '${C}' returning id`))
+      .rows.length,
+    0,
+  );
+  await assert.rejects(as(C, `update public.profiles set nickname = 'x'`), /check/);
+  await as(C, `update public.profiles set nickname = '유신2', avatar_path = '${C}/a.jpg'`);
+  assert.equal((await as(C, 'select nickname from public.profiles')).rows[0].nickname, '유신2');
+});
+
+test('닉네임이 없거나 맞지 않으면 이메일 앞부분이나 여행자로 만듭니다', async () => {
+  const D = '00000000-0000-0000-0000-00000000000d';
+  const E = '00000000-0000-0000-0000-00000000000e';
+  await db.exec(`insert into auth.users values ('${D}', 'traveler@users.newworld.app', null)`);
+  await db.exec(
+    `insert into auth.users values ('${E}', 'x@users.newworld.app', '{"nickname": " "}')`,
+  );
+  assert.equal((await as(D, 'select nickname from public.profiles')).rows[0].nickname, 'traveler');
+  assert.equal((await as(E, 'select nickname from public.profiles')).rows[0].nickname, '여행자');
 });

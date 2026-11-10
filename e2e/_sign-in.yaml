@@ -1,28 +1,14 @@
+# 데모 모드는 계정이 없어도 둘러보기로 시작합니다.
 appId: com.ryushin01.newworld
 tags:
   - helper
 ---
 - extendedWaitUntil:
     visible:
-      id: field-email
+      id: demo-browse
     timeout: 60000
 - tapOn:
-    id: field-email
-- inputText: demo@newworld.app
-- waitForAnimationToEnd
-- tapOn:
-    id: field-password
-- inputText: demo-password
-# 시스템 키보드 닫기 명령이 간헐적으로 실패해 글자가 없는 곳을 눌러 닫습니다.
-- tapOn: 현실의 유적부터 전설의 땅까지
-- waitForAnimationToEnd
-- tapOn:
-    id: sign-in-submit
-- runFlow:
-    when:
-      visible: 지금 안 함
-    commands:
-      - tapOn: 지금 안 함
+    id: demo-browse
 - extendedWaitUntil:
     visible:
       id: world-search-real

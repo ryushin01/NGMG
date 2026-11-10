@@ -6,10 +6,10 @@ import type { LocalPhoto } from '../api/types';
 const MAX_EDGE = 1920;
 
 /** 긴 변을 줄이고 JPEG로 압축합니다. 위치 정보(EXIF)도 이 과정에서 제거됩니다. */
-export const compressPhoto = async (photo: LocalPhoto) => {
+export const compressPhoto = async (photo: LocalPhoto, maxEdge = MAX_EDGE) => {
   const context = ImageManipulator.manipulate(photo.uri);
-  if (Math.max(photo.width, photo.height) > MAX_EDGE) {
-    context.resize(photo.width >= photo.height ? { width: MAX_EDGE } : { height: MAX_EDGE });
+  if (Math.max(photo.width, photo.height) > maxEdge) {
+    context.resize(photo.width >= photo.height ? { width: maxEdge } : { height: maxEdge });
   }
   const rendered = await context.renderAsync();
   const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.8 });

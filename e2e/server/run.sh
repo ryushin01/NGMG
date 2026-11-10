@@ -5,23 +5,12 @@
 # 토큰 만료까지 시험하려면 supabase/config.toml의 auth.jwt_expiry를 잠시 낮추고 TOKEN_WAIT(초)를 줍니다.
 set -u
 cd "$(dirname "$0")"
-EMAIL="e2e-$(date +%s)@newworld.test"
+# 아이디로 가입합니다. 앱은 아이디를 {아이디}@users.newworld.app 주소로 바꿔 Supabase Auth에 넘깁니다.
+USERNAME="e2e$(date +%s)"
+EMAIL="$USERNAME@users.newworld.app"
 DB=supabase_db_newworld
 sql() { docker exec -i "$DB" psql -U postgres -At -c "$1"; }
-mail_link() {
-  # 수신자 메일 중 $1을 포함한 가장 최근 메일의 첫 인증 링크를 찾습니다.
-  curl -s "http://127.0.0.1:54324/api/v1/search?query=to:$EMAIL" |
-    node -e "
-      let raw='';process.stdin.on('data',d=>raw+=d).on('end',async()=>{
-        const list=JSON.parse(raw).messages.filter(m=>m.Subject.includes('$1'));
-        if(!list.length){process.exit(1)}
-        const res=await fetch('http://127.0.0.1:54324/api/v1/message/'+list[0].ID);
-        const body=await res.json();
-        const m=body.Text.match(/https?:[^\s)]+verify[^\s)]+/);
-        console.log(m[0]);
-      })"
-}
-step() { echo "== $1"; timeout "${STEP_TIMEOUT:-420}" maestro --device "$DEVICE" test -e EMAIL="$EMAIL" "$1.yaml" > "$LOGS/$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "$LOGS/$1.log" | head -3; exit 1; }; }
+step() { echo "== $1"; timeout "${STEP_TIMEOUT:-420}" maestro --device "$DEVICE" test -e USERNAME="$USERNAME" "$1.yaml" > "$LOGS/$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "$LOGS/$1.log" | head -3; exit 1; }; }
 check() { [ "$2" = "$3" ] && echo "ok   $1 = $2" || { echo "FAIL $1: $2 (기대값 $3)"; FAILED=1; }; }
 FAILED=0
 LOGS=$(mktemp -d)
@@ -35,9 +24,8 @@ screenshot() {
 }
 
 step 1-sign-up
-LINK=$(mail_link Confirm); echo "인증 링크 수신"
-curl -s -o /dev/null -L --max-redirs 1 "$LINK" || true
-check "인증 완료" "$(sql "select count(*) from auth.users where email='$EMAIL' and email_confirmed_at is not null")" 1
+check "가입" "$(sql "select count(*) from auth.users where email='$EMAIL'")" 1
+check "프로필 닉네임" "$(sql "select p.nickname from public.profiles p join auth.users u on u.id = p.id where u.email='$EMAIL'")" 서버여행자
 
 step 2-data
 sleep 2
@@ -73,18 +61,11 @@ check "복구 후 기록" "$(sql "select count(*) from public.records where user
 check "복구 후 체크" "$(sql "select count(*) from public.checklist_items where user_id='$UID_' and checked")" 2
 
 step 3-reload
-LINK=$(mail_link Reset); echo "재설정 링크 수신"
-TARGET=$(curl -s -o /dev/null -w '%{redirect_url}' "$LINK")
-case "$TARGET" in newworld://*access_token*type=recovery*) echo "ok   재설정 링크가 앱으로 연결";; *) echo "FAIL 재설정 링크: ${TARGET%%#*}"; FAILED=1;; esac
-if [ "${PLATFORM:-ios}" = android ]; then
-  adb -s "$DEVICE" shell "am start -a android.intent.action.VIEW -d '$TARGET'" > /dev/null
-else
-  xcrun simctl openurl "$DEVICE" "$TARGET"
-fi
 
 step 4-new-password
 sleep 2
 check "사용자 삭제" "$(sql "select count(*) from auth.users where id='$UID_'")" 0
+check "프로필 삭제" "$(sql "select count(*) from public.profiles where id='$UID_'")" 0
 check "장소 삭제" "$(sql "select count(*) from public.places where user_id='$UID_'")" 0
 check "체크리스트 삭제" "$(sql "select count(*) from public.checklist_items where user_id='$UID_'")" 0
 check "저장소 파일 삭제" "$(sql "select count(*) from storage.objects where bucket_id='record-photos' and name like '$UID_/%'")" 0
