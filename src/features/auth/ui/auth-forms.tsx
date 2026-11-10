@@ -28,6 +28,8 @@ type FormFieldProps<T extends FieldValues> = {
   required?: boolean;
   /** 키보드의 완료 키를 눌렀을 때 실행합니다. 제출 버튼이 키보드에 가려져도 보낼 수 있습니다. */
   onSubmit?: () => void;
+  /** 키보드의 다음 키를 눌렀을 때 다음 칸으로 초점을 옮깁니다. */
+  onNext?: () => void;
 };
 
 // 비밀번호 칸이 둘이면 iOS가 강력한 암호 시트를 입력 중에 다시 띄워 글자 입력을 끊습니다.
@@ -63,6 +65,7 @@ export const FormField = <T extends FieldValues>({
   hint,
   required = true,
   onSubmit,
+  onNext,
 }: FormFieldProps<T>) => {
   const { secret, ...props } = { secret: false, ...KIND_PROPS[kind] };
   return (
@@ -71,6 +74,7 @@ export const FormField = <T extends FieldValues>({
       name={name}
       render={({ field, fieldState }) => (
         <Field
+          ref={field.ref}
           testID={`field-${name}`}
           label={label}
           hint={hint}
@@ -79,8 +83,10 @@ export const FormField = <T extends FieldValues>({
           onChangeText={field.onChange}
           onBlur={field.onBlur}
           error={fieldState.error?.message}
-          onSubmitEditing={onSubmit}
+          onSubmitEditing={onSubmit ?? onNext}
           returnKeyType={onSubmit ? 'go' : 'next'}
+          // 다음 칸으로 넘어갈 때는 키보드를 닫지 않습니다.
+          submitBehavior={onNext ? 'submit' : undefined}
           autoCorrect={false}
           secureTextEntry={secret}
           autoCapitalize="none"
@@ -93,7 +99,7 @@ export const FormField = <T extends FieldValues>({
 
 export const SignInForm = () => {
   const lock = useSubmitLock();
-  const { control, handleSubmit } = useForm<
+  const { control, handleSubmit, setFocus } = useForm<
     z.input<typeof signInSchema>,
     unknown,
     z.output<typeof signInSchema>
@@ -114,7 +120,13 @@ export const SignInForm = () => {
   });
   return (
     <YStack gap={20}>
-      <FormField control={control} name="username" label="아이디" kind="username" />
+      <FormField
+        control={control}
+        name="username"
+        onNext={() => setFocus('password')}
+        label="아이디"
+        kind="username"
+      />
       <FormField
         control={control}
         name="password"
@@ -147,7 +159,7 @@ export const SignInForm = () => {
 
 export const SignUpForm = () => {
   const lock = useSubmitLock();
-  const { control, handleSubmit } = useForm<
+  const { control, handleSubmit, setFocus } = useForm<
     z.input<typeof signUpSchema>,
     unknown,
     z.output<typeof signUpSchema>
@@ -177,6 +189,7 @@ export const SignUpForm = () => {
       <FormField
         control={control}
         name="username"
+        onNext={() => setFocus('password')}
         label="아이디"
         kind="username"
         hint="영문 소문자, 숫자, 밑줄(_)로 4~20자"
@@ -184,18 +197,21 @@ export const SignUpForm = () => {
       <FormField
         control={control}
         name="password"
+        onNext={() => setFocus('passwordConfirm')}
         label="비밀번호 (8자 이상)"
         kind="new-password"
       />
       <FormField
         control={control}
         name="passwordConfirm"
+        onNext={() => setFocus('nickname')}
         label="비밀번호 확인"
         kind="new-password"
       />
       <FormField
         control={control}
         name="nickname"
+        onNext={() => setFocus('name')}
         label="닉네임"
         kind="nickname"
         hint="여권과 공유 이미지에 보이는 이름입니다. 2~20자"
@@ -226,7 +242,7 @@ export const SignUpForm = () => {
 export const ChangePasswordForm = () => {
   const router = useRouter();
   const lock = useSubmitLock();
-  const { control, handleSubmit } = useForm<z.infer<typeof changePasswordSchema>>({
+  const { control, handleSubmit, setFocus } = useForm<z.infer<typeof changePasswordSchema>>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: { current: '', password: '', passwordConfirm: '' },
   });
@@ -247,10 +263,17 @@ export const ChangePasswordForm = () => {
   });
   return (
     <YStack gap={20}>
-      <FormField control={control} name="current" label="지금 비밀번호" kind="password" />
+      <FormField
+        control={control}
+        name="current"
+        onNext={() => setFocus('password')}
+        label="지금 비밀번호"
+        kind="password"
+      />
       <FormField
         control={control}
         name="password"
+        onNext={() => setFocus('passwordConfirm')}
         label="새 비밀번호 (8자 이상)"
         kind="new-password"
       />
@@ -273,7 +296,7 @@ export const ChangePasswordForm = () => {
 export const RecoverForm = () => {
   const lock = useSubmitLock();
   const showCode = useRecoveryCodeStore((state) => state.show);
-  const { control, handleSubmit } = useForm<
+  const { control, handleSubmit, setFocus } = useForm<
     z.input<typeof recoverSchema>,
     unknown,
     z.output<typeof recoverSchema>
@@ -303,10 +326,17 @@ export const RecoverForm = () => {
       <AppText tone="muted">
         가입할 때 받은 복구 코드로 새 비밀번호를 정합니다. 5번 틀리면 15분 동안 잠깁니다.
       </AppText>
-      <FormField control={control} name="username" label="아이디" kind="username" />
+      <FormField
+        control={control}
+        name="username"
+        onNext={() => setFocus('code')}
+        label="아이디"
+        kind="username"
+      />
       <FormField
         control={control}
         name="code"
+        onNext={() => setFocus('password')}
         label="복구 코드"
         kind="code"
         hint="예: K7MQ-2XWD-9PTA (하이픈과 대소문자는 상관없습니다)"
@@ -314,6 +344,7 @@ export const RecoverForm = () => {
       <FormField
         control={control}
         name="password"
+        onNext={() => setFocus('passwordConfirm')}
         label="새 비밀번호 (8자 이상)"
         kind="new-password"
       />

@@ -45,7 +45,8 @@ const Navigator = () => {
       <Stack
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface } }}
       >
-        <Stack.Protected guard={!!session}>
+        {/* 이름순 첫 화면이 아니라 로그인 화면으로 보내도록 돌아갈 곳을 정해 둡니다. */}
+        <Stack.Protected guard={!!session} redirectTo="/sign-in">
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="destination/[id]" />
           <Stack.Screen name="courses" />
@@ -71,7 +72,7 @@ const Navigator = () => {
           <Stack.Screen name="password" />
           <Stack.Screen name="recovery-code" />
         </Stack.Protected>
-        <Stack.Protected guard={!session}>
+        <Stack.Protected guard={!session} redirectTo="/">
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="sign-up" />
           <Stack.Screen name="recover" />

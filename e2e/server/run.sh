@@ -6,11 +6,12 @@
 set -u
 cd "$(dirname "$0")"
 # 아이디로 가입합니다. 앱은 아이디를 {아이디}@users.newworld.app 주소로 바꿔 Supabase Auth에 넘깁니다.
-USERNAME="e2e$(date +%s)"
-EMAIL="$USERNAME@users.newworld.app"
+# zsh의 USERNAME은 로그인 사용자 이름을 담는 특수 변수라 쓰지 않습니다.
+ACCOUNT_ID="e2e$(date +%s)"
+EMAIL="$ACCOUNT_ID@users.newworld.app"
 DB=supabase_db_newworld
 sql() { docker exec -i "$DB" psql -U postgres -At -c "$1"; }
-step() { echo "== $1"; timeout "${STEP_TIMEOUT:-420}" maestro --device "$DEVICE" test -e USERNAME="$USERNAME" "$1.yaml" > "$LOGS/$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "$LOGS/$1.log" | head -3; exit 1; }; }
+step() { echo "== $1"; timeout "${STEP_TIMEOUT:-420}" maestro --device "$DEVICE" test -e ACCOUNT_ID="$ACCOUNT_ID" "$1.yaml" > "$LOGS/$1.log" 2>&1 || { grep -E "FAILED|Assertion is false" "$LOGS/$1.log" | head -3; exit 1; }; }
 check() { [ "$2" = "$3" ] && echo "ok   $1 = $2" || { echo "FAIL $1: $2 (기대값 $3)"; FAILED=1; }; }
 FAILED=0
 LOGS=$(mktemp -d)
@@ -25,6 +26,7 @@ screenshot() {
 
 step 1-sign-up
 check "가입" "$(sql "select count(*) from auth.users where email='$EMAIL'")" 1
+check "복구 코드(재설정 후 새 코드)" "$(sql "select count(*) from private.recovery_codes r join auth.users u on u.id = r.user_id where u.email='$EMAIL' and r.failed_attempts = 0")" 1
 check "프로필 닉네임" "$(sql "select p.nickname from public.profiles p join auth.users u on u.id = p.id where u.email='$EMAIL'")" 서버여행자
 
 step 2-data
@@ -65,6 +67,7 @@ step 3-reload
 step 4-new-password
 sleep 2
 check "사용자 삭제" "$(sql "select count(*) from auth.users where id='$UID_'")" 0
+check "복구 코드 삭제" "$(sql "select count(*) from private.recovery_codes where user_id='$UID_'")" 0
 check "프로필 삭제" "$(sql "select count(*) from public.profiles where id='$UID_'")" 0
 check "장소 삭제" "$(sql "select count(*) from public.places where user_id='$UID_'")" 0
 check "체크리스트 삭제" "$(sql "select count(*) from public.checklist_items where user_id='$UID_'")" 0

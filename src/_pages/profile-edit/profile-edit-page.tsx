@@ -27,7 +27,7 @@ const ProfileEditForm = ({
   const lock = useSubmitLock();
   /** undefined: 그대로, null: 지움, LocalPhoto: 새 사진 */
   const [avatar, setAvatar] = useState<LocalPhoto | null | undefined>(undefined);
-  const { control, handleSubmit } = useForm<ProfileForm>({
+  const { control, handleSubmit, setFocus } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     defaultValues: { nickname: initial.nickname, name: initial.name },
   });
@@ -92,6 +92,7 @@ const ProfileEditForm = ({
       <FormField
         control={control}
         name="nickname"
+        onNext={() => setFocus('name')}
         label="닉네임"
         kind="nickname"
         hint="여권과 공유 이미지에 보이는 이름입니다. 2~20자"

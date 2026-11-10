@@ -8,7 +8,7 @@ appId: com.ryushin01.newworld
     timeout: 30000
 - tapOn:
     id: field-username
-- inputText: ${USERNAME}
+- inputText: ${ACCOUNT_ID}
 - waitForAnimationToEnd
 - tapOn:
     id: field-password
