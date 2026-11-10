@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { Layers, LocateFixed, Plus } from 'lucide-react-native';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, useWindowDimensions } from 'react-native';
 import type { LatLng, MapType } from 'react-native-maps';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -77,15 +77,29 @@ export const MapPage = () => {
     () =>
       allPlaces.filter(
         (place) =>
-          (filter === 'all' || place.kind === filter) && (!tag || place.tags.includes(tag)),
+          (filter === 'all' ||
+            (filter === 'verified'
+              ? !!place.catalogId && verifiedIds.has(place.catalogId)
+              : place.kind === filter)) &&
+          (!tag || place.tags.includes(tag)),
       ),
-    [allPlaces, filter, tag],
+    [allPlaces, filter, tag, verifiedIds],
   );
   const tags = useMemo(
     () => [...new Set(allPlaces.flatMap((place) => place.tags))].slice(0, 12),
     [allPlaces],
   );
   const selected = allPlaces.find((place) => place.id === selectedId) ?? null;
+
+  // 인증한 곳은 세계 곳곳에 흩어져 있으므로, 현장 인증 필터에서는 지도에 보이는 핀이 모두 들어오게 맞춥니다.
+  // 인증 목록이 늦게 오거나 태그를 바꿔 보이는 핀이 달라지면 다시 맞춥니다.
+  const verifiedKey = filter === 'verified' ? visiblePlaces.map((place) => place.id).join(',') : '';
+  useEffect(() => {
+    if (!verifiedKey) return;
+    mapRef.current?.fit(visiblePlaces.map(({ latitude, longitude }) => ({ latitude, longitude })));
+    // 보이는 핀 목록이 바뀔 때만 맞춥니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifiedKey]);
 
   const selectPlace = (place: Place) => {
     Haptics.selectionAsync();

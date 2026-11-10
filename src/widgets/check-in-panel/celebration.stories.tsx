@@ -23,6 +23,7 @@ const meta = {
     destination: findDestination('avalon')!,
     checkedAt,
     badges,
+    allBadges: badges,
     onClose: () => undefined,
     onOpenPassport: () => undefined,
   },

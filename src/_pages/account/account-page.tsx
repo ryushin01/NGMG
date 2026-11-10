@@ -6,8 +6,10 @@ import { useState } from 'react';
 import { Alert, ScrollView, Switch } from 'react-native';
 import { toast } from 'sonner-native';
 import { View, XStack, YStack } from 'tamagui';
+import { useCheckins } from '@/entities/checkin';
 import { summarizeChecklist, useChecklist } from '@/entities/checklist';
 import { useSessionStore } from '@/entities/session';
+import { ArrivalAlertSwitch } from '@/features/arrival-alert';
 import { useExportData } from '@/features/data-export';
 import { backend, isDemoOffline, setDemoOffline, sync, useSyncState } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
@@ -58,6 +60,8 @@ export const AccountPage = () => {
   const email = useSessionStore((state) => state.session?.email ?? '');
   const { ops } = useSyncState();
   const checklist = useChecklist();
+  const checkins = useCheckins();
+  const checkedIds = new Set((checkins.data ?? []).map((item) => item.catalogId));
   const exportData = useExportData();
   const [demoOffline, setDemoOfflineState] = useState(isDemoOffline);
   const signOut = useMutation({
@@ -144,6 +148,7 @@ export const AccountPage = () => {
           <Divider />
           <Row label="앱 버전" value={Constants.expoConfig?.version ?? '-'} />
         </YStack>
+        <ArrivalAlertSwitch checkedIds={checkedIds} />
         {backend.mode === 'demo' ? (
           <Touchable
             testID="demo-offline"

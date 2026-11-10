@@ -25,8 +25,9 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: world-search-fantasy
 - inputText: 아발론
-# 키보드가 결과 카드를 가리므로 고정 글자를 눌러 내립니다.
+# 키보드가 결과 카드를 가리므로 내립니다(iOS는 고정 글자를 누르고, Android는 키보드를 닫습니다).
 - tapOn: 여행지 검색
+- runFlow: _hide-keyboard-android.yaml
 - extendedWaitUntil:
     visible:
       id: destination-avalon
@@ -46,9 +47,9 @@ appId: com.ryushin01.newworld
     id: checkin-gps
 - runFlow:
     when:
-      visible: .*(허용|Allow).*
+      visible: .*(허용|Allow|While using).*
     commands:
-      - tapOn: .*(앱을 사용하는 동안 허용|Allow While Using App).*
+      - tapOn: .*(앱을 사용하는 동안 허용|Allow While Using App|앱 사용 중에만 허용|While using the app).*
 - extendedWaitUntil:
     visible:
       id: checkin-celebration
@@ -59,6 +60,16 @@ appId: com.ryushin01.newworld
 - assertVisible:
     id: badge-legend-walker
 - takeScreenshot: checkin-celebration
+# 축하 창에서 바로 뱃지 카드로 바꿔 보고 돌아옵니다.
+- tapOn:
+    id: checkin-share-badges
+- extendedWaitUntil:
+    visible:
+      id: badge-card
+    timeout: 8000
+- tapOn:
+    id: badge-share-close
+- assertVisible: 스탬프를 찍었어요
 - tapOn:
     id: checkin-passport
 - extendedWaitUntil:
@@ -89,3 +100,20 @@ appId: com.ryushin01.newworld
     id: badge-share-close
 - assertNotVisible:
     id: badge-card
+# 지도에서 현장 인증 필터를 고르면 인증한 곳이 체크 핀으로 보입니다.
+- tapOn: 뒤로 가기
+- tapOn: 뒤로 가기
+- tapOn:
+    id: tab-map
+- extendedWaitUntil:
+    visible:
+      id: filter-verified
+    timeout: 8000
+- tapOn:
+    id: filter-verified
+- waitForAnimationToEnd
+# 지도 마커는 Maestro가 읽지 못하므로, 인증한 아발론으로 맞춘 지도와 체크 핀은 화면으로 남깁니다.
+- assertVisible:
+    id: filter-verified
+    selected: true
+- takeScreenshot: map-verified

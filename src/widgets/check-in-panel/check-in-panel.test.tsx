@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo } from 'react-native';
 import { toast } from 'sonner-native';
 import { TamaguiProvider } from 'tamagui';
 import { tamaguiConfig } from '~/tamagui.config';
@@ -44,14 +45,21 @@ it('데모 인증으로 스탬프를 찍으면 축하 화면과 새 뱃지를 �
   expect(screen.getByText('스탬프를 찍었어요')).toBeTruthy();
   expect(screen.getByTestId('badge-first-step')).toBeTruthy();
   expect(screen.getByTestId('badge-legend-walker')).toBeTruthy();
+  await fireEvent.press(screen.getByTestId('checkin-share-badges'));
+  expect(screen.getByTestId('badge-card')).toBeTruthy();
+  expect(screen.getByText(/개 가운데 \d+개를 모았어요/)).toBeTruthy();
+  await fireEvent.press(screen.getByTestId('badge-share-close'));
+  expect(screen.getByText('스탬프를 찍었어요')).toBeTruthy();
   await fireEvent.press(screen.getByTestId('checkin-passport'));
   expect(mockPush).toHaveBeenCalledWith('/passport');
 });
 
-it('현장에서 멀면 거리와 함께 다시 시도하라고 알립니다', async () => {
+it('현장에서 멀면 거리와 함께 다시 시도하라고 알리고 화면 낭독기에도 읽어 줍니다', async () => {
+  const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
   await show([], { status: 'far', distance: 8650 });
   await fireEvent.press(screen.getByTestId('checkin-gps'));
   expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('연고지에서 8,650km'));
+  expect(announce).toHaveBeenCalledWith(expect.stringContaining('연고지에서 8,650km'));
 });
 
 it('이미 인증했으면 날짜와 인증 방식을 보여 주고 버튼을 숨깁니다', async () => {

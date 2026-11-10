@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { BookOpen, Landmark, Map, Sparkles, UserRound, type LucideIcon } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
+import { useArrivalSync } from '@/features/arrival-alert';
 import { useColors } from '@/shared/ui';
 
 function icon(Icon: LucideIcon) {
@@ -11,6 +12,7 @@ function icon(Icon: LucideIcon) {
 
 export const TabsLayout = () => {
   const colors = useColors();
+  useArrivalSync();
   return (
     <Tabs
       screenOptions={{

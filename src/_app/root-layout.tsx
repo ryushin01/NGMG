@@ -5,6 +5,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useSessionBootstrap, useSessionStore } from '@/entities/session';
+// 백그라운드 도착 작업은 앱이 깨어날 때 가장 먼저 정의되어야 하므로 루트에서 불러옵니다.
+import { useNotificationLink } from '@/features/arrival-alert';
 import { backend } from '@/shared/api';
 import { useAppFonts, useColors } from '@/shared/ui';
 import { Providers } from './providers';
@@ -56,6 +58,7 @@ const Navigator = () => {
   const fontsReady = useAppFonts();
   const ready = sessionReady && fontsReady;
   useRecoveryLink(ready);
+  useNotificationLink(ready && !!session);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
