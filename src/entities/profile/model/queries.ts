@@ -20,7 +20,15 @@ export const useProfile = () => {
 export const useUpdateProfile = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (input: ProfileInput) => backend.profile.update(input),
-    onSuccess: (profile) => client.setQueryData(profileKeys.me(currentUserId()), profile),
+    // 저장을 시작한 회원을 기억해, 그사이 다른 계정으로 바뀌었으면 캐시에 쓰지 않습니다.
+    mutationFn: async (input: ProfileInput) => {
+      const userId = currentUserId();
+      return { userId, profile: await backend.profile.update(input) };
+    },
+    onSuccess: ({ userId, profile }) => {
+      if (userId && userId === currentUserId()) {
+        client.setQueryData(profileKeys.me(userId), profile);
+      }
+    },
   });
 };
