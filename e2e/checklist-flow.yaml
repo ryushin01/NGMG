@@ -122,6 +122,16 @@ appId: com.ryushin01.newworld
 - runFlow: _hide-keyboard-android.yaml
 - tapOn:
     id: sign-up-submit
+# 가입하면 복구 코드를 한 번 보여 줍니다.
+- extendedWaitUntil:
+    visible:
+      id: recovery-code-modal
+    timeout: 15000
+- assertVisible:
+    id: recovery-code
+    text: "[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}"
+- tapOn:
+    id: recovery-code-done
 - runFlow:
     when:
       visible: 지금 안 함

@@ -1,1 +1,7 @@
-export { ChangePasswordPage, SignInPage, SignUpPage } from './auth-pages';
+export {
+  ChangePasswordPage,
+  RecoverPage,
+  ResetRecoveryCodePage,
+  SignInPage,
+  SignUpPage,
+} from './auth-pages';

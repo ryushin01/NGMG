@@ -5,7 +5,13 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toast } from 'sonner-native';
 import { View, YStack } from 'tamagui';
-import { ChangePasswordForm, SignInForm, SignUpForm } from '@/features/auth';
+import {
+  ChangePasswordForm,
+  RecoverForm,
+  ResetRecoveryCodeForm,
+  SignInForm,
+  SignUpForm,
+} from '@/features/auth';
 import { backend } from '@/shared/api';
 import { toErrorMessage } from '@/shared/lib';
 import { AppText, Button, Header, useColors } from '@/shared/ui';
@@ -87,6 +93,24 @@ export const ChangePasswordPage = () => (
     <Header title="비밀번호 변경" />
     <FormScroll>
       <ChangePasswordForm />
+    </FormScroll>
+  </View>
+);
+
+export const RecoverPage = () => (
+  <View flex={1} backgroundColor="surface">
+    <Header title="복구 코드로 재설정" />
+    <FormScroll>
+      <RecoverForm />
+    </FormScroll>
+  </View>
+);
+
+export const ResetRecoveryCodePage = () => (
+  <View flex={1} backgroundColor="surface">
+    <Header title="복구 코드 다시 발급" />
+    <FormScroll>
+      <ResetRecoveryCodeForm />
     </FormScroll>
   </View>
 );

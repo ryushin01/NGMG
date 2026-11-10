@@ -1,5 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { compressPhoto, photoStore } from '../lib/photo';
+import { createRecoveryCode, hashRecoveryCode } from '../lib/recovery-code';
 import { storageAdapter } from '../lib/storage';
 import { DEMO_PLACES, DEMO_RECORDS, DEMO_SEARCH } from './demo-data';
 import type {
@@ -41,7 +42,18 @@ type DemoState = {
   sequence: number;
 };
 
-type DemoAccount = { salt: string; hash: string };
+type DemoAccount = {
+  salt: string;
+  hash: string;
+  /** 복구 코드 해시. 이전 버전에서 만든 계정에는 없습니다. */
+  recoveryHash?: string;
+  failures?: number;
+  lockedUntil?: number;
+};
+
+/** 복구 코드를 연달아 틀리면 잠가 무작위 대입을 막습니다. 서버와 같은 규칙입니다. */
+const MAX_RECOVERY_FAILURES = 5;
+const RECOVERY_LOCK_MS = 15 * 60 * 1000;
 type StoredProfile = { nickname: string; name: string; avatar: string | null };
 
 /** 둘러보기 계정. 이전 버전에서 쌓인 데이터를 이어 쓰도록 회원 id를 그대로 둡니다. */
@@ -146,7 +158,8 @@ const loadState = (): Partial<DemoState> => {
           typeof entry[0] === 'string' &&
           isObject(entry[1]) &&
           typeof entry[1].salt === 'string' &&
-          typeof entry[1].hash === 'string',
+          typeof entry[1].hash === 'string' &&
+          (entry[1].recoveryHash === undefined || typeof entry[1].recoveryHash === 'string'),
       ),
       profiles: validItems<[string, StoredProfile]>(
         state.profiles,
@@ -357,9 +370,56 @@ export const demoBackend: Backend = {
         throw new Error('User already registered');
       }
       const salt = Crypto.randomUUID();
-      accounts.set(username, { salt, hash: await hashPassword(salt, password) });
+      const recoveryCode = createRecoveryCode();
+      accounts.set(username, {
+        salt,
+        hash: await hashPassword(salt, password),
+        recoveryHash: await hashRecoveryCode(recoveryCode),
+      });
       profiles.set(userIdOf(username), { nickname, name, avatar: null });
       setSession({ userId: userIdOf(username), username });
+      return { recoveryCode };
+    },
+    async recover({ username, code, password }) {
+      await wait();
+      const account = accounts.get(username);
+      if (account?.lockedUntil && account.lockedUntil > Date.now()) {
+        throw new Error('Recovery locked');
+      }
+      if (!account?.recoveryHash || (await hashRecoveryCode(code)) !== account.recoveryHash) {
+        if (account) {
+          const failures = (account.failures ?? 0) + 1;
+          accounts.set(username, {
+            ...account,
+            failures: failures >= MAX_RECOVERY_FAILURES ? 0 : failures,
+            lockedUntil:
+              failures >= MAX_RECOVERY_FAILURES ? Date.now() + RECOVERY_LOCK_MS : undefined,
+          });
+          persist();
+        }
+        throw new Error('Invalid recovery code');
+      }
+      const salt = Crypto.randomUUID();
+      const recoveryCode = createRecoveryCode();
+      accounts.set(username, {
+        salt,
+        hash: await hashPassword(salt, password),
+        recoveryHash: await hashRecoveryCode(recoveryCode),
+      });
+      setSession({ userId: userIdOf(username), username });
+      return { recoveryCode };
+    },
+    async resetRecoveryCode(current) {
+      await wait();
+      const username = session?.username ?? '';
+      const account = accounts.get(username);
+      if (!account || (await hashPassword(account.salt, current)) !== account.hash) {
+        throw new Error('Invalid login credentials');
+      }
+      const recoveryCode = createRecoveryCode();
+      accounts.set(username, { ...account, recoveryHash: await hashRecoveryCode(recoveryCode) });
+      persist();
+      return { recoveryCode };
     },
     async browse() {
       await wait();
@@ -376,7 +436,7 @@ export const demoBackend: Backend = {
         throw new Error('Invalid login credentials');
       }
       const salt = Crypto.randomUUID();
-      accounts.set(username, { salt, hash: await hashPassword(salt, next) });
+      accounts.set(username, { ...account, salt, hash: await hashPassword(salt, next) });
       persist();
     },
     async deleteAccount() {

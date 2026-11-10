@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 import { env, PHOTO_BUCKET } from '../config';
 import { isTransientError } from '../lib/errors';
 import { compressPhoto } from '../lib/photo';
+import { createRecoveryCode, hashRecoveryCode } from '../lib/recovery-code';
 import { storageAdapter } from '../lib/storage';
 import type {
   Backend,
@@ -261,6 +262,34 @@ const toProfile = async (row: ProfileRow): Promise<Profile> => {
   return { nickname: row.nickname, name: row.name, avatarUrl: error ? null : data.signedUrl };
 };
 
+/** 메일로 확인할 수 없으므로 지금 비밀번호로 다시 로그인해 본인인지 확인합니다. */
+const verifyPassword = async (password: string) => {
+  const { data } = await client.auth.getSession();
+  const email = data.session?.user.email;
+  if (!email) throw new Error('로그인이 필요합니다.');
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+};
+
+/** 새 복구 코드를 만들어 해시만 서버에 저장하고 원문을 돌려줍니다. 저장하지 못하면 null입니다. */
+const saveRecoveryCode = async () => {
+  const recoveryCode = createRecoveryCode();
+  const { error } = await client.rpc('set_recovery_code', {
+    p_code_hash: await hashRecoveryCode(recoveryCode),
+  });
+  return { recoveryCode: error ? null : recoveryCode };
+};
+
+/** Edge Function이 돌려준 오류 문구를 꺼냅니다. 연결 오류는 그대로 둡니다. */
+const functionError = async (error: unknown) => {
+  const context = (error as { context?: Response }).context;
+  if (context && typeof context.json === 'function') {
+    const body = (await context.json().catch(() => null)) as { error?: string } | null;
+    if (body?.error) return new Error(body.error);
+  }
+  return error;
+};
+
 const currentUserId = async () => {
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
@@ -429,6 +458,26 @@ export const supabaseBackend: Backend = {
         options: { data: { nickname, name } },
       });
       if (error) throw error;
+      return saveRecoveryCode();
+    },
+    async recover({ username, code, password }) {
+      const { data, error } = await client.functions.invoke<{ recoveryCode: string | null }>(
+        'recover-account',
+        { body: { username, code, password } },
+      );
+      if (error) throw await functionError(error);
+      const { error: signInError } = await client.auth.signInWithPassword({
+        email: toAuthEmail(username),
+        password,
+      });
+      if (signInError) throw signInError;
+      return { recoveryCode: data?.recoveryCode ?? null };
+    },
+    async resetRecoveryCode(current) {
+      await verifyPassword(current);
+      const result = await saveRecoveryCode();
+      if (!result.recoveryCode) throw new Error('복구 코드를 만들지 못했습니다.');
+      return result;
     },
     async browse() {
       throw new Error('둘러보기는 데모 모드에서만 쓸 수 있습니다.');
@@ -452,15 +501,7 @@ export const supabaseBackend: Backend = {
       localSignOutListeners.forEach((listener) => listener(null));
     },
     async updatePassword(current, next) {
-      // 메일로 확인할 수 없으므로 지금 비밀번호로 다시 로그인해 본인인지 확인합니다.
-      const { data } = await client.auth.getSession();
-      const email = data.session?.user.email;
-      if (!email) throw new Error('로그인이 필요합니다.');
-      const { error: verifyError } = await client.auth.signInWithPassword({
-        email,
-        password: current,
-      });
-      if (verifyError) throw verifyError;
+      await verifyPassword(current);
       const { error } = await client.auth.updateUser({ password: next });
       if (error) throw error;
     },

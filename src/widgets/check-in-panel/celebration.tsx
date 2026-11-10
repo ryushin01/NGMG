@@ -27,7 +27,9 @@ export const Celebration = ({
   onClose,
   onOpenPassport,
 }: CelebrationProps) => {
-  const owner = useProfile().data?.nickname;
+  const profileQuery = useProfile();
+  const owner = profileQuery.data;
+  const ownerLoading = profileQuery.isPending && profileQuery.fetchStatus !== 'idle';
   // 새 모달을 겹치지 않고 같은 창을 뱃지 카드 화면으로 바꿉니다.
   const [sharing, setSharingState] = useState(false);
   const setSharing = (next: boolean) => {
@@ -59,6 +61,7 @@ export const Celebration = ({
           <BadgeShareContent
             statuses={allBadges}
             owner={owner}
+            ownerLoading={ownerLoading}
             closeLabel="뒤로"
             onClose={() => setSharing(false)}
           />

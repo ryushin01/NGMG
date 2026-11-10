@@ -13,7 +13,14 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('sonner-native', () => ({ toast: Object.assign(jest.fn(), { error: jest.fn() }) }));
 jest.mock('@/shared/config', () => ({ isSupabaseConfigured: false }));
 jest.mock('@/entities/checkin', () => ({ useCheckins: jest.fn() }));
-jest.mock('@/entities/profile', () => ({ useProfile: () => ({ data: { nickname: '유신' } }) }));
+jest.mock('@/entities/profile', () => ({
+  useProfile: () => ({
+    data: { nickname: '유신', name: '', avatarUrl: null },
+    isPending: false,
+    fetchStatus: 'idle',
+  }),
+  ProfileAvatar: () => null,
+}));
 jest.mock('@/features/check-in', () => ({ CHECK_IN_RADIUS_KM: 3, useCheckIn: jest.fn() }));
 
 const avalon = findDestination('avalon')!;

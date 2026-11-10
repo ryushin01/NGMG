@@ -37,14 +37,15 @@ npx supabase db push
 npx supabase config push   # 메일 인증 끄기(아이디 가입) 등 인증 설정을 올립니다.
 npx supabase functions deploy place-search
 npx supabase functions deploy delete-account
+npx supabase functions deploy recover-account
 ```
 
-| 구성   | 내용                                                                                                                |
-| ------ | ------------------------------------------------------------------------------------------------------------------- |
-| 테이블 | `places`, `records`, `record_photos`, `checklist_items`, `trips`, `checkins`, `profiles`, 요약 뷰 `place_summaries` |
-| 저장소 | 비공개 버킷 `record-photos`, 경로 `{user_id}/{record_id}/{파일}`                                                    |
-| 권한   | 모든 테이블과 저장소에 RLS를 적용해 본인 데이터만 접근합니다.                                                       |
-| 함수   | `place-search`(주소·장소 검색, 좌표→주소), `delete-account`(계정, 기록 사진, 프로필 사진 삭제)                      |
+| 구성   | 내용                                                                                                                                           |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 테이블 | `places`, `records`, `record_photos`, `checklist_items`, `trips`, `checkins`, `profiles`, 요약 뷰 `place_summaries`                            |
+| 저장소 | 비공개 버킷 `record-photos`, 경로 `{user_id}/{record_id}/{파일}`                                                                               |
+| 권한   | 모든 테이블과 저장소에 RLS를 적용해 본인 데이터만 접근합니다.                                                                                  |
+| 함수   | `place-search`(주소·장소 검색, 좌표→주소), `delete-account`(계정, 기록 사진, 프로필 사진 삭제), `recover-account`(복구 코드로 비밀번호 재설정) |
 
 ## 오프라인 동작
 
@@ -85,7 +86,10 @@ supabase migration up --local   # 이미 만든 로컬 DB에 새 마이그레이
 DEVICE=<시뮬레이터 ID> pnpm run test:e2e:server
 ```
 
-아이디 가입과 프로필 생성, 로그인, 장소·사진·기록·체크리스트 저장, 서버 중단 중 재시작과 저장, 복구 후 업로드, MY의 비밀번호 변경, 계정 삭제를 앱에서 실행하고 DB와 저장소 내용을 직접 조회해 확인합니다. 토큰 만료까지 시험하려면 `auth.jwt_expiry`를 잠시 낮추고 `TOKEN_WAIT`(초)를 지정합니다.
+아이디 가입과 프로필 생성, 복구 코드로 재설정, 로그인, 장소·사진·기록·체크리스트 저장, 서버 중단 중 재시작과 저장, 복구 후 업로드, MY의 비밀번호 변경, 계정 삭제를 앱에서 실행하고 DB와 저장소 내용을 직접 조회해 확인합니다. 토큰 만료까지 시험하려면 `auth.jwt_expiry`를 잠시 낮추고 `TOKEN_WAIT`(초)를 지정합니다.
+
+- 서버 E2E의 테스트 아이디는 `ACCOUNT_ID` 변수에 둡니다. zsh의 `USERNAME`은 로그인 사용자 이름을 담는 특수 변수라 바꿀 수 없습니다.
+- iOS 시뮬레이터에서는 새 비밀번호 칸을 채운 뒤 자동 완성이 초점을 붙잡아 아래 칸을 누를 수 없을 때가 있어, 폼은 키보드의 다음 키(`pressKey: Enter`)로 칸을 옮깁니다.
 
 ## 배포
 
@@ -148,7 +152,9 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 
 - 가입과 로그인은 이메일 없이 아이디(영문 소문자·숫자·밑줄 4~20자)와 비밀번호로 합니다. 대문자로 입력해도 소문자로 맞춥니다.
 - Supabase Auth는 이메일이 필요하므로 앱이 아이디를 `{아이디}@users.newworld.app`로 바꿔 넘깁니다. 이 주소로는 메일을 보내지 않으므로 `supabase/config.toml`에서 메일 인증을 끕니다. 화면에는 보이지 않습니다.
-- 메일이 없어 비밀번호 찾기는 없습니다. 로그인한 상태에서 MY의 `비밀번호 변경`으로 지금 비밀번호를 확인한 뒤 바꿉니다.
+- 메일이 없으므로 비밀번호를 잊었을 때는 **복구 코드**로 재설정합니다. 가입할 때 12자 코드(헷갈리는 0/O, 1/I/L 제외, `XXXX-XXXX-XXXX`)를 한 번만 보여 주고, 서버와 기기에는 SHA-256 해시만 저장합니다. 재설정에 쓴 코드는 버리고 새 코드를 보여 주며, MY의 `복구 코드 다시 발급`으로 지금 비밀번호를 확인한 뒤 바꿀 수 있습니다. 5번 틀리면 15분 동안 잠급니다.
+- 서버에서는 코드 해시를 API에 노출되지 않는 `private.recovery_codes`에 둡니다. 앱은 `set_recovery_code`(본인 것만 저장)만 부를 수 있고, 확인과 교체(`verify_recovery_code`, `replace_recovery_code`)는 서비스 키로만 실행되며 Edge Function `recover-account`가 부릅니다.
+- 로그인한 상태에서는 MY의 `비밀번호 변경`으로 지금 비밀번호를 확인한 뒤 바꿉니다.
 - 프로필(`profiles`)은 닉네임(2~20자, 여권과 공유 이미지에 표시), 본명(선택, 본인만 봄), 프로필 사진(비공개 버킷 `avatars`, `{user_id}/{파일}`, 512px JPEG)입니다. 가입 메타데이터로 받은 닉네임과 본명으로 DB 트리거가 만듭니다.
 - 데모 모드의 둘러보기 계정은 비밀번호가 없어 비밀번호 변경이 나오지 않습니다.
 
@@ -175,4 +181,4 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 
 ## 서버 적용 현황
 
-Supabase 프로젝트 `newworld`에는 `20261108000000`까지 적용되어 있습니다. 무료 플랜의 활성 프로젝트 한도 때문에 일시 중지한 상태이며, 앱은 `.env` 없이 데모 모드로 동작합니다. 다시 켜면 `npx supabase db push`로 `20261109000000_trips_currency.sql`(통화, 여정)·`20261110000000_checkins.sql`(현장 인증)·`20261111000000_profiles.sql`(프로필)을 적용하고 `npx supabase config push`(메일 인증 끄기), `npx supabase functions deploy delete-account`를 실행합니다. 이미 이메일로 가입한 계정은 이메일 앞부분이 아이디가 됩니다.
+Supabase 프로젝트 `newworld`에는 `20261108000000`까지 적용되어 있습니다. 무료 플랜의 활성 프로젝트 한도 때문에 일시 중지한 상태이며, 앱은 `.env` 없이 데모 모드로 동작합니다. 다시 켜면 `npx supabase db push`로 `20261109000000_trips_currency.sql`(통화, 여정)·`20261110000000_checkins.sql`(현장 인증)·`20261111000000_profiles.sql`(프로필)·`20261112000000_recovery_codes.sql`(복구 코드)을 적용하고 `npx supabase config push`(메일 인증 끄기), `npx supabase functions deploy delete-account recover-account`를 실행합니다. 이미 이메일로 가입한 계정은 이메일 앞부분이 아이디가 됩니다.

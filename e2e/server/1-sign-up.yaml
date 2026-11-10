@@ -10,7 +10,7 @@ appId: com.ryushin01.newworld
     id: go-sign-up
 - tapOn:
     id: field-username
-- inputText: ${USERNAME}
+- inputText: ${ACCOUNT_ID}
 - waitForAnimationToEnd
 - tapOn:
     id: field-password
@@ -28,18 +28,83 @@ appId: com.ryushin01.newworld
 - tapOn:
     id: field-nickname
 - inputText: 서버여행자
+# 키보드가 가입 버튼을 가리므로 키보드의 다음 키로 닫은 뒤 누릅니다.
+- pressKey: Enter
 - runFlow: ../_hide-keyboard-android.yaml
 - tapOn:
     id: sign-up-submit
-# 메일 인증 없이 가입과 동시에 로그인됩니다. 다음 단계는 로그인부터 하므로 로그아웃합니다.
-- runFlow: _after-sign-in.yaml
+# 메일 인증 없이 가입과 동시에 로그인되고, 복구 코드를 한 번 보여 줍니다.
+- repeat:
+    times: 5
+    commands:
+      - runFlow:
+          when:
+            visible: 지금 안 함
+          commands:
+            - tapOn: 지금 안 함
+      - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
-      id: tab-my
+      id: recovery-code-modal
+    timeout: 20000
+- copyTextFrom:
+    id: recovery-code
+- tapOn:
+    id: recovery-code-done
+- extendedWaitUntil:
+    visible:
+      id: world-search-real
     timeout: 20000
 - tapOn:
     id: tab-my
-- assertVisible: 서버여행자
+- assertVisible: 서버여행자, 아이디 ${ACCOUNT_ID}
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    direction: DOWN
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: sign-out
+# 받은 복구 코드로 비밀번호를 재설정하면(같은 비밀번호로) 로그인되고 새 코드가 나옵니다.
+- extendedWaitUntil:
+    visible:
+      id: go-recover
+    timeout: 15000
+- tapOn:
+    id: go-recover
+- tapOn:
+    id: field-username
+- inputText: ${ACCOUNT_ID}
+- tapOn:
+    id: field-code
+- inputText: ${maestro.copiedText}
+# 키보드가 아래 칸을 가리므로 칸을 누르지 않고 키보드의 다음 키로 옮깁니다. 마지막 칸의 완료 키로 보냅니다.
+- pressKey: Enter
+- inputText: first-password
+- pressKey: Enter
+- inputText: first-password
+- assertVisible:
+    id: field-passwordConfirm
+    text: "•{14}"
+- pressKey: Enter
+- runFlow: ../_hide-keyboard-android.yaml
+- runFlow:
+    when:
+      visible:
+        id: recover-submit
+    commands:
+      - tapOn:
+          id: recover-submit
+- extendedWaitUntil:
+    visible:
+      id: recovery-code-modal
+    timeout: 20000
+- tapOn:
+    id: recovery-code-done
+# 다음 단계는 로그인부터 하므로 로그아웃합니다.
+- tapOn:
+    id: tab-my
 - scrollUntilVisible:
     element:
       id: sign-out
