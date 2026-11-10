@@ -11,6 +11,8 @@ import { BadgeCard, type BadgeOwner } from './badge-card';
 type BadgeShareContentProps = {
   statuses: BadgeStatus[];
   owner?: BadgeOwner;
+  /** 프로필을 아직 불러오는 중이면 카드가 완성될 때까지 공유를 막습니다. */
+  ownerLoading?: boolean;
   /** 닫기 버튼의 글자. 축하 창 안에서는 '뒤로'로 씁니다. */
   closeLabel?: string;
   onClose: () => void;
@@ -20,6 +22,7 @@ type BadgeShareContentProps = {
 export const BadgeShareContent = ({
   statuses,
   owner,
+  ownerLoading = false,
   closeLabel = '닫기',
   onClose,
 }: BadgeShareContentProps) => {
@@ -30,7 +33,7 @@ export const BadgeShareContent = ({
   const avatarUrl = owner?.avatarUrl ?? null;
   const [readyUrl, setReadyUrl] = useState<string | null>(null);
   const markReady = useCallback(() => setReadyUrl(avatarUrl), [avatarUrl]);
-  const avatarReady = !avatarUrl || readyUrl === avatarUrl;
+  const avatarReady = !ownerLoading && (!avatarUrl || readyUrl === avatarUrl);
   const onShare = async () => {
     if (!(await share(card, { dialogTitle: '기념 뱃지 공유' }))) {
       toast.error('뱃지 이미지를 만들지 못했습니다.');
@@ -71,12 +74,19 @@ export const BadgeShareContent = ({
 type BadgeShareProps = {
   statuses: BadgeStatus[];
   owner?: BadgeOwner;
+  ownerLoading?: boolean;
   visible: boolean;
   onClose: () => void;
 };
 
 /** 뱃지 카드를 미리 보여 주는 모달. */
-export const BadgeShare = ({ statuses, owner, visible, onClose }: BadgeShareProps) => (
+export const BadgeShare = ({
+  statuses,
+  owner,
+  ownerLoading,
+  visible,
+  onClose,
+}: BadgeShareProps) => (
   <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
     <View
       flex={1}
@@ -86,7 +96,12 @@ export const BadgeShare = ({ statuses, owner, visible, onClose }: BadgeShareProp
       padding={16}
       accessibilityViewIsModal
     >
-      <BadgeShareContent statuses={statuses} owner={owner} onClose={onClose} />
+      <BadgeShareContent
+        statuses={statuses}
+        owner={owner}
+        ownerLoading={ownerLoading}
+        onClose={onClose}
+      />
     </View>
   </Modal>
 );

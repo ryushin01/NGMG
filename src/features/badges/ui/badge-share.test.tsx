@@ -38,3 +38,12 @@ it('사진이 없으면 바로 공유할 수 있습니다', async () => {
   await render(show(null));
   expect(shareDisabled()).toBe(false);
 });
+
+it('프로필을 불러오는 동안에는 공유를 막습니다', async () => {
+  await render(
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
+      <BadgeShareContent statuses={[]} ownerLoading onClose={jest.fn()} />
+    </TamaguiProvider>,
+  );
+  expect(shareDisabled()).toBe(true);
+});

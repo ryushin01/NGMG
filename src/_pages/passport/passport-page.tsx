@@ -24,14 +24,17 @@ export const PassportPage = () => {
   const router = useRouter();
   const places = usePlaces();
   const checkins = useCheckins();
-  const profile = useProfile().data;
+  const profileQuery = useProfile();
+  const profile = profileQuery.data;
+  // 처음 불러오는 중에는 카드가 아직 완성되지 않았습니다. 로그인 전처럼 조회하지 않는 상태는 기다리지 않습니다.
+  const profileLoading = profileQuery.isPending && profileQuery.fetchStatus !== 'idle';
   const nickname = profile?.nickname;
   // 프로필 사진이 뜨기 전에 찍으면 사진이 빠지므로 준비될 때까지 여권 공유를 막습니다.
   // 사진 주소가 바뀌면 새 사진을 기다리도록, 준비된 주소를 기억해 지금 주소와 비교합니다.
   const avatarUrl = profile?.avatarUrl ?? null;
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const markAvatarLoaded = useCallback(() => setLoadedUrl(avatarUrl), [avatarUrl]);
-  const avatarReady = !avatarUrl || loadedUrl === avatarUrl;
+  const avatarReady = !profileLoading && (!avatarUrl || loadedUrl === avatarUrl);
   const { width } = useWindowDimensions();
   const card = useRef(null) as unknown as Parameters<typeof captureRef>[0];
   const [sharing, setSharing] = useState(false);
@@ -176,6 +179,7 @@ export const PassportPage = () => {
       <BadgeShare
         statuses={badges}
         owner={profile}
+        ownerLoading={profileLoading}
         visible={badgeShareOpen}
         onClose={() => setBadgeShareOpen(false)}
       />
