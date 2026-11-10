@@ -4,10 +4,20 @@ import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 import { DESTINATIONS } from '@/entities/destination';
 import { storageAdapter } from '@/shared/lib';
-import { pickRegions } from './regions';
-import { ARRIVAL_TASK } from './task';
+import { ARRIVAL_TASK, pickRegions } from './regions';
 
 const ENABLED_KEY = 'newworld.arrival.enabled';
+/** 백그라운드 작업은 화면의 데이터를 쓸 수 없어, 마지막으로 받은 인증 목록을 기기에 남겨 둡니다. */
+const CHECKED_KEY = 'newworld.arrival.checked';
+
+const readChecked = (): Set<string> => {
+  try {
+    const value: unknown = JSON.parse(storageAdapter.getItem(CHECKED_KEY) ?? '[]');
+    return new Set(Array.isArray(value) ? value.filter((id) => typeof id === 'string') : []);
+  } catch {
+    return new Set();
+  }
+};
 
 export const isArrivalAlertEnabled = () => storageAdapter.getItem(ENABLED_KEY) === '1';
 
@@ -44,12 +54,15 @@ const stopRegions = async () => {
 
 export const disableArrivalAlert = async () => {
   storageAdapter.removeItem(ENABLED_KEY);
+  storageAdapter.removeItem(CHECKED_KEY);
   await stopRegions();
 };
 
 /** 켜져 있으면 지금 위치에서 가까운 미인증 여행지로 지역을 다시 고릅니다. '항상' 권한이 사라졌으면 설정도 끕니다. */
-export const syncArrivalRegions = async (checkedIds: ReadonlySet<string>) => {
+export const syncArrivalRegions = async (checkedIds?: ReadonlySet<string>) => {
   if (!isArrivalAlertEnabled()) return;
+  if (checkedIds) storageAdapter.setItem(CHECKED_KEY, JSON.stringify([...checkedIds]));
+  const checked = checkedIds ?? readChecked();
   const { granted } = await Location.getBackgroundPermissionsAsync();
   if (!granted) {
     await disableArrivalAlert();
@@ -59,7 +72,7 @@ export const syncArrivalRegions = async (checkedIds: ReadonlySet<string>) => {
     (await Location.getLastKnownPositionAsync({ maxAge: 30 * 60 * 1000 })) ??
     (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }).catch(() => null));
   if (!position) return;
-  const regions = pickRegions(DESTINATIONS, checkedIds, position.coords);
+  const regions = pickRegions(DESTINATIONS, checked, position.coords);
   // 모두 인증했으면 지켜볼 곳이 없으므로 등록만 멈추고 설정은 그대로 둡니다.
   if (regions.length === 0) {
     await stopRegions();

@@ -11,6 +11,9 @@ import {
 } from '../model/settings';
 import { MAX_REGIONS } from '../model/regions';
 
+/** 한 칸은 위치 갱신 지역으로 씁니다. */
+const NEARBY_COUNT = MAX_REGIONS - 1;
+
 const DENIED: Record<Exclude<EnableResult, 'enabled'>, string> = {
   'location-denied': '위치 권한이 없어 알림을 켜지 못했습니다.',
   'background-denied': "위치 접근을 '항상 허용'으로 바꿔야 앱을 닫아도 알려 드릴 수 있습니다.",
@@ -73,14 +76,15 @@ export const ArrivalAlertSwitch = ({ checkedIds }: { checkedIds: ReadonlySet<str
       disabled={busy}
       accessibilityRole="switch"
       accessibilityLabel="근처 여행지 도착 알림"
-      accessibilityHint={`아직 인증하지 않은 가까운 여행지 ${MAX_REGIONS}곳의 3km 안에 들어가면 알려 드립니다`}
+      accessibilityHint={`아직 인증하지 않은 가까운 여행지 ${NEARBY_COUNT}곳의 3km 안에 들어가면 알려 드립니다`}
       accessibilityState={{ checked: enabled, busy }}
     >
       <XStack alignItems="center" gap={12} minHeight={44}>
         <YStack flex={1} gap={2}>
           <AppText>근처 여행지 도착 알림</AppText>
           <AppText size="caption" tone="muted">
-            아직 인증하지 않은 가까운 여행지 {MAX_REGIONS}곳의 3km 안에 들어가면 알려 드려요.
+            아직 인증하지 않은 가까운 여행지 {NEARBY_COUNT}곳의 3km 안에 들어가면 알려 드려요. 멀리
+            이동하면 새 위치 기준으로 다시 고릅니다.
           </AppText>
         </YStack>
         <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no">
