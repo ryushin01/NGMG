@@ -52,3 +52,18 @@ it('알림을 띄우지 못하면 다음 도착 때 다시 알릴 수 있도록 
   await expect(notifyArrival('petra', now)).rejects.toThrow('fail');
   expect(await notifyArrival('petra', now + 1000)).toBe(true);
 });
+
+it('한 여행지 알림이 실패해도 그사이 성공한 다른 여행지 기록은 지우지 않습니다', async () => {
+  const now = 2_200_000_000_000;
+  let failA: (error: Error) => void = () => undefined;
+  jest
+    .mocked(Notifications.scheduleNotificationAsync)
+    .mockReturnValueOnce(new Promise((_, reject) => (failA = reject)))
+    .mockResolvedValueOnce('b');
+  const a = notifyArrival('acropolis', now);
+  expect(await notifyArrival('angkor-wat', now)).toBe(true);
+  failA(new Error('fail'));
+  await expect(a).rejects.toThrow('fail');
+  expect(await notifyArrival('angkor-wat', now + 1000)).toBe(false);
+  expect(await notifyArrival('acropolis', now + 1000)).toBe(true);
+});

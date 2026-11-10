@@ -45,8 +45,15 @@ export const notifyArrival = async (id: string, now = Date.now()) => {
       trigger: Platform.OS === 'android' ? { channelId: ARRIVAL_CHANNEL } : null,
     });
   } catch (error) {
-    // 알림이 뜨지 않았으면 다음 도착 때 다시 알릴 수 있도록 기록을 되돌립니다.
-    storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify(notified));
+    // 알림이 뜨지 않았으면 다음 도착 때 다시 알릴 수 있도록 이 여행지의 기록만 되돌립니다.
+    // 그사이 다른 여행지가 남긴 기록은 지우지 않도록 저장값을 다시 읽습니다.
+    const current = readNotified();
+    if (current[id] === now) {
+      const previous = notified[id];
+      if (previous === undefined) delete current[id];
+      else current[id] = previous;
+      storageAdapter.setItem(NOTIFIED_KEY, JSON.stringify(current));
+    }
     throw error;
   }
   return true;
