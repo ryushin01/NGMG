@@ -3,6 +3,7 @@ const NETWORK_MESSAGE = '네트워크 연결을 확인해 주세요.';
 const MESSAGES: [RegExp, string][] = [
   [/invalid login credentials/i, '아이디 또는 비밀번호가 맞지 않습니다.'],
   [/already registered/i, '이미 사용 중인 아이디입니다.'],
+  [/unsupported photo format/i, '이 사진은 저장할 수 없는 형식입니다. 다른 사진을 골라 주세요.'],
   [/invalid recovery code/i, '아이디 또는 복구 코드가 맞지 않습니다.'],
   [
     /recovery locked/i,

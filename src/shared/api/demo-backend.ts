@@ -324,7 +324,7 @@ const findRecord = (id: string) => {
 const toRecord = async (id: string, input: RecordSaveInput): Promise<TripRecord> => {
   const place = findPlace(input.record.placeId);
   // 서버 모드와 같은 압축 경로가 실제 기기에서 동작하는지 함께 검증합니다.
-  const compressed = await Promise.all(input.newPhotos.map(compressPhoto));
+  const compressed = await Promise.all(input.newPhotos.map((photo) => compressPhoto(photo)));
   const added: Photo[] = await Promise.all(
     compressed.map(async (photo) => {
       const name = await photoStore.save(photo.uri);

@@ -33,3 +33,9 @@ it('서버에 닿지 못한 오류는 원인을 알 수 있는 안내로 바꿉�
   );
   expect(toErrorMessage({ message: 'x', code: '23514' }, '저장 실패')).toBe('저장 실패');
 });
+
+it('저장할 수 없는 사진 형식은 다른 사진을 고르라고 안내합니다', () => {
+  expect(toErrorMessage(new Error('Unsupported photo format'))).toBe(
+    '이 사진은 저장할 수 없는 형식입니다. 다른 사진을 골라 주세요.',
+  );
+});
