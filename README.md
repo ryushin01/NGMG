@@ -61,15 +61,15 @@
 
 ![React, TypeScript, Supabase, PostgreSQL, Jest, pnpm, GitHub Actions](https://skillicons.dev/icons?i=react,ts,supabase,postgres,jest,pnpm,githubactions)
 
-| 구분        | 사용 기술                                                                                                                                                        |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 프레임워크  | Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router                                                                                                |
-| UI          | Tamagui 3, Reanimated 4, Gesture Handler, Bottom Sheet, FlashList, Keyboard Controller, sonner-native, Lucide, view-shot, Expo Google Fonts(고운바탕, Marcellus) |
-| 지도·위치   | react-native-maps, supercluster, expo-location, expo-task-manager(지역 감시), expo-notifications                                                                 |
-| 상태·데이터 | TanStack Query, zustand, MMKV, React Hook Form, Zod, dayjs                                                                                                       |
-| 서버        | Supabase(Postgres, RLS, Auth, Storage, Edge Functions), OpenStreetMap Photon, Open-Meteo                                                                         |
-| 품질        | ESLint, Prettier, husky, lint-staged, Jest, React Native Testing Library, PGlite, Maestro, Storybook                                                             |
-| 배포        | EAS Build, GitHub Actions                                                                                                                                        |
+| 구분        | 사용 기술                                                                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 프레임워크  | Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router                                                                                                          |
+| UI          | Tamagui 3, Reanimated 4, Gesture Handler, Bottom Sheet, FlashList, Keyboard Controller, sonner-native, Lucide, view-shot, Expo Google Fonts(고운바탕, 고운돋움, Marcellus) |
+| 지도·위치   | react-native-maps, supercluster, expo-location, expo-task-manager(지역 감시), expo-notifications                                                                           |
+| 상태·데이터 | TanStack Query, zustand, MMKV, React Hook Form, Zod, dayjs                                                                                                                 |
+| 서버        | Supabase(Postgres, RLS, Auth, Storage, Edge Functions), OpenStreetMap Photon, Open-Meteo                                                                                   |
+| 품질        | ESLint, Prettier, husky, lint-staged, Jest, React Native Testing Library, PGlite, Maestro, Storybook                                                                       |
+| 배포        | EAS Build, GitHub Actions                                                                                                                                                  |
 
 ## 시작하기
 
