@@ -413,6 +413,22 @@ describe('계정 분리', () => {
     expect(store.has('newworld.snapshot.a')).toBe(false);
     expect(JSON.parse(store.get('newworld.outbox.a') as string)).toHaveLength(1);
   });
+
+  it('저장된 보낼함·스냅숏이 깨졌어도 로그인이 막히지 않고, 읽을 수 있는 작업만 남깁니다', () => {
+    const { store, sync, signInAs, server } = setup();
+    server.down = true;
+    store.set('newworld.snapshot.a', '{broken');
+    store.set(
+      'newworld.outbox.a',
+      JSON.stringify([
+        { id: 'o1', type: 'place.remove', placeId: 'p1', label: '삭제', status: 'pending' },
+        { id: 'o2', type: 'unknown', status: 'pending' },
+        'garbage',
+      ]),
+    );
+    expect(() => signInAs('a')).not.toThrow();
+    expect(sync.getState().ops.map((op) => op.id)).toEqual(['o1']);
+  });
 });
 
 describe('체크리스트', () => {

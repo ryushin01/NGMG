@@ -4,7 +4,7 @@ const config: ExpoConfig = {
   name: '신세계',
   slug: 'newworld',
   scheme: 'newworld',
-  version: '2.8.0',
+  version: '2.8.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',

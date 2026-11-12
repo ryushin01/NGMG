@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 import { DESTINATIONS } from '@/entities/destination';
-import { storageAdapter } from '@/shared/lib';
+import { parseStoredJson, storageAdapter } from '@/shared/lib';
 import { ARRIVAL_CHANNEL } from './arrival';
 import { ARRIVAL_TASK, pickRegions } from './regions';
 
@@ -12,12 +12,8 @@ const ENABLED_KEY = 'newworld.arrival.enabled';
 const CHECKED_KEY = 'newworld.arrival.checked';
 
 const readChecked = (): Set<string> => {
-  try {
-    const value: unknown = JSON.parse(storageAdapter.getItem(CHECKED_KEY) ?? '[]');
-    return new Set(Array.isArray(value) ? value.filter((id) => typeof id === 'string') : []);
-  } catch {
-    return new Set();
-  }
+  const value = parseStoredJson(storageAdapter.getItem(CHECKED_KEY));
+  return new Set(Array.isArray(value) ? value.filter((id) => typeof id === 'string') : []);
 };
 
 /**

@@ -1,4 +1,5 @@
 import { isTransientError } from '../lib/errors';
+import { isRecord, parseStoredJson } from '../lib/stored-json';
 import type {
   Backend,
   ChecklistItem,
@@ -73,6 +74,48 @@ const withCurrency = <T extends { currency?: string }>(record: T) => ({
   ...record,
   currency: record.currency ?? 'KRW',
 });
+
+const OP_TYPES = new Set<string>([
+  'place.create',
+  'place.update',
+  'place.remove',
+  'record.create',
+  'record.update',
+  'record.remove',
+  'checklist.upsert',
+  'checklist.remove',
+  'trip.save',
+  'trip.remove',
+  'checkin.create',
+]);
+
+/** 저장된 보낼함에서 읽을 수 있는 작업만 남깁니다. 모양이 다른 작업 하나 때문에 로그인이 막히지 않게 합니다. */
+const readOutbox = (raw: string | null): OutboxOp[] => {
+  const value = parseStoredJson(raw);
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (op): op is OutboxOp =>
+      isRecord(op) &&
+      typeof op.id === 'string' &&
+      typeof op.type === 'string' &&
+      OP_TYPES.has(op.type) &&
+      (op.status === 'pending' || op.status === 'failed'),
+  );
+};
+
+/** 저장된 스냅숏은 칸마다 배열일 때만 씁니다. 아니면 서버에서 다시 받습니다. */
+const readSnapshot = (raw: string | null): Snapshot => {
+  const value = parseStoredJson(raw);
+  if (!isRecord(value)) return EMPTY_SNAPSHOT;
+  const list = <T>(key: keyof Snapshot) => (Array.isArray(value[key]) ? (value[key] as T[]) : null);
+  return {
+    places: list<Place>('places'),
+    records: list<TripRecord>('records'),
+    checklist: list<ChecklistItem>('checklist'),
+    trips: list<Trip>('trips'),
+    checkins: list<CheckIn>('checkins'),
+  };
+};
 
 const withOpCurrency = (op: OutboxOp): OutboxOp =>
   op.type === 'record.create' || op.type === 'record.update'
@@ -255,8 +298,8 @@ export const createOfflineBackend = (base: Backend, deps: Deps) => {
     if (next === userId) return;
     userId = next;
     const read = (key: string) => (userId ? deps.storage.getItem(key) : null);
-    ops = (JSON.parse(read(outboxKey()) ?? '[]') as OutboxOp[]).map(withOpCurrency);
-    const saved: Snapshot = { ...EMPTY_SNAPSHOT, ...JSON.parse(read(snapshotKey()) ?? 'null') };
+    ops = readOutbox(read(outboxKey())).map(withOpCurrency);
+    const saved = readSnapshot(read(snapshotKey()));
     snapshot = { ...saved, records: saved.records && saved.records.map(withCurrency) };
     publish();
     if (userId) void flush();

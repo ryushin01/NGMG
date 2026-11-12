@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { findDestination } from '@/entities/destination';
-import { storageAdapter } from '@/shared/lib';
+import { isRecord, parseStoredJson, storageAdapter } from '@/shared/lib';
 
 const NOTIFIED_KEY = 'newworld.arrival.notified';
 export const ARRIVAL_CHANNEL = 'arrival';
@@ -9,12 +9,14 @@ export const ARRIVAL_CHANNEL = 'arrival';
 export const QUIET_MS = 12 * 60 * 60 * 1000;
 
 const readNotified = (): Record<string, number> => {
-  try {
-    const value: unknown = JSON.parse(storageAdapter.getItem(NOTIFIED_KEY) ?? '{}');
-    return value && typeof value === 'object' ? (value as Record<string, number>) : {};
-  } catch {
-    return {};
-  }
+  const value = parseStoredJson(storageAdapter.getItem(NOTIFIED_KEY));
+  if (!isRecord(value)) return {};
+  // 시각이 숫자인 항목만 씁니다.
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, number] => typeof entry[1] === 'number',
+    ),
+  );
 };
 
 export const arrivalMessage = (id: string) => {
