@@ -4,9 +4,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Expo SDK가 버전을 정하는 패키지는 Dependabot이 올리면 SDK 권장 버전과 어긋나 네이티브 빌드가 깨질 수 있습니다.
+    # 이 패키지들은 `npx expo install --fix`(SDK 올릴 때는 `npx expo install expo@^새버전 --fix`)로만 올립니다.
+    ignore:
+      - dependency-name: 'expo'
+      - dependency-name: 'expo-*'
+      - dependency-name: '@expo/*'
+      - dependency-name: 'react'
+      - dependency-name: 'react-dom'
+      - dependency-name: 'react-native'
+      - dependency-name: 'react-native-*'
+      - dependency-name: '@react-native/*'
+      - dependency-name: '@react-native-async-storage/*'
+      - dependency-name: '@react-native-community/*'
+      - dependency-name: '@shopify/flash-list'
     groups:
-      expo:
-        patterns: ['expo', 'expo-*', '@expo/*', 'react-native', 'react-native-*', '@react-native/*']
       minor-and-patch:
         update-types: ['minor', 'patch']
   - package-ecosystem: github-actions
