@@ -75,39 +75,63 @@ const withCurrency = <T extends { currency?: string }>(record: T) => ({
   currency: record.currency ?? 'KRW',
 });
 
-const OP_TYPES = new Set<string>([
-  'place.create',
-  'place.update',
-  'place.remove',
-  'record.create',
-  'record.update',
-  'record.remove',
-  'checklist.upsert',
-  'checklist.remove',
-  'trip.save',
-  'trip.remove',
-  'checkin.create',
-]);
+const isString = (value: unknown): value is string => typeof value === 'string';
+const hasId = (value: unknown): value is Record<string, unknown> & { id: string } =>
+  isRecord(value) && isString(value.id);
+const listOf = (value: unknown, check: (item: unknown) => boolean) =>
+  Array.isArray(value) && value.every(check);
+
+/** 작업 종류마다 화면 계산(applyOps)과 다시 보내기가 읽는 칸이 있는지 확인합니다. */
+const OP_BODY_CHECKS: Record<OpBody['type'], (op: Record<string, unknown>) => boolean> = {
+  'place.create': (op) => isString(op.placeId) && isRecord(op.input),
+  'place.update': (op) => isString(op.placeId) && isRecord(op.input),
+  'place.remove': (op) => isString(op.placeId),
+  'record.create': (op) => isString(op.recordId) && isQueuedRecord(op.input),
+  'record.update': (op) => isString(op.recordId) && isQueuedRecord(op.input),
+  'record.remove': (op) => isString(op.recordId),
+  'checklist.upsert': (op) => listOf(op.items, hasId),
+  'checklist.remove': (op) => listOf(op.ids, isString),
+  'trip.save': (op) => hasId(op.trip),
+  'trip.remove': (op) => isString(op.tripId),
+  'checkin.create': (op) => isRecord(op.checkIn) && isString(op.checkIn.catalogId),
+};
+
+function isQueuedRecord(input: unknown) {
+  return (
+    isRecord(input) &&
+    isRecord(input.record) &&
+    listOf(input.newPhotos, isRecord) &&
+    listOf(input.keptPhotos, isRecord)
+  );
+}
+
+const isOutboxOp = (op: unknown): op is OutboxOp => {
+  if (!isRecord(op) || !isString(op.id) || !isString(op.type)) return false;
+  if (op.status !== 'pending' && op.status !== 'failed') return false;
+  const check = OP_BODY_CHECKS[op.type as OpBody['type']];
+  return Object.hasOwn(OP_BODY_CHECKS, op.type) && check(op);
+};
 
 /** 저장된 보낼함에서 읽을 수 있는 작업만 남깁니다. 모양이 다른 작업 하나 때문에 로그인이 막히지 않게 합니다. */
 const readOutbox = (raw: string | null): OutboxOp[] => {
   const value = parseStoredJson(raw);
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (op): op is OutboxOp =>
-      isRecord(op) &&
-      typeof op.id === 'string' &&
-      typeof op.type === 'string' &&
-      OP_TYPES.has(op.type) &&
-      (op.status === 'pending' || op.status === 'failed'),
-  );
+  return Array.isArray(value) ? value.filter(isOutboxOp) : [];
 };
 
-/** 저장된 스냅숏은 칸마다 배열일 때만 씁니다. 아니면 서버에서 다시 받습니다. */
+/** 칸마다 원소의 모양을 확인합니다. 하나라도 어긋나면 그 칸은 버리고 서버에서 다시 받습니다. */
+const SNAPSHOT_ITEM_CHECKS: Record<keyof Snapshot, (item: unknown) => boolean> = {
+  places: hasId,
+  records: (item) => hasId(item) && isString(item.visitedAt) && isString(item.placeId),
+  checklist: hasId,
+  trips: hasId,
+  checkins: (item) => hasId(item) && isString(item.catalogId),
+};
+
 const readSnapshot = (raw: string | null): Snapshot => {
   const value = parseStoredJson(raw);
   if (!isRecord(value)) return EMPTY_SNAPSHOT;
-  const list = <T>(key: keyof Snapshot) => (Array.isArray(value[key]) ? (value[key] as T[]) : null);
+  const list = <T>(key: keyof Snapshot) =>
+    listOf(value[key], SNAPSHOT_ITEM_CHECKS[key]) ? (value[key] as T[]) : null;
   return {
     places: list<Place>('places'),
     records: list<TripRecord>('records'),
