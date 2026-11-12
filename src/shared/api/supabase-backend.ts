@@ -7,6 +7,7 @@ import { isTransientError } from '../lib/errors';
 import { compressPhoto } from '../lib/photo';
 import { createRecoveryCode, hashRecoveryCode } from '../lib/recovery-code';
 import { storageAdapter } from '../lib/storage';
+import { isRecord, parseStoredJson } from '../lib/stored-json';
 import type {
   Backend,
   ChecklistItem,
@@ -65,10 +66,12 @@ const rememberSession = (session: Session | null) => {
 };
 
 const lastSession = (): Session | null => {
-  const raw = storageAdapter.getItem(LAST_SESSION_KEY);
-  if (!raw) return null;
-  const stored = JSON.parse(raw) as { userId: string; username?: string; email?: string };
-  return { userId: stored.userId, username: stored.username ?? stored.email?.split('@')[0] ?? '' };
+  const stored = parseStoredJson(storageAdapter.getItem(LAST_SESSION_KEY));
+  // 깨졌거나 모양이 다르면 저장된 세션이 없는 것으로 봅니다(오프라인에서 앱을 열 때 막히지 않게).
+  if (!isRecord(stored) || typeof stored.userId !== 'string') return null;
+  const username = typeof stored.username === 'string' ? stored.username : undefined;
+  const email = typeof stored.email === 'string' ? stored.email : undefined;
+  return { userId: stored.userId, username: username ?? email?.split('@')[0] ?? '' };
 };
 
 type PlaceRow = {
