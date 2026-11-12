@@ -71,7 +71,7 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.15",
+    "@electric-sql/pglite": "^0.5.16",
     "@storybook/react-native": "^10.7.1",
     "@tamagui/cli": "^3.3.2",
     "@testing-library/react-native": "^14.1.0",
