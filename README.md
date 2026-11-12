@@ -1,7 +1,7 @@
 # NewWorld - 신세계
 
 [![CI](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml/badge.svg)](https://github.com/ryushin01/NewWorld/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-2.8.0-c2792b)
+![version](https://img.shields.io/badge/version-2.8.1-c2792b)
 
 피라미드와 잉카 유적부터 아발론과 에덴 동산까지, 역사와 신화·전설 속 여행지를 탐험하고 기록하는 모바일 앱입니다.
 

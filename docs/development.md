@@ -59,6 +59,8 @@ npx supabase functions deploy recover-account
 - 대기 변경과 마지막 서버 값은 계정별 키로 보관합니다. 로그아웃하면 서버 값 사본만 지웁니다.
 - 데모 모드는 MY 페이지의 `데모 모드 연결 끊기`로 끊긴 상태를 재현합니다.
 
+기기에 저장된 값(보낼함, 스냅숏, 마지막 세션, 도착 알림 기록)은 `src/shared/lib/stored-json.ts`의 `parseStoredJson`·`isRecord`로 읽습니다. 보낼함은 작업 종류마다 필요한 내용이 있는 작업만, 스냅숏은 원소 모양까지 맞는 칸만 쓰고 나머지는 서버에서 다시 받습니다. 저장값이 깨져도 로그인(오프라인으로 앱 열기)이 막히지 않게 하기 위해서입니다.
+
 ## 외부 데이터
 
 | 항목       | 출처                                  | 비고                                                                                                                          |
@@ -126,6 +128,14 @@ Feature-Sliced Design을 따릅니다. `src/app`은 Expo Router 경로이며 `sr
 | `brandText` | `#85491a` | 강조 글자, 링크                                         |
 | `ink`       | `#1a254f` | 제목, 주요 버튼                                         |
 | `fantasy`   | `#7a5af8` | 환상 세계 면. 글자는 `fantasyText`(`#5b3fd1`)를 씁니다. |
+
+## 의존성 갱신 (Dependabot)
+
+`.github/dependabot.yml`이 npm 패키지를 매주 확인해 부 버전·패치를 한 PR로 묶고, GitHub Actions는 매달 올립니다.
+
+Expo SDK가 버전을 정하는 패키지(`expo*`, `react`, `react-native*`, `@react-native-*`, `@shopify/flash-list`)는 Dependabot에서 뺐습니다. Dependabot이 올리면 SDK 권장 버전과 어긋나 네이티브 빌드나 Expo Go에서 깨질 수 있고, CI는 네이티브 빌드를 하지 않아 이를 잡지 못합니다. 이 패키지들은 `npx expo install --fix`(SDK를 올릴 때는 `npx expo install expo@^새버전 --fix`)로만 올리고 `npx expo install --check`로 확인합니다.
+
+저장소는 공개된 지 하루가 안 된 패키지를 받지 않습니다(`minimumReleaseAge`). `expo install`이 갓 나온 판을 고르면 설치가 멈추므로 하루 기다린 뒤 다시 실행합니다.
 
 ## 빌드 주의 사항
 
