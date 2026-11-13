@@ -77,6 +77,8 @@ const BulletList = ({ items }: { items: string[] }) => (
   </YStack>
 );
 
+const SOURCES_URL = 'https://github.com/ryushin01/NewWorld#출처';
+
 const LinkLine = ({ label, url }: { label: string; url: string }) => (
   <Touchable
     onPress={() => openLink(url)}
@@ -348,17 +350,9 @@ export const DestinationDetailPage = () => {
             {fantasy ? '아직 이곳을 여행한 기록이 없습니다.' : '아직 다녀온 기록이 없습니다.'}
           </AppText>
         )}
+        {/* 사진·참고 자료의 출처는 화면이 아니라 README와 docs/credits.md에 두고, 여기서는 그곳으로 잇습니다. */}
         <YStack padding={20} gap={6}>
-          <AppText size="caption" tone="muted" bold accessibilityRole="header">
-            자료 출처
-          </AppText>
-          {destination.sources.map((source) => (
-            <LinkLine key={source.url} label={source.label} url={source.url} />
-          ))}
-          <LinkLine
-            label={`사진: ${destination.imageCredit.author} (${destination.imageCredit.license})`}
-            url={destination.imageCredit.url}
-          />
+          <LinkLine label="자료·사진 출처 (README)" url={SOURCES_URL} />
         </YStack>
       </ScrollView>
       {solid ? (
