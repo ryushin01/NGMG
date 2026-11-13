@@ -96,12 +96,15 @@ const OP_BODY_CHECKS: Record<OpBody['type'], (op: Record<string, unknown>) => bo
   'checkin.create': (op) => isRecord(op.checkIn) && isString(op.checkIn.catalogId),
 };
 
+/** 화면 계산(toRecord·정렬)과 사진 정리가 읽는 칸: 기록의 장소·방문일, 새 사진의 파일 이름, 남길 사진의 id·주소 */
 function isQueuedRecord(input: unknown) {
   return (
     isRecord(input) &&
     isRecord(input.record) &&
-    listOf(input.newPhotos, isRecord) &&
-    listOf(input.keptPhotos, isRecord)
+    isString(input.record.placeId) &&
+    isString(input.record.visitedAt) &&
+    listOf(input.newPhotos, (photo) => isRecord(photo) && isString(photo.name)) &&
+    listOf(input.keptPhotos, (photo) => hasId(photo) && isString(photo.url))
   );
 }
 

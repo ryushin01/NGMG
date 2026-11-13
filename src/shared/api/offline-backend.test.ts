@@ -440,6 +440,26 @@ describe('계정 분리', () => {
         { id: 'o1', type: 'record.create', recordId: 'r1', label: '기록', status: 'pending' },
         { id: 'o2', type: 'checklist.remove', ids: [1], label: '삭제', status: 'pending' },
         { id: 'o3', type: 'trip.remove', tripId: 't1', label: '삭제', status: 'failed' },
+        {
+          id: 'o4',
+          type: 'record.update',
+          recordId: 'r2',
+          input: { record: {}, newPhotos: [], keptPhotos: [] },
+          label: '기록',
+          status: 'pending',
+        },
+        {
+          id: 'o5',
+          type: 'record.create',
+          recordId: 'r3',
+          input: {
+            record: { placeId: 'p1', visitedAt: '2026-11-01' },
+            newPhotos: [{ width: 1, height: 1 }],
+            keptPhotos: [],
+          },
+          label: '기록',
+          status: 'pending',
+        },
       ]),
     );
     expect(() => signInAs('a')).not.toThrow();
@@ -623,7 +643,7 @@ describe('통화가 생기기 전의 기기 데이터', () => {
       'newworld.snapshot.a',
       JSON.stringify({
         places: [],
-        records: [{ id: 'old', visitedAt: '2026-01-01' }],
+        records: [{ id: 'old', placeId: 'p1', visitedAt: '2026-01-01' }],
         checklist: [],
       }),
     );
@@ -636,7 +656,11 @@ describe('통화가 생기기 전의 기기 데이터', () => {
           recordId: 'old',
           label: '기록',
           status: 'failed',
-          input: { record: { visitedAt: '2026-01-02' }, keptPhotos: [], newPhotos: [] },
+          input: {
+            record: { placeId: 'p1', visitedAt: '2026-01-02' },
+            keptPhotos: [],
+            newPhotos: [],
+          },
         },
       ]),
     );
