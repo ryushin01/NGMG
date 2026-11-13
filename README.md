@@ -44,7 +44,7 @@
 | 기능               | 내용                                                                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------------- |
 | 실존·환상 탭       | 실존 유적 25곳(역사·사실)과 환상 세계 30곳(신화·전설), 분류·대륙·전승권 필터와 검색                           |
-| 여행지 상세        | 소개, 볼거리, 가기 좋은 때, 여행 팁, 전승의 원전과 작품, 자료·사진 출처 링크(README), 오프라인 열람                        |
+| 여행지 상세        | 소개, 볼거리, 가기 좋은 때, 여행 팁, 전승의 원전과 작품, 자료·사진 출처 링크(README), 오프라인 열람           |
 | 지도               | 실존·환상 핀 구분, 현장 인증 핀과 필터, 핀 묶음, 위성 지도, 현재 위치, 직접 위치 지정, 장소 검색              |
 | 여행 기록          | 실존: 날씨, 기온, 교통, 숙소, 비용 / 환상: 들어간 길, 만난 존재, 가져온 것 / 사진 10장, 별점                  |
 | 가고 싶어요        | 여행지 저장, 다녀옴 표시, 도감 달성률                                                                         |
@@ -122,13 +122,13 @@ src/
 
 ## 출처
 
-| 자료 | 저작자 | 사용 허락 | 원본 |
-|---|---|---|---|
-| 여행지 사진 | Wikimedia Commons의 각 저작자 | 사진마다 CC BY·CC BY-SA·퍼블릭 도메인 | [여행지별 목록](docs/credits.md) |
-| 소개 글 참고 자료 | 위키백과·나무위키 | 각 사이트의 사용 허락 | [여행지별 목록](docs/credits.md) |
-| 장소 검색 | OpenStreetMap 기여자 (Photon) | ODbL | [openstreetmap.org/copyright](https://www.openstreetmap.org/copyright) |
-| 날씨 | Open-Meteo | CC BY 4.0 | [open-meteo.com](https://open-meteo.com) |
-| Gowun Batang(고운바탕) · Gowun Dodum(고운돋움) 글꼴 | The Gowun Batang·Gowun Dodum Project Authors(류양희) | SIL OFL 1.1 | [yangheeryu/Gowun-Batang](https://github.com/yangheeryu/Gowun-Batang) · [yangheeryu/Gowun-Dodum](https://github.com/yangheeryu/Gowun-Dodum) |
-| Marcellus 글꼴 | Brian J. Bonislawsky(Astigmatic) | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Marcellus) |
+| 자료                                                | 저작자                                               | 사용 허락                             | 원본                                                                                                                                        |
+| --------------------------------------------------- | ---------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 여행지 사진                                         | Wikimedia Commons의 각 저작자                        | 사진마다 CC BY·CC BY-SA·퍼블릭 도메인 | [여행지별 목록](docs/credits.md)                                                                                                            |
+| 소개 글 참고 자료                                   | 위키백과·나무위키                                    | 각 사이트의 사용 허락                 | [여행지별 목록](docs/credits.md)                                                                                                            |
+| 장소 검색                                           | OpenStreetMap 기여자 (Photon)                        | ODbL                                  | [openstreetmap.org/copyright](https://www.openstreetmap.org/copyright)                                                                      |
+| 날씨                                                | Open-Meteo                                           | CC BY 4.0                             | [open-meteo.com](https://open-meteo.com)                                                                                                    |
+| Gowun Batang(고운바탕) · Gowun Dodum(고운돋움) 글꼴 | The Gowun Batang·Gowun Dodum Project Authors(류양희) | SIL OFL 1.1                           | [yangheeryu/Gowun-Batang](https://github.com/yangheeryu/Gowun-Batang) · [yangheeryu/Gowun-Dodum](https://github.com/yangheeryu/Gowun-Dodum) |
+| Marcellus 글꼴                                      | Brian J. Bonislawsky(Astigmatic)                     | SIL OFL 1.1                           | [Google Fonts](https://fonts.google.com/specimen/Marcellus)                                                                                 |
 
 여행지 상세의 '자료·사진 출처' 링크가 이 표로 옵니다. 약관상 화면에 있어야 하는 장소 검색의 OpenStreetMap 표기와, 좌표가 Open-Meteo로 간다는 기록 화면의 안내는 화면에 그대로 둡니다. 여행지별 목록은 `pnpm credits`로 데이터에서 다시 만듭니다.

@@ -1,0 +1,2 @@
+# pnpm credits가 데이터에서 만드는 파일이라, 서식을 바꾸면 credits.test.ts의 비교가 깨집니다.
+docs/credits.md
