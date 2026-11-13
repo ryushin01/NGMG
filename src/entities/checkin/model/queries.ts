@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { backend, type CheckIn } from '@/shared/api';
 
-export const checkinKeys = { all: ['checkins'] as const };
+const checkinKeys = { all: ['checkins'] as const };
 
 export const useCheckins = () =>
   useQuery({ queryKey: checkinKeys.all, queryFn: () => backend.checkins.list() });

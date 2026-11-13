@@ -153,11 +153,7 @@ const withOpCurrency = (op: OutboxOp): OutboxOp =>
  * 서버에서 마지막으로 받은 값 위에 아직 올리지 못한 변경을 순서대로 덮어씁니다.
  * 서버 응답에 이미 반영된 변경이 다시 적용되어도 결과가 같아야 합니다.
  */
-export const applyOps = (
-  snapshot: Snapshot,
-  ops: OutboxOp[],
-  uriOf: (name: string) => string,
-): View => {
+const applyOps = (snapshot: Snapshot, ops: OutboxOp[], uriOf: (name: string) => string): View => {
   let places = snapshot.places ?? [];
   let records = snapshot.records ?? [];
   let checklist = snapshot.checklist ?? [];

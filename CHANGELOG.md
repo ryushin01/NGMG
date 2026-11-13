@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.8.3 - 미출시
+
+- 정리: 슬라이스 공개 API에서 다른 슬라이스가 쓰지 않는 내보내기를 뺌(쿼리 키 `tripKeys`·`recordKeys`·`checkinKeys`·`profileKeys`, 여행지 타입, 뱃지·인증·도착 알림 내부 값 등). 파일 안에서만 쓰는 값의 export도 뗌
+- 정리: 쓰지 않는 `mythSpaceOf`·`MYTH_SPACE_LABELS`(뱃지는 `MYTH_SPACES`를 바로 씀)와 `ScreenSpacer`, 테스트 목(mock)에 남아 있던 `mythSpaceOf`
+- 의존성: supercluster 9가 타입을 직접 싣고 있어 `@types/supercluster`(v7용) 삭제
+- 점검: AppState·NetInfo 리스너와 인증 구독은 모두 해제 함수로 정리됨, 코드 중복 0.21%
+
 ## 2.8.2 - 미출시
 
 - 버그: 기기에 저장된 기록 작업에 장소·방문일이 빠져 있으면 오프라인으로 앱을 열 때 기록 정렬에서 예외가 나던 문제. 기록 작업은 장소·방문일, 새 사진의 파일 이름, 남길 사진의 id·주소까지 있을 때만 남김

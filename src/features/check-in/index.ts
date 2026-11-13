@@ -1,1 +1,1 @@
-export { CHECK_IN_RADIUS_KM, useCheckIn, type CheckInResult } from './model/use-check-in';
+export { CHECK_IN_RADIUS_KM, useCheckIn } from './model/use-check-in';

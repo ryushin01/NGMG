@@ -16,7 +16,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const queryPersister = createAsyncStoragePersister({
+const queryPersister = createAsyncStoragePersister({
   storage: storageAdapter,
   key: 'newworld.query-cache',
   throttleTime: 1000,

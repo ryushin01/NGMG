@@ -57,7 +57,7 @@ const RECOVERY_LOCK_MS = 15 * 60 * 1000;
 type StoredProfile = { nickname: string; name: string; avatar: string | null };
 
 /** 둘러보기 계정. 이전 버전에서 쌓인 데이터를 이어 쓰도록 회원 id를 그대로 둡니다. */
-export const GUEST_USERNAME = 'guest';
+const GUEST_USERNAME = 'guest';
 const GUEST_SESSION: Session = { userId: 'demo-guest@newworld.demo', username: GUEST_USERNAME };
 const AVATAR_EDGE = 512;
 

@@ -1,5 +1,4 @@
-export { useRecoveryCodeStore } from './model/recovery-store';
-export { nickname, profileSchema, realName, username } from './model/schema';
+export { profileSchema } from './model/schema';
 export {
   ChangePasswordForm,
   FormField,
