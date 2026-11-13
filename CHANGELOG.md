@@ -2,6 +2,7 @@
 
 ## 2.8.3 - 미출시
 
+- 출처: 여행지 상세의 '자료 출처'(참고 자료 링크·사진 저작자)를 걷어 내고 README 출처 링크 하나만 둠. 여행지별 사진·참고 자료 목록은 `docs/credits.md`로 옮기고 `pnpm credits`로 데이터에서 만들며, 어긋나면 테스트가 실패함. README에 출처 표(사진·참고 자료·OpenStreetMap·Open-Meteo·글꼴)를 더함
 - 정리: 슬라이스 공개 API에서 다른 슬라이스가 쓰지 않는 내보내기를 뺌(쿼리 키 `tripKeys`·`recordKeys`·`checkinKeys`·`profileKeys`, 여행지 타입, 뱃지·인증·도착 알림 내부 값 등). 파일 안에서만 쓰는 값의 export도 뗌
 - 정리: 쓰지 않는 `mythSpaceOf`·`MYTH_SPACE_LABELS`(뱃지는 `MYTH_SPACES`를 바로 씀)와 `ScreenSpacer`, 테스트 목(mock)에 남아 있던 `mythSpaceOf`
 - 의존성: supercluster 9가 타입을 직접 싣고 있어 `@types/supercluster`(v7용) 삭제

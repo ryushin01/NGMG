@@ -91,6 +91,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "credits": "UPDATE_CREDITS=1 jest src/entities/destination/model/credits.test.ts",
     "assets": "node scripts/generate-assets.mjs",
     "test:e2e": "zsh scripts/e2e-ios.sh",
     "test:e2e:server": "zsh e2e/server/run.sh",
