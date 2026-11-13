@@ -12,7 +12,7 @@ export const ARRIVAL_RADIUS_M = 3000;
  * 현재 위치를 둘러싼 이 지역을 벗어나면 백그라운드 작업이 여행지를 다시 고릅니다.
  */
 export const REFRESH_REGION_ID = 'newworld-refresh';
-export const REFRESH_RADIUS_M = 50000;
+const REFRESH_RADIUS_M = 50000;
 
 type Point = { latitude: number; longitude: number };
 

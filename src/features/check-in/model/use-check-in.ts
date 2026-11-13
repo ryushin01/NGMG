@@ -10,7 +10,7 @@ import { distanceKm } from '@/shared/lib';
 export const CHECK_IN_RADIUS_KM = 3;
 
 /** 실내처럼 위치를 받지 못하면 요청이 끝나지 않을 수 있어 이 시간 뒤에는 마지막 위치로 대신합니다. */
-export const LOCATION_TIMEOUT_MS = 15000;
+const LOCATION_TIMEOUT_MS = 15000;
 
 const currentCoords = async () => {
   let timer: ReturnType<typeof setTimeout> | undefined;

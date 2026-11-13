@@ -1,15 +1,7 @@
-export { COURSES, findCourse, type Course } from './model/courses';
+export { COURSES, findCourse } from './model/courses';
 export { pickDaily } from './model/daily';
 export { linksOf } from './model/links';
-export {
-  LORE_LABELS,
-  LORES_BY_REALM,
-  MYTH_SPACE_LABELS,
-  MYTH_SPACES,
-  mythSpaceOf,
-  type Lore,
-  type MythSpace,
-} from './model/myth';
+export { LORE_LABELS, LORES_BY_REALM, MYTH_SPACES, type Lore } from './model/myth';
 export { READING_LINKS } from './model/reading';
 export { TIMELINE_YEARS } from './model/timeline';
 export {
@@ -19,12 +11,7 @@ export {
   REAL_GROUPS,
   searchDestinations,
 } from './model/catalog';
-export type {
-  Destination,
-  DestinationSource,
-  FantasyDestination,
-  RealDestination,
-} from './model/types';
+export type { Destination } from './model/types';
 export { DestinationCard } from './ui/destination-card';
 export { Postcard } from './ui/postcard';
 export { Stamp } from './ui/stamp';

@@ -8,9 +8,9 @@ import { createOfflineBackend } from './offline-backend';
 import type { Backend } from './types';
 
 export * from './types';
-export { fetchConditions, type Conditions } from './conditions';
+export { fetchConditions } from './conditions';
 export { isDemoOffline, setDemoOffline } from './demo-backend';
-export type { OutboxOp, SyncState } from './offline-backend';
+export type { OutboxOp } from './offline-backend';
 
 const base: Backend = isSupabaseConfigured
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports

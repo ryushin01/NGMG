@@ -178,7 +178,7 @@ export const BADGES: Badge[] = [
 
 const byId = new Map(DESTINATIONS.map((item) => [item.id, item]));
 
-export const toStamped = (checkins: CheckIn[]): StampedDestination[] =>
+const toStamped = (checkins: CheckIn[]): StampedDestination[] =>
   [...checkins]
     .sort((a, b) => a.checkedAt.localeCompare(b.checkedAt))
     .flatMap((checkin) => {

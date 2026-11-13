@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { backend, type RecordSaveInput } from '@/shared/api';
 
-export const recordKeys = {
+const recordKeys = {
   all: ['records'] as const,
   list: (placeId?: string) => ['records', 'list', placeId ?? 'all'] as const,
   detail: (id: string) => ['records', 'detail', id] as const,

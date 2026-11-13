@@ -1,6 +1,6 @@
 import { ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, XStack } from 'tamagui';
+import { XStack } from 'tamagui';
 import { useColors } from './colors';
 import { Touchable } from './pressable';
 import { AppText } from './typography';
@@ -86,5 +86,3 @@ export const BottomCta = ({
     </Touchable>
   );
 };
-
-export const ScreenSpacer = ({ height = 24 }: { height?: number }) => <View height={height} />;

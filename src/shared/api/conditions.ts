@@ -11,8 +11,7 @@ const WMO: [number[], string][] = [
   [[95, 96, 99], '뇌우'],
 ];
 
-export const describeWeather = (code: number) =>
-  WMO.find(([codes]) => codes.includes(code))?.[1] ?? '';
+const describeWeather = (code: number) => WMO.find(([codes]) => codes.includes(code))?.[1] ?? '';
 
 /** 세계 어디든 시차 계산이 필요 없도록 UTC로 묻고 UTC 시각으로 찾습니다. */
 export const toUtcHour = (iso: string) => `${new Date(iso).toISOString().slice(0, 13)}:00`;

@@ -36,7 +36,6 @@ jest.mock('@/entities/destination', () => {
     ],
     COURSES: [{ id: 'arthur', title: '아서왕의 길', stops: ['stonehenge', 'camelot', 'avalon'] }],
     MYTH_SPACES: spaces,
-    mythSpaceOf: (id: string) => Object.keys(spaces).find((space) => spaces[space].includes(id)),
   };
 });
 
