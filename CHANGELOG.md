@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.8.4 - 미출시
+
+- 앱 아이콘·스플래시·파비콘을 보물 지도로: game-icons.net의 Lorc “Treasure map”(CC BY 3.0, 금색 #b8862b로 칠함). 원본 SVG를 `assets/brand/treasure-map.svg`에 두고 `pnpm run assets`(`scripts/generate-assets.mjs`)가 계단 피라미드 대신 이 그림으로 iOS 아이콘, 안드로이드 적응형 전경·단색, 알림 아이콘, 스플래시, 웹 파비콘을 만듦. 바탕색(#2a2233)과 지도 핀은 그대로. 로그인 화면의 아이콘도 같은 그림
+- README 출처 표에 아이콘을 더함
+
 ## 2.8.3 - 미출시
 
 - 출처: 여행지 상세의 '자료 출처'(참고 자료 링크·사진 저작자)를 걷어 내고 README 출처 링크 하나만 둠. 여행지별 사진·참고 자료 목록은 `docs/credits.md`로 옮기고 `pnpm credits`로 데이터에서 만들며, 어긋나면 테스트가 실패함. README에 출처 표(사진·참고 자료·OpenStreetMap·Open-Meteo·글꼴)를 더함
