@@ -1,27 +1,16 @@
 // 앱 아이콘, 스플래시, 지도 핀을 SVG 원본에서 생성합니다. 실행: pnpm run assets
-import { mkdir, rm } from 'node:fs/promises';
+import { mkdir, readFile, rm } from 'node:fs/promises';
 import sharp from 'sharp';
 
-const SAND = '#d99a55';
 const INK = '#2a2233';
-const VIOLET = '#9d85ff';
+const GOLD = '#b8862b';
 
-/** 별빛 아래의 계단식 피라미드. 1024 캔버스 기준입니다. */
-const pyramid = ({ mono = false } = {}) => {
-  const step = mono ? '#ffffff' : SAND;
-  const steps = [
-    [212, 742, 600, 92],
-    [272, 636, 480, 92],
-    [332, 530, 360, 92],
-    [392, 424, 240, 92],
-  ];
-  return `
-  ${steps.map(([x, y, width, height]) => `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="10" fill="${step}"/>`).join('')}
-  <rect x="452" y="330" width="120" height="80" rx="10" fill="${step}"/>
-  <path d="M512 118 L540 202 L626 230 L540 258 L512 342 L484 258 L398 230 L484 202 Z" fill="${mono ? '#ffffff' : VIOLET}"/>
-  <path d="M770 260 L782 298 L820 310 L782 322 L770 360 L758 322 L720 310 L758 298 Z" fill="${mono ? '#ffffff' : '#f4e7d3'}"/>
-  <path d="M250 330 L260 360 L290 370 L260 380 L250 410 L240 380 L210 370 L240 360 Z" fill="${mono ? '#ffffff' : '#f4e7d3'}"/>`;
-};
+/** 보물 지도(game-icons.net의 Lorc “Treasure map”, CC BY 3.0, 금색으로 칠함). 1024 캔버스 가운데 720px에 둡니다. */
+const mapPath = (await readFile('assets/brand/treasure-map.svg', 'utf8')).match(
+  /<path[^>]* d="([^"]+)"/,
+)[1];
+const treasureMap = ({ mono = false } = {}) =>
+  `<g transform="translate(152 152) scale(1.40625)"><path d="${mapPath}" fill="${mono ? '#ffffff' : GOLD}"/></g>`;
 
 const svg = (inner, size = 1024) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 1024 1024">${inner}</svg>`;
@@ -36,18 +25,22 @@ const png = (source, path, size) =>
 const background = `<rect width="1024" height="1024" fill="${INK}"/>`;
 
 await mkdir('assets/pins', { recursive: true });
-await png(svg(`${background}${pyramid()}`), 'assets/icon.png', 1024);
-await png(svg(scaled(0.68, pyramid())), 'assets/android-icon-foreground.png', 1024);
+await png(svg(`${background}${treasureMap()}`), 'assets/icon.png', 1024);
+await png(svg(scaled(0.68, treasureMap())), 'assets/android-icon-foreground.png', 1024);
 await png(svg(background), 'assets/android-icon-background.png', 1024);
-await png(svg(scaled(0.68, pyramid({ mono: true }))), 'assets/android-icon-monochrome.png', 1024);
-// Android 알림 작은 아이콘은 투명 바탕의 흰색 단색이어야 합니다.
-await png(svg(scaled(0.9, pyramid({ mono: true }))), 'assets/notification-icon.png', 96);
 await png(
-  svg(`<rect width="1024" height="1024" rx="220" fill="${INK}"/>${scaled(0.9, pyramid())}`),
+  svg(scaled(0.68, treasureMap({ mono: true }))),
+  'assets/android-icon-monochrome.png',
+  1024,
+);
+// Android 알림 작은 아이콘은 투명 바탕의 흰색 단색이어야 합니다.
+await png(svg(scaled(0.9, treasureMap({ mono: true }))), 'assets/notification-icon.png', 96);
+await png(
+  svg(`<rect width="1024" height="1024" rx="220" fill="${INK}"/>${scaled(0.9, treasureMap())}`),
   'assets/splash-icon.png',
   1024,
 );
-await png(svg(`${background}${pyramid()}`), 'assets/favicon.png', 48);
+await png(svg(`${background}${treasureMap()}`), 'assets/favicon.png', 48);
 
 // 핀은 색과 함께 도형(계단 피라미드, 별)으로도 종류를 구별합니다.
 const pinSvg = (
